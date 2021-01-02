@@ -313,7 +313,8 @@ function Icon.new(order)
 	-- Signals (events)
 	self.updated = maid:give(Signal.new())
 	self.selected = maid:give(Signal.new())
-	self.deselected = maid:give(Signal.new())
+    self.deselected = maid:give(Signal.new())
+    self.toggled = maid:give(Signal.new())
 	self.hoverStarted = maid:give(Signal.new())
 	self.hoverEnded = maid:give(Signal.new())
 	self.dropdownOpened = maid:give(Signal.new())
@@ -818,7 +819,8 @@ function Icon:select()
 	if #self.dropdownIcons > 0 or #self.menuIcons > 0 then
 		IconController:_updateSelectionGroup()
 	end
-	self.selected:Fire()
+    self.selected:Fire()
+    self.toggled:Fire(self.isSelected)
 	return self
 end
 
@@ -833,7 +835,8 @@ function Icon:deselect()
 	if #self.dropdownIcons > 0 or #self.menuIcons > 0 then
 		IconController:_updateSelectionGroup()
 	end
-	self.deselected:Fire()
+    self.deselected:Fire()
+    self.toggled:Fire(self.isSelected)
 	return self
 end
 
