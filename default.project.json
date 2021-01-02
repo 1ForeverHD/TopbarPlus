@@ -1,0 +1,14 @@
+{
+  "name": "TopbarPlus",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+
+      "Icon": {
+        "$path": "src/Icon"
+      }
+    }
+  }
+}
