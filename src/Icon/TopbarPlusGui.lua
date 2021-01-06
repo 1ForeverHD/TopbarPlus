@@ -1,17 +1,10 @@
--- UTILITY
-local DirectoryService = require(4926442976)
-local Maid = require(5086306120)
-local Signal = require(4893141590)
-
-
-
 -- SETUP ICON TEMPLATE
 local topbarPlusGui = Instance.new("ScreenGui")
 topbarPlusGui.Enabled = true
 topbarPlusGui.DisplayOrder = 0
 topbarPlusGui.IgnoreGuiInset = true
 topbarPlusGui.ResetOnSpawn = false
-topbarPlusGui.Name = "Topbar+"
+topbarPlusGui.Name = "TopbarPlus"
 
 local activeItems = Instance.new("Folder")
 activeItems.Name = "ActiveItems"
@@ -335,11 +328,11 @@ indicator.Active = false
 
 
 
--- SETUP DIRECTORIES
-local projectName = "Topbar+"
-DirectoryService:createDirectory("ReplicatedStorage.HDAdmin."..projectName, script:GetChildren())
-DirectoryService:createDirectory("StarterGui", {topbarPlusGui})
+-- PARENT
+local localPlayer = game:GetService("Players").LocalPlayer
+local playerGui = localPlayer.PlayerGui
+topbarPlusGui.Parent = playerGui
 
 
 
-return true
+return topbarPlusGui

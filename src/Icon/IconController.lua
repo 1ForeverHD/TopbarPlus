@@ -8,24 +8,18 @@ local tweenService = game:GetService("TweenService")
 local players = game:GetService("Players")
 local IconController = {}
 local replicatedStorage = game:GetService("ReplicatedStorage")
-local HDAdmin = replicatedStorage:WaitForChild("HDAdmin")
-local Signal = require(HDAdmin:WaitForChild("Signal"))
+local Signal = require(script.Parent.Signal)
+local TopbarPlusGui = require(script.Parent.TopbarPlusGui)
 local topbarIcons = {}
 local fakeChatName = "_FakeChat"
 local forceTopbarDisabled = false
 local menuOpen
 local topbarUpdating = false
-local STUPID_ROBLOX_CONTROLLER_OFFSET = 32
+local STUPID_CONTROLLER_OFFSET = 32
 
 
 
 -- LOCAL METHODS
-local function getTopbarPlusGui()
-	local player = game:GetService("Players").LocalPlayer
-	local playerGui = player:WaitForChild("PlayerGui")
-	local topbarPlusGui = playerGui:WaitForChild("Topbar+")
-	return topbarPlusGui
-end
 local function checkTopbarEnabled()
 	local success, bool = xpcall(function()
 		return starterGui:GetCore("TopbarEnabled")
@@ -42,7 +36,7 @@ end
 IconController.topbarEnabled = true
 IconController.controllerModeEnabled = false
 IconController.previousTopbarEnabled = checkTopbarEnabled()
-IconController.leftGap = 24
+IconController.leftGap = 12
 IconController.midGap = 12
 IconController.rightGap = 12
 
@@ -108,9 +102,8 @@ function IconController.setGameTheme(theme)
 end
 
 function IconController.setDisplayOrder(value)
-	local topbarPlusGui = getTopbarPlusGui()
-	value = tonumber(value) or topbarPlusGui.DisplayOrder
-	topbarPlusGui.DisplayOrder = value
+	value = tonumber(value) or TopbarPlusGui.DisplayOrder
+	TopbarPlusGui.DisplayOrder = value
 end
 IconController.setDisplayOrder(10)
 
@@ -160,7 +153,7 @@ function IconController.updateTopbar(toggleTransitionInfo)
 	local furthestRightIcon
 	local furthestLeftIcon
 	local function overflowCheck(otherIcon, newPositon)
-		local Icon = require(script.Parent.Icon)
+		local Icon = require(script.Parent)
 		local overflowIcon = IconController.getIcon("_overFlowIcon")
 		if not overflowIcon then
 			overflowIcon = Icon.new()
@@ -233,8 +226,7 @@ function IconController.updateTopbar(toggleTransitionInfo)
 			end
 			local offsetX = alignmentInfo.getStartOffset(totalIconX, alignment)
 			local preOffsetX = offsetX
-			local topbar = getTopbarPlusGui()
-			local containerX = topbar.TopbarContainer.AbsoluteSize.X
+			local containerX = TopbarPlusGui.TopbarContainer.AbsoluteSize.X
 			for i, otherIcon in pairs(records) do
 				local increment, preOffset = getIncrement(otherIcon, alignment)
 				local newAbsoluteX = alignmentInfo.startScale*containerX + preOffsetX+preOffset
@@ -266,9 +258,7 @@ function IconController.setTopbarEnabled(bool, forceBool)
 	if forceBool == nil then
 		forceBool = true
 	end
-	local topbar = getTopbarPlusGui()
-	if not topbar then return end
-	local indicator = topbar.Indicator
+	local indicator = TopbarPlusGui.Indicator
 	if forceBool and not bool then
 		forceTopbarDisabled = true
 	elseif forceBool and bool then
@@ -276,7 +266,7 @@ function IconController.setTopbarEnabled(bool, forceBool)
 	end
 	if IconController.controllerModeEnabled then
 		if bool then
-			if topbar.TopbarContainer.Visible or forceTopbarDisabled or menuOpen or not checkTopbarEnabled() then return end
+			if TopbarPlusGui.TopbarContainer.Visible or forceTopbarDisabled or menuOpen or not checkTopbarEnabled() then return end
 			if forceBool then
 				indicator.Visible = checkTopbarEnabled()
 			else
@@ -288,9 +278,9 @@ function IconController.setTopbarEnabled(bool, forceBool)
 						end)
 					end)
 				end
-				topbar.TopbarContainer.Visible = true
-				topbar.TopbarContainer:TweenPosition(
-					UDim2.new(0,0,0,5 + STUPID_ROBLOX_CONTROLLER_OFFSET),
+				TopbarPlusGui.TopbarContainer.Visible = true
+				TopbarPlusGui.TopbarContainer:TweenPosition(
+					UDim2.new(0,0,0,5 + STUPID_CONTROLLER_OFFSET),
 					Enum.EasingDirection.Out,
 					Enum.EasingStyle.Quad,
 					0.1,
@@ -323,7 +313,7 @@ function IconController.setTopbarEnabled(bool, forceBool)
 				IconController._setControllerSelectedObject(newSelectedObject)
 				indicator.Image = "rbxassetid://5278151071"
 				indicator:TweenPosition(
-					UDim2.new(0.5,0,0,targetOffset + STUPID_ROBLOX_CONTROLLER_OFFSET),
+					UDim2.new(0.5,0,0,targetOffset + STUPID_CONTROLLER_OFFSET),
 					Enum.EasingDirection.Out,
 					Enum.EasingStyle.Quad,
 					0.1,
@@ -336,17 +326,17 @@ function IconController.setTopbarEnabled(bool, forceBool)
 			else
 				indicator.Visible = checkTopbarEnabled()
 			end
-			if not topbar.TopbarContainer.Visible then return end
+			if not TopbarPlusGui.TopbarContainer.Visible then return end
 			guiService.AutoSelectGuiEnabled = true
 			IconController:_updateSelectionGroup(true)
-			topbar.TopbarContainer:TweenPosition(
-				UDim2.new(0,0,0,-topbar.TopbarContainer.Size.Y.Offset + STUPID_ROBLOX_CONTROLLER_OFFSET),
+			TopbarPlusGui.TopbarContainer:TweenPosition(
+				UDim2.new(0,0,0,-TopbarPlusGui.TopbarContainer.Size.Y.Offset + STUPID_CONTROLLER_OFFSET),
 				Enum.EasingDirection.Out,
 				Enum.EasingStyle.Quad,
 				0.1,
 				true,
 				function()
-					topbar.TopbarContainer.Visible = false
+					TopbarPlusGui.TopbarContainer.Visible = false
 				end
 			)
 			indicator.Image = "rbxassetid://5278151556"
@@ -359,7 +349,7 @@ function IconController.setTopbarEnabled(bool, forceBool)
 			)
 		end
 	else
-		local topbarContainer = topbar.TopbarContainer
+		local topbarContainer = TopbarPlusGui.TopbarContainer
 		if checkTopbarEnabled() then
 			topbarContainer.Visible = bool
 		else
@@ -433,16 +423,15 @@ function IconController._setControllerSelectedObject(object)
 end
 
 function IconController._enableControllerMode(bool)
-	local topbar = getTopbarPlusGui()
-	local indicator = topbar.Indicator
+	local indicator = TopbarPlusGui.Indicator
 	local controllerOptionIcon = IconController.getIcon("_TopbarControllerOption")
 	if IconController.controllerModeEnabled == bool then
 		return
 	end
 	IconController.controllerModeEnabled = bool
 	if bool then
-		topbar.TopbarContainer.Position = UDim2.new(0,0,0,5)
-		topbar.TopbarContainer.Visible = false
+		TopbarPlusGui.TopbarContainer.Position = UDim2.new(0,0,0,5)
+		TopbarPlusGui.TopbarContainer.Visible = false
 		local scaleMultiplier = getScaleMultiplier()
 		indicator.Position = UDim2.new(0.5,0,0,5)
 		indicator.Size = UDim2.new(0, 18*scaleMultiplier, 0, 18*scaleMultiplier)
@@ -450,8 +439,8 @@ function IconController._enableControllerMode(bool)
 		indicator.Visible = checkTopbarEnabled()
 		indicator.Position = UDim2.new(0.5,0,0,5)
 	else
-		topbar.TopbarContainer.Position = UDim2.new(0,0,0,0)
-		topbar.TopbarContainer.Visible = checkTopbarEnabled()
+		TopbarPlusGui.TopbarContainer.Position = UDim2.new(0,0,0,0)
+		TopbarPlusGui.TopbarContainer.Visible = checkTopbarEnabled()
 		indicator.Visible = false
 		IconController._setControllerSelectedObject(nil)
 	end
@@ -500,7 +489,7 @@ coroutine.wrap(function()
 	
 	-- Create PC 'Enter Controller Mode' Icon
 	runService.Heartbeat:Wait() -- This is required to prevent an infinite recursion
-	local Icon = require(script.Parent.Icon)
+	local Icon = require(script.Parent)
 	local controllerOptionIcon = Icon.new()
 		:setName("_TopbarControllerOption")
 		:setOrder(100)
@@ -548,8 +537,6 @@ coroutine.wrap(function()
 
 	-- Hide/show topbar when indicator action selected in controller mode
 	userInputService.InputBegan:Connect(function(input,gpe)
-		local topbar = getTopbarPlusGui()
-		if not topbar then return end
 		if not IconController.controllerModeEnabled then return end
 		if input.KeyCode == Enum.KeyCode.DPadDown then
 			if not guiService.SelectedObject and checkTopbarEnabled() then
