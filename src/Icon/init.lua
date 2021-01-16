@@ -13,6 +13,7 @@ local IconController = require(script.IconController)
 local Signal = require(script.Signal)
 local Maid = require(script.Maid)
 local TopbarPlusGui = require(script.TopbarPlusGui)
+local TopbarPlusReference = require(script.TopbarPlusReference)
 local Themes = require(script.Themes)
 local activeItems = TopbarPlusGui.ActiveItems
 local topbarContainer = TopbarPlusGui.TopbarContainer
@@ -21,6 +22,7 @@ local DEFAULT_THEME = Themes.Default
 local THUMB_OFFSET = 55
 local Icon = {}
 Icon.__index = Icon
+TopbarPlusReference.addToReplicatedStorage()
 
 
 
@@ -532,7 +534,7 @@ function Icon.mimic(coreIconToMimic)
 		icon:setImage("rbxasset://textures/ui/TopBar/chatOn.png", "selected")
 		icon:setImageYScale(0.625)
 		-- Since roblox's core gui api sucks melons I reverted to listening for signals within the chat modules
-		-- But now they've just gone and removed some critical signals without warning!! wth!!
+		-- unfortunately however they've just gone and removed *these* signals therefore 
 		-- this mimic chat and similar features are now impossible to recreate accurately, so I'm disabling for now
 		-- ill go ahead and post a feature request; fingers crossed we get something by the next decade
 
