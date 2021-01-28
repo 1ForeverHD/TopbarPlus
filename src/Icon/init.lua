@@ -371,6 +371,7 @@ function Icon.new(order)
 	self.dropdownOpen = false
 	self.menuOpen = false
 	self.targetAbsolutePosition = nil
+	self.locked = false
 	
 	-- Private Properties
 	self._draggingFinger = false
@@ -408,9 +409,11 @@ function Icon.new(order)
 
 	-- Shows/hides the dark overlay when the icon is presssed/released
 	instances.iconButton.MouseButton1Down:Connect(function()
+		if self.locked then return end
 		self:_updateStateOverlay(0.7, Color3.new(0, 0, 0))
 	end)
 	instances.iconButton.MouseButton1Up:Connect(function()
+		if self.locked then return end
 		self:_updateStateOverlay(0.9, Color3.new(1, 1, 1))
 	end)
 
@@ -448,7 +451,9 @@ function Icon.new(order)
 	-- a controller selection box, or dragged over with a touchpad
 	self.hoverStarted:Connect(function(x, y)
 		self.hovering = true
-		self:_updateStateOverlay(0.9, Color3.fromRGB(255, 255, 255))
+		if not self.locked then
+			self:_updateStateOverlay(0.9, Color3.fromRGB(255, 255, 255))
+		end
 		if not self.isSelected then
 			self:_displayTip(true)
 			self:_displayCaption(true)
@@ -821,6 +826,7 @@ function Icon:_playClickSound()
 end
 
 function Icon:select()
+	if self.locked then return self end
 	self.isSelected = true
 	self:_setToggleItemVisible(true)
 	if #self.dropdownIcons > 0 or #self.menuIcons > 0 then
@@ -837,6 +843,7 @@ function Icon:select()
 end
 
 function Icon:deselect()
+	if self.locked then return self end
 	self.isSelected = false
 	self:_setToggleItemVisible(false)
 	if (#self.dropdownIcons > 0 or #self.menuIcons > 0) and self.totalNotices > 0 then
@@ -1106,6 +1113,16 @@ end
 function Icon:unbindToggleKey(keyCodeEnum)
 	assert(typeof(keyCodeEnum) == "EnumItem", "argument[1] must be a KeyCode EnumItem!")
 	self._bindedToggleKeys[keyCodeEnum] = nil
+	return self
+end
+
+function Icon:lock()
+	self.locked = true
+	return self
+end
+
+function Icon:unlock()
+	self.locked = false
 	return self
 end
 
