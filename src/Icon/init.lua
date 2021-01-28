@@ -27,7 +27,7 @@ TopbarPlusReference.addToReplicatedStorage()
 
 
 -- CONSTRUCTORS
-function Icon.new(order)
+function Icon.new()
 	local self = {}
 	setmetatable(self, Icon)
 
@@ -384,7 +384,6 @@ function Icon.new(order)
 	-- Apply start values
 	self:setName("UnnamedIcon")
 	self:setTheme(DEFAULT_THEME, true)
-	self:setOrder(order)
 
 	-- Input handlers
 	-- Calls deselect/select when the icon is clicked
