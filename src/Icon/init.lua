@@ -377,6 +377,7 @@ function Icon.new(order)
 	self._updatingIconSize = true
 	self._previousDropdownOpen = false
 	self._previousMenuOpen = false
+	self._bindedToggleKeys = {}
 	
 	-- Apply start values
 	self:setName("UnnamedIcon")
@@ -413,7 +414,7 @@ function Icon.new(order)
 		self:_updateStateOverlay(0.9, Color3.new(1, 1, 1))
 	end)
 
-	-- Tap away
+	-- Tap away + KeyCode toggles
 	userInputService.InputBegan:Connect(function(input, touchingAnObject)
 		local validTapAwayInputs = {
 			[Enum.UserInputType.MouseButton1] = true,
@@ -431,6 +432,15 @@ function Icon.new(order)
 			end
 			self._tappingAway = false
 		end
+		--
+		if self._bindedToggleKeys[input.KeyCode] and not touchingAnObject then
+			if self.isSelected then
+				self:deselect()
+			else
+				self:select()
+			end
+		end
+		--
 	end)
 	
 	-- hoverStarted and hoverEnded triggers and actions
@@ -1087,6 +1097,18 @@ end
 
 
 -- FEATURE METHODS
+function Icon:bindToggleKey(keyCodeEnum)
+	assert(typeof(keyCodeEnum) == "EnumItem", "argument[1] must be a KeyCode EnumItem!")
+	self._bindedToggleKeys[keyCodeEnum] = true
+	return self
+end
+
+function Icon:unbindToggleKey(keyCodeEnum)
+	assert(typeof(keyCodeEnum) == "EnumItem", "argument[1] must be a KeyCode EnumItem!")
+	self._bindedToggleKeys[keyCodeEnum] = nil
+	return self
+end
+
 -- Toggle Item
 function Icon:setToggleItem(guiObject)
 	if not guiObject:IsA("GuiObject") and not guiObject:IsA("LayerCollector") then
