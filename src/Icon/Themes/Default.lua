@@ -81,7 +81,7 @@ return {
         dropdownAlignment = "auto", -- 'left', 'mid', 'right' or 'auto' (auto is where the dropdown alignment matches the icons alignment)
         dropdownMaxIconsBeforeScroll = 3,
         dropdownMinWidth = 32,
-        dropdownSquareCorners = true,
+        dropdownSquareCorners = false,
         dropdownBindToggleToIcon = true,
         dropdownToggleOnLongPress = false,
         dropdownToggleOnRightClick = false,

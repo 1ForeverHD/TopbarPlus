@@ -1,6 +1,6 @@
 -- This module enables you to place Icon wherever you like within the data model while
 -- still enabling third-party applications (such as HDAdmin/Nanoblox) to locate it
--- This is necessary to prevent two ZonePlus applications initiating at runtime which would
+-- This is necessary to prevent two TopbarPlus applications initiating at runtime which would
 -- cause icons to overlap with each other
 
 local replicatedStorage = game:GetService("ReplicatedStorage")

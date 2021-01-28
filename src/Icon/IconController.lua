@@ -16,6 +16,50 @@ local forceTopbarDisabled = false
 local menuOpen
 local topbarUpdating = false
 local STUPID_CONTROLLER_OFFSET = 32
+local alignmentDetails = {}
+alignmentDetails["left"] = {
+	startScale = 0,
+	getOffset = function()
+		local offset = 48
+		if starterGui:GetCoreGuiEnabled("Chat") then
+			offset += 12 + 32
+		end
+		return offset
+	end,
+	getStartOffset = function()
+		local alignmentGap = IconController["leftGap"]
+		local startOffset = alignmentDetails.left.getOffset() + alignmentGap
+		return startOffset
+	end,
+	records = {}
+}
+alignmentDetails["mid"] = {
+	startScale = 0.5,
+	getOffset = function()
+		return 0
+	end,
+	getStartOffset = function(totalIconX) 
+		local alignmentGap = IconController["midGap"]
+		return -totalIconX/2 + (alignmentGap/2)
+	end,
+	records = {}
+}
+alignmentDetails["right"] = {
+	startScale = 1,
+	getOffset = function()
+		local offset = 0
+		if starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Backpack) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu) then
+			offset += 48
+		end
+		return offset
+	end,
+	getStartOffset = function(totalIconX)
+		local startOffset = -totalIconX - alignmentDetails.right.getOffset()
+		return startOffset
+	end,
+	records = {}
+	--reverseSort = true
+}
 
 
 
@@ -116,12 +160,43 @@ function IconController.getIcon(name)
 	return false
 end
 
+function IconController.canShowIconOnTopbar(icon)
+	if (icon.enabled == true or icon.accountForWhenDisabled) and icon.presentOnTopbar then
+		return true
+	end
+	return false
+end
+
 function IconController.getIcons()
 	local allIcons = {}
 	for otherIcon, _ in pairs(topbarIcons) do
 		table.insert(allIcons, otherIcon)
 	end
 	return allIcons
+end
+
+function IconController.getMenuOffset(icon)
+	local alignment = icon:get("alignment")
+	local alignmentGap = IconController[alignment.."Gap"]
+	local iconSize = icon:get("iconSize") or UDim2.new(0, 32, 0, 32)
+	local sizeX = iconSize.X.Offset
+	local iconWidthAndGap = (sizeX + alignmentGap)
+	local extendLeft = 0
+	local extendRight = 0
+	local additionalRight = 0
+	if icon.menuOpen then
+		local menuSize = icon:get("menuSize")
+		local menuSizeXOffset = menuSize.X.Offset
+		local direction = icon:_getMenuDirection()
+		if direction == "right" then
+			extendRight += menuSizeXOffset + alignmentGap/6--2
+		elseif direction == "left" then
+			extendLeft = menuSizeXOffset + 4
+			extendRight += alignmentGap/3--4
+			additionalRight = menuSizeXOffset
+		end
+	end
+	return extendLeft, extendRight, additionalRight
 end
 
 -- This is responsible for positioning the topbar icons
@@ -135,81 +210,32 @@ function IconController.updateTopbar(toggleTransitionInfo)
 		local iconWidthAndGap = (sizeX + alignmentGap)
 		local increment = iconWidthAndGap
 		local preOffset = 0
-		--
-		if otherIcon._parentIcon == nil and otherIcon.menuOpen then
-			local menuSize = otherIcon:get("menuSize")
-			local direction = otherIcon:_getMenuDirection()
-			increment = increment + menuSize.X.Offset
-			if direction == "right" then
-				increment += alignmentGap/6--2
-			elseif direction == "left" then
-				preOffset = increment - iconWidthAndGap + 4
-				increment += alignmentGap/3--4
-			end
+		if otherIcon._parentIcon == nil then
+			local extendLeft, extendRight, additionalRight = IconController.getMenuOffset(otherIcon)
+			preOffset += extendLeft
+			increment += extendRight + additionalRight
 		end
-		--
 		return increment, preOffset
 	end
-	local furthestRightIcon
-	local furthestLeftIcon
-	local function overflowCheck(otherIcon, newPositon)
-		local Icon = require(script.Parent)
-		local overflowIcon = IconController.getIcon("_overFlowIcon")
-		if not overflowIcon then
-			overflowIcon = Icon.new()
-				:setImage(6069276526)
-				:setName("_overFlowIcon")
-		end
+	if topbarUpdating then -- This prevents the topbar updating and shifting icons more than it needs to
+		return false
 	end
 	coroutine.wrap(function()
-		if topbarUpdating then -- This prevents the topbar updating and shifting icons more than it needs to
-			return false
-		end
 		topbarUpdating = true
 		runService.Heartbeat:Wait()
 		topbarUpdating = false
 		
-		local alignmentDetails = {
-			left = {
-				startScale = 0,
-				getStartOffset = function(_, alignment)
-					local alignmentGap = IconController[alignment.."Gap"]
-					local offset = 48 + alignmentGap
-					if starterGui:GetCoreGuiEnabled("Chat") then
-						offset = offset + 12 + 32
-					end
-					return offset
-				end,
-				records = {}
-			},
-			mid = {
-				startScale = 0.5,
-				getStartOffset = function(totalIconX, alignment) 
-					local alignmentGap = IconController[alignment.."Gap"]
-					return -totalIconX/2 + (alignmentGap/2)
-				end,
-				records = {}
-			},
-			right = {
-				startScale = 1,
-				getStartOffset = function(totalIconX, alignment) 
-					local alignmentGap = IconController[alignment.."Gap"]
-					local offset = -totalIconX + alignmentGap - 48
-					if starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Backpack) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu) then
-						offset = offset - alignmentGap
-					end
-					return offset
-				end,
-				records = {}
-				--reverseSort = true
-			},
-		}
+		for alignment, alignmentInfo in pairs(alignmentDetails) do
+			alignmentInfo.records = {}
+		end
+
 		for otherIcon, _ in pairs(topbarIcons) do
-			if otherIcon.enabled == true and otherIcon.presentOnTopbar then
+			if IconController.canShowIconOnTopbar(otherIcon) then
 				local alignment = otherIcon:get("alignment")
 				table.insert(alignmentDetails[alignment].records, otherIcon)
 			end
 		end
+		local viewportSize = workspace.CurrentCamera.ViewportSize
 		for alignment, alignmentInfo in pairs(alignmentDetails) do
 			local records = alignmentInfo.records
 			if #records > 1 then
@@ -230,26 +256,196 @@ function IconController.updateTopbar(toggleTransitionInfo)
 			for i, otherIcon in pairs(records) do
 				local increment, preOffset = getIncrement(otherIcon, alignment)
 				local newAbsoluteX = alignmentInfo.startScale*containerX + preOffsetX+preOffset
-				local thisOverflowBoundary = 0
-				local currentOverflowBoundary = alignmentInfo.overflowBoundary
-				if currentOverflowBoundary == nil or currentOverflowBoundary then
-					alignmentInfo.overflowBoundary = thisOverflowBoundary
-				end
 				preOffsetX = preOffsetX + increment
 			end
 			for i, otherIcon in pairs(records) do
 				local container = otherIcon.instances.iconContainer
 				local increment, preOffset = getIncrement(otherIcon, alignment)
 				local newPositon = UDim2.new(alignmentInfo.startScale, offsetX+preOffset, 0, 4)
+				local isAnOverflowIcon = string.match(otherIcon.name, "_overflowIcon-")
 				if toggleTransitionInfo then
 					tweenService:Create(container, toggleTransitionInfo, {Position = newPositon}):Play()
 				else
 					container.Position = newPositon
 				end
-				overflowCheck(otherIcon, newPositon)
 				offsetX = offsetX + increment
+				otherIcon.targetAbsolutePosition = UDim2.new(0, (newPositon.X.Scale*viewportSize.X) + newPositon.X.Offset, 0, (newPositon.Y.Scale*viewportSize.Y) + newPositon.Y.Offset)
 			end
 		end
+
+		-- OVERFLOW HANDLER
+		--------
+		local START_LEEWAY = 10 -- The additional offset where the end icon will be converted to ... without an apparant change in position
+		local function getBoundaryX(iconToCheck, side, gap)
+			local additionalGap = gap or 0
+			local currentSize = iconToCheck:get("iconSize")
+			local sizeX = currentSize.X.Offset
+			local extendLeft, extendRight = IconController.getMenuOffset(iconToCheck)
+			local boundaryXOffset = (side == "left" and (-additionalGap-extendLeft)) or (side == "right" and sizeX+additionalGap+extendRight)
+			local boundaryX = iconToCheck.targetAbsolutePosition.X.Offset + boundaryXOffset
+			return boundaryX
+		end
+		local function getSizeX(iconToCheck, usePrevious)
+			local currentSize, previousSize = iconToCheck:get("iconSize", nil, "beforeDropdown")
+			local newSize = (usePrevious and previousSize) or currentSize
+			local extendLeft, extendRight = IconController.getMenuOffset(iconToCheck)
+			local sizeX = newSize.X.Offset + extendLeft + extendRight
+			return sizeX
+		end
+
+		for alignment, alignmentInfo in pairs(alignmentDetails) do
+			local overflowIcon = alignmentInfo.overflowIcon
+			if overflowIcon then
+				local alignmentGap = IconController[alignment.."Gap"]
+				local oppositeAlignment = (alignment == "left" and "right") or "left"
+				local oppositeAlignmentInfo = alignmentDetails[oppositeAlignment]
+				local oppositeOverflowIcon = IconController.getIcon("_overflowIcon-"..oppositeAlignment)
+				
+				-- This determines whether any icons (from opposite or mid alignment) are overlapping with this alignment
+				local overflowBoundaryX = getBoundaryX(overflowIcon, alignment)
+				if overflowIcon.enabled then
+					overflowBoundaryX = getBoundaryX(overflowIcon, oppositeAlignment, alignmentGap)
+				end
+				local function doesExceed(givenBoundaryX)
+					local exceeds = (alignment == "left" and givenBoundaryX < overflowBoundaryX) or (alignment == "right" and givenBoundaryX > overflowBoundaryX)
+					return exceeds
+				end
+				local alignmentOffset = oppositeAlignmentInfo.getOffset()
+				if not overflowIcon.enabled then
+					alignmentOffset += START_LEEWAY
+				end
+				local alignmentBorderX = (alignment == "left" and viewportSize.X - alignmentOffset) or (alignment == "right" and alignmentOffset)
+				local closestBoundaryX = alignmentBorderX
+				local exceededCriticalBoundary = doesExceed(closestBoundaryX)
+				local function checkBoundaryExceeded(recordToCheck)
+					local totalIcons = #recordToCheck
+					for i = 1, totalIcons do
+						local endIcon = recordToCheck[totalIcons+1 - i]
+						if IconController.canShowIconOnTopbar(endIcon) then
+							local isAnOverflowIcon = string.match(endIcon.name, "_overflowIcon-")
+							if isAnOverflowIcon and totalIcons ~= 1 then --!!!
+								break
+							elseif isAnOverflowIcon and not endIcon.enabled then
+								continue
+							end
+							local additionalMyX = 0
+							if not overflowIcon.enabled then
+								additionalMyX = START_LEEWAY
+							end
+							local myBoundaryX = getBoundaryX(endIcon, alignment, additionalMyX)
+							local isNowClosest = (alignment == "left" and myBoundaryX < closestBoundaryX) or (alignment == "right" and myBoundaryX > closestBoundaryX)
+							if isNowClosest then
+								closestBoundaryX = myBoundaryX
+								if doesExceed(myBoundaryX) then
+									exceededCriticalBoundary = true
+								end
+							end
+						end
+					end
+				end
+				checkBoundaryExceeded(alignmentDetails[oppositeAlignment].records)
+				checkBoundaryExceeded(alignmentDetails.mid.records)
+
+				-- This determines which icons to give to the overflow if an overlap is present
+				if exceededCriticalBoundary then
+					local recordToCheck = alignmentInfo.records
+					local totalIcons = #recordToCheck
+					for i = 1, totalIcons do
+						local endIcon = (alignment == "left" and recordToCheck[totalIcons+1 - i]) or (alignment == "right" and recordToCheck[i])
+						if endIcon ~= overflowIcon and IconController.canShowIconOnTopbar(endIcon) then
+							local additionalGap = alignmentGap
+							local overflowIconSizeX = overflowIcon:get("iconSize").X.Offset
+							if overflowIcon.enabled then
+								additionalGap += alignmentGap + overflowIconSizeX
+							end
+							local myBoundaryXPlusGap = getBoundaryX(endIcon, oppositeAlignment, additionalGap)
+							local exceeds = (alignment == "left" and myBoundaryXPlusGap >= closestBoundaryX) or (alignment == "right" and myBoundaryXPlusGap <= closestBoundaryX)
+							if exceeds then
+								if not overflowIcon.enabled then
+									local overflowContainer = overflowIcon.instances.iconContainer
+									local yPos = overflowContainer.Position.Y
+									local appearXAdditional = (alignment == "left" and -overflowContainer.Size.X.Offset) or 0
+									local appearX = getBoundaryX(endIcon, oppositeAlignment, appearXAdditional)
+									overflowContainer.Position = UDim2.new(0, appearX, yPos.Scale, yPos.Offset)
+									overflowIcon:setEnabled(true)
+								end
+								endIcon:join(overflowIcon, "dropdown")
+								if #endIcon.menuIcons > 0 and endIcon.menuOpen then
+									endIcon:deselect()
+									endIcon:select()
+									overflowIcon:select()
+								end
+								if #endIcon.dropdownIcons > 0 then
+									endIcon._overflowConvertedToMenu = true
+									local wasSelected = endIcon.isSelected
+									endIcon:deselect()
+									local iconsToConvert = {}
+									for _, dIcon in pairs(endIcon.dropdownIcons) do
+										table.insert(iconsToConvert, dIcon)
+									end
+									for _, dIcon in pairs(endIcon.dropdownIcons) do
+										dIcon:leave()
+									end
+									endIcon:setMenu(iconsToConvert)
+									if wasSelected and overflowIcon.isSelected then
+										endIcon:select()
+									end
+								end
+							end
+							break
+						end
+					end
+				
+				else
+					
+					-- This checks to see if the lowest/highest (depending on left/right) ordered overlapping icon is no longer overlapping, removes from the dropdown, and repeats if valid
+					local winningOrder, winningOverlappedIcon
+					local totalOverlappingIcons = #overflowIcon.dropdownIcons
+					if not (oppositeOverflowIcon.enabled and #alignmentInfo.records == 1 and #oppositeAlignmentInfo.records ~= 1) then
+						for _, overlappedIcon in pairs(overflowIcon.dropdownIcons) do
+							local iconOrder = overlappedIcon:get("order")
+							if winningOverlappedIcon == nil or (alignment == "left" and iconOrder < winningOrder) or (alignment == "right" and iconOrder > winningOrder) then
+								winningOrder = iconOrder
+								winningOverlappedIcon = overlappedIcon
+							end
+						end
+					end
+					if winningOverlappedIcon then
+						local sizeX = getSizeX(winningOverlappedIcon, true)
+						local myForesightBoundaryX = getBoundaryX(overflowIcon, oppositeAlignment)
+						if totalOverlappingIcons == 1 then
+							myForesightBoundaryX = getBoundaryX(overflowIcon, alignment, alignmentGap-START_LEEWAY)
+						end
+						local availableGap = math.abs(closestBoundaryX - myForesightBoundaryX) - (alignmentGap*2)
+						local noLongerExeeds = (sizeX < availableGap)
+						if noLongerExeeds then
+							if #overflowIcon.dropdownIcons == 1 then
+								overflowIcon:setEnabled(false)
+							end
+							local overflowContainer = overflowIcon.instances.iconContainer
+							local yPos = overflowContainer.Position.Y
+							overflowContainer.Position = UDim2.new(0, myForesightBoundaryX, yPos.Scale, yPos.Offset)
+							winningOverlappedIcon:leave()
+							--
+							if winningOverlappedIcon._overflowConvertedToMenu then
+								winningOverlappedIcon._overflowConvertedToMenu = nil
+								local iconsToConvert = {}
+								for _, dIcon in pairs(winningOverlappedIcon.menuIcons) do
+									table.insert(iconsToConvert, dIcon)
+								end
+								for _, dIcon in pairs(winningOverlappedIcon.menuIcons) do
+									dIcon:leave()
+								end
+								winningOverlappedIcon:setDropdown(iconsToConvert)
+							end
+							--
+						end
+					end
+
+				end
+			end
+		end
+		--------
 		return true
 	end)()
 end
@@ -294,7 +490,7 @@ function IconController.setTopbarEnabled(bool, forceBool)
 				runService.Heartbeat:Wait()
 				local indicatorSizeTrip = 50 --indicator.AbsoluteSize.Y * 2
 				for otherIcon, _ in pairs(topbarIcons) do
-					if otherIcon.enabled == true and otherIcon.presentOnTopbar and (selectIcon == nil or otherIcon:get("order") > selectIcon:get("order")) then
+					if IconController.canShowIconOnTopbar(otherIcon) and (selectIcon == nil or otherIcon:get("order") > selectIcon:get("order")) then
 						selectIcon = otherIcon
 					end
 					local container = otherIcon.instances.iconContainer
@@ -549,6 +745,28 @@ coroutine.wrap(function()
 		end
 		input:Destroy()
 	end)
+
+	-- Setup overflow icons
+	for alignment, detail in pairs(alignmentDetails) do
+		if alignment ~= "mid" then
+			local overflowName = "_overflowIcon-"..alignment
+			local overflowIcon = Icon.new()
+				:setImage(6069276526)
+				:setName(overflowName)
+				:setEnabled(false)
+			detail.overflowIcon = overflowIcon
+			overflowIcon.accountForWhenDisabled = true
+			if alignment == "left" then
+				overflowIcon:setOrder(math.huge)
+				overflowIcon:setLeft()
+				overflowIcon:set("dropdownAlignment", "right")
+			elseif alignment == "right" then
+				overflowIcon:setOrder(-math.huge)
+				overflowIcon:setRight()
+				overflowIcon:set("dropdownAlignment", "left")
+			end
+		end
+	end
 end)()
 
 -- Mimic the enabling of the topbar when StarterGui:SetCore("TopbarEnabled", state) is called

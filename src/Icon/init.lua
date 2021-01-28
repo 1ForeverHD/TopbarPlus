@@ -359,6 +359,7 @@ function Icon.new(order)
 	self.name = ""
 	self.isSelected = false
 	self.presentOnTopbar = true
+	self.accountForWhenDisabled = false
 	self.enabled = true
 	self.hovering = false
 	self.tipText = nil
@@ -368,13 +369,14 @@ function Icon.new(order)
 	self.dropdownIcons = {}
 	self.menuIcons = {}
 	self.dropdownOpen = false
-	self._previousDropdownOpen = false
 	self.menuOpen = false
-	self._previousMenuOpen = false
+	self.targetAbsolutePosition = nil
 	
 	-- Private Properties
 	self._draggingFinger = false
 	self._updatingIconSize = true
+	self._previousDropdownOpen = false
+	self._previousMenuOpen = false
 	
 	-- Apply start values
 	self:setName("UnnamedIcon")
@@ -1213,6 +1215,9 @@ end
 
 -- Join or leave a special feature such as a Dropdown or Menu
 function Icon:join(parentIcon, featureName, dontUpdate)
+	if self._parentIcon then
+		self:leave()
+	end
 	local newFeatureName = (featureName and featureName:lower()) or "dropdown"
 	local beforeName = "before"..featureName:sub(1,1):upper()..featureName:sub(2)
 	local parentFrame = parentIcon.instances[featureName.."Frame"]
@@ -1403,7 +1408,7 @@ function Icon:_updateDropdown()
 			newFrameSizeY = newFrameSizeY + increment/4
 		end
 		newCanvasSizeY = newCanvasSizeY + increment
-		local otherIconWidth = otherIconSize.X.Offset + 4 + 100 -- the +100 is to allow for notices
+		local otherIconWidth = otherIconSize.X.Offset --+ 4 + 100 -- the +100 is to allow for notices
 		if otherIconWidth > newMinWidth then
 			newMinWidth = otherIconWidth
 		end
@@ -1411,34 +1416,39 @@ function Icon:_updateDropdown()
 
 	local finalCanvasSizeY = (lastVisibleIconIndex == totalIcons and 0) or newCanvasSizeY
 	self:set("dropdownCanvasSize", UDim2.new(0, 0, 0, finalCanvasSizeY))
-	self:set("dropdownSize", UDim2.new(0, newMinWidth, 0, newFrameSizeY))
+	self:set("dropdownSize", UDim2.new(0, (newMinWidth+4)*2, 0, newFrameSizeY))
 
 	-- Set alignment while considering screen bounds
 	local dropdownAlignment = values.dropdownAlignment:lower()
 	local alignmentDetails = {
 		left = {
 			AnchorPoint = Vector2.new(0, 0),
-			PositionXScale = 0
+			PositionXScale = 0,
+			ThicknessMultiplier = 0,
 		},
 		mid = {
 			AnchorPoint = Vector2.new(0.5, 0),
-			PositionXScale = 0.5
+			PositionXScale = 0.5,
+			ThicknessMultiplier = 0.5,
 		},
 		right = {
 			AnchorPoint = Vector2.new(0.5, 0),
 			PositionXScale = 1,
 			FrameAnchorPoint = Vector2.new(0, 0),
 			FramePositionXScale = 0,
+			ThicknessMultiplier = 1,
 		}
 	}
 	local alignmentDetail = alignmentDetails[dropdownAlignment]
 	if not alignmentDetail then
 		alignmentDetail = alignmentDetails[values.iconAlignment:lower()]
 	end
+	--print(self.name, dropdownAlignment, values.iconAlignment:lower(), alignmentDetail)
 	dropdownContainer.AnchorPoint = alignmentDetail.AnchorPoint
 	dropdownContainer.Position = UDim2.new(alignmentDetail.PositionXScale, 0, 1, YPadding+0)
-	local thicknessHalf = values.scrollBarThickness/2
-	local additionalOffset = (dropdownFrame.VerticalScrollBarPosition == Enum.VerticalScrollBarPosition.Right and thicknessHalf) or -thicknessHalf
+	local scrollbarThickness = values.scrollBarThickness
+	local newThickness = scrollbarThickness * alignmentDetail.ThicknessMultiplier
+	local additionalOffset = (dropdownFrame.VerticalScrollBarPosition == Enum.VerticalScrollBarPosition.Right and newThickness) or -newThickness
 	dropdownFrame.AnchorPoint = alignmentDetail.FrameAnchorPoint or alignmentDetail.AnchorPoint
 	dropdownFrame.Position = UDim2.new(alignmentDetail.FramePositionXScale or alignmentDetail.PositionXScale, additionalOffset, 0, 0)
 	self._dropdownCanvasPos = Vector2.new(0, 0)
