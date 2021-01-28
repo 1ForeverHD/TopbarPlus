@@ -372,6 +372,7 @@ function Icon.new(order)
 	self.menuOpen = false
 	self.targetAbsolutePosition = nil
 	self.locked = false
+	self.topPadding = UDim.new(0, 4)
 	
 	-- Private Properties
 	self._draggingFinger = false
@@ -1123,6 +1124,14 @@ end
 
 function Icon:unlock()
 	self.locked = false
+	return self
+end
+
+function Icon:setTopPadding(offset, scale)
+	local newOffset = offset or 4
+	local newScale = scale or 0
+	self.topPadding = UDim.new(newScale, newOffset)
+	self.updated:Fire()
 	return self
 end
 

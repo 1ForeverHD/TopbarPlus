@@ -261,7 +261,8 @@ function IconController.updateTopbar(toggleTransitionInfo)
 			for i, otherIcon in pairs(records) do
 				local container = otherIcon.instances.iconContainer
 				local increment, preOffset = getIncrement(otherIcon, alignment)
-				local newPositon = UDim2.new(alignmentInfo.startScale, offsetX+preOffset, 0, 4)
+				local topPadding = otherIcon.topPadding
+				local newPositon = UDim2.new(alignmentInfo.startScale, offsetX+preOffset, topPadding.Scale, topPadding.Offset)
 				local isAnOverflowIcon = string.match(otherIcon.name, "_overflowIcon-")
 				if toggleTransitionInfo then
 					tweenService:Create(container, toggleTransitionInfo, {Position = newPositon}):Play()
