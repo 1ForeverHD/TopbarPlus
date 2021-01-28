@@ -321,6 +321,7 @@ function Icon.new()
 	self.dropdownClosed = maid:give(Signal.new())
 	self.menuOpened = maid:give(Signal.new())
 	self.menuClosed = maid:give(Signal.new())
+	self.notified = maid:give(Signal.new())
 	self._endNotices = maid:give(Signal.new())
 	self._ignoreClippingChanged = maid:give(Signal.new())
 	
@@ -885,6 +886,7 @@ function Icon:notify(clearNoticeEvent, noticeId)
 		self.totalNotices = self.totalNotices + 1
 		self.instances.noticeLabel.Text = (self.totalNotices < 100 and self.totalNotices) or "99+"
 
+		self.notified:Fire(noticeId)
 		notifComplete:Wait()
 		
 		endEvent:Disconnect()
