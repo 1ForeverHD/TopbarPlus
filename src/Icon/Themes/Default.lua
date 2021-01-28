@@ -1,9 +1,24 @@
--- IMPORTANT
--- Do not remove or modify this file (module) at all!
--- The default theme is needed when constructing an icon and when comparing default values
--- against other values.
--- Unlike other themes, the Default theme module may be overwritten during a plugin update
--- if you make any changes yourself.
+--[[
+This file is necessary for constructing the default Icon template
+Do not remove this module otherwise TopbarPlus will break
+Modifying this file may also cause TopbarPlus to break
+It's recommended instead to create a separate theme module and use this instead
+
+To apply your theme after creating it, do:
+```lua
+local IconController = require(pathway.to.IconController)
+local Themes = require(pathway.to.Themes)
+IconController.setGameTheme(Themes.YourThemeName)
+```
+
+or by applying to an individual icon:
+```lua
+local Icon = require(pathway.to.Icon)
+local Themes = require(pathway.to.Themes)
+local newIcon = Icon.new()
+    :setTheme(Themes.YourThemeName)
+```
+--]]
 
 return {
     
