@@ -1,0 +1,57 @@
+site_name: TopbarPlus
+site_description: Documentation for TopbarPlus
+site_author: Ben Horton
+site_url: https://1ForeverHD.github.io/TopbarPlus/
+
+repo_name: 1ForeverHD/TopbarPlus
+repo_url: https://github.com/1ForeverHD/TopbarPlus
+edit_uri: ""
+
+theme:
+  logo: https://user-images.githubusercontent.com/51117782/104590568-71724f80-5663-11eb-9bc1-344fc2a4193c.png
+  favicon: https://user-images.githubusercontent.com/51117782/104590568-71724f80-5663-11eb-9bc1-344fc2a4193c.png
+  name: material
+  features:
+    - navigation.tabs
+    #- navigation.instant
+    #- navigation.sections
+  palette:
+    primary: blue
+    accent: blue
+    scheme: preference
+  highlightjs: true
+  hljs_languages:
+    - lua
+
+extra_javascript:
+  - javascripts/tags.js
+
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/1ForeverHD/
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/ForeverHD_
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/channel/UCj9QhyYCvhAwiBHA5B88pYg
+
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+
+nav:
+  - Home:
+    - Introduction: index.md
+    - Features: features.md
+    - Installation: installation.md
+    - Third Parties: third_parties.md
+    - API:
+      - Icon: api/icon.md
+      - IconController: api/icon_controller.md
+    - Resources: resources.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
