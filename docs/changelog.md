@@ -1,10 +1,10 @@
+## [2.0.0] - January 29 2021
 [features]: https://1foreverhd.github.io/TopbarPlus/features/
 [TopbarPlus Playground]: https://www.roblox.com/games/6199274521/TopbarPlus-Playground
 [Third Parties]: https://1foreverhd.github.io/TopbarPlus/third_parties/
 
 This contains a brief overview of all changes. To fully explore these changes it's recommended you visit [features] and the [TopbarPlus Playground].
 
-## [2.0.0] - January 29 2021
 ### Added
 - Menus (dropdowns but horizontal and with scrolling support!)
 - Corners
