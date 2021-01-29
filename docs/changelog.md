@@ -1,10 +1,4 @@
 ## [2.0.0] - January 29 2021
-[features]: https://1foreverhd.github.io/TopbarPlus/features/
-[TopbarPlus Playground]: https://www.roblox.com/games/6199274521/TopbarPlus-Playground
-[Third Parties]: https://1foreverhd.github.io/TopbarPlus/third_parties/
-
-This contains a brief overview of all changes. To fully explore these changes it's recommended you visit [features] and the [TopbarPlus Playground].
-
 ### Added
 - Menus (dropdowns but horizontal and with scrolling support!)
 - Corners
@@ -21,7 +15,7 @@ This contains a brief overview of all changes. To fully explore these changes it
 - Rich Text support
 - ``Icon.mimic(coreIconToMimic)`` constructor to replace functions like ``IconController.createFakeChat``
 - ``icon:Destroy()`` uppercase alias to assist developers who utilise PascalCase tools such as Maids
-- Referencing support for third parties, see [Third Parties]
+- Referencing support for third parties, see [Third Parties](https://1foreverhd.github.io/TopbarPlus/third_parties/)
 - ``icon:set(settingName, value)``
 - ``icon:get(settingName, value)``
 - ``icon:clearNotices()``
@@ -85,7 +79,6 @@ This contains a brief overview of all changes. To fully explore these changes it
 - ``icon.endNotifications`` event
 - ``IconController:getAllIcons`` (replaced with ``IconController.getIcons``)
 - Some properties may have been removed too
-
 
 ### Fixed
 - Console-mode rapid enabling and disabling bug
