@@ -17,7 +17,7 @@ local icon = Icon.new()
 !!! info
     The order icons appear are determined by their construction sequence. Icons constructed first will have a smaller order number, therefore will appear left of icons with a higher order. For instance, if you construct a shop icon then an inventory icon, the shop icon will appear furthest left. You can modify this behaviour using [icon:setOrder].
 
-This constructs an empty ``32x32`` icon on the topbar. To add an image and label:
+This constructs an empty ``32x32`` icon on the topbar. To add an image and label, do:
 ```lua
 icon:setImage(imageId)
 icon:setLabel("Label")
@@ -31,9 +31,9 @@ local icon = Icon.new()
 ```
 
 !!! info
-    Chainable methods will have the 'chainable' tag next to their name within the API Icon docs.
+    Chainable methods have a ``chainable`` tag next to their name within the API Icon docs.
 
-Sometimes you'll want an item to appear only when *deselected*, and similarily only when *selected*. You can achieve this by specifying ``"deselected"`` or ``"selected"`` within the ``toggleState`` parameter of icon methods. Leaving this parameter blank or with ``nil`` will default to applying to both states. For example:
+Sometimes you'll want an item to appear only when *deselected*, and similarily only when *selected*. You can achieve this by specifying ``"deselected"`` or ``"selected"`` within the ``toggleState`` parameter of icon methods. Leaving this parameter blank or as ``nil`` will default to applying to both states. For example:
 ```lua
 local icon = Icon.new()
     :setImage(closedImageId, "deselected")
