@@ -86,7 +86,6 @@ This contains a brief overview of all changes. To fully explore these changes it
 - ``IconController:getAllIcons`` (replaced with ``IconController.getIcons``)
 - Some properties may have been removed too
 
-
 ### Fixed
 - Console-mode rapid enabling and disabling bug
 - Recursive update topbar bug
