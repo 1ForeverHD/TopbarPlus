@@ -2,22 +2,21 @@
 [baseparts]: https://developer.roblox.com/en-us/api-reference/class/BasePart
 [zone]: https://1foreverhd.github.io/ZonePlus/zone/
 [Zone module docs]: https://1foreverhd.github.io/ZonePlus/zone/
+[zone:setOrder]: https://1foreverhd.github.io/TopbarPlus/API/Icon/#setorder
 
-ZonePlus is a module enabling the construction of dynamic zones. These zones utilise region checking, raycasting and the new [BasePart.CanTouch] property to effectively determine players and parts within their boundaries.
+TopbarPlus is a module enabling the construction of dynamic topbar icons. These icons 
 
-Creating a zone is as simple as:
+Creating an icon is as simple as:
 
 ``` lua
--- Assuming we place ZonePlus in ReplicatedStorage
-local Zone = require(game:GetService("ReplicatedStorage").Zone)
-local zoneGroup = workspace.SafeZoneGroup
-local zone = Zone.new(zoneGroup)
+-- Assuming we place TopbarPlus in ReplicatedStorage
+local Icon = require(game:GetService("ReplicatedStorage").Icon)
+local icon = Icon.new()
 ```
 
-Zones take one argument: a **group**. A group can be any non-basepart instance (such as a Model, Folder, etc) that contain descendant [baseparts]. Alternatively a group can be a singular basepart instance, or a table containing an array of baseparts. 
-
 !!! info
-    Zones are compatible with all basepart classes, however it's recommended to use simple parts (blocks, balls, cylinders, wedges, etc) where possible as these are more efficient and accurate. Some classes for instance, such as MeshParts and UnionOperations, require additional raycast checks to verify their surface geometries.
+    The order icons appear are determined by their construction sequence. Icons constructed first will have a smaller order number, therefore will appear left of icons with a higher order. For instance, if you construct a shop icon then an inventory icon, the shop icon will appear furthest left. You can modify this behaviour using [zone:setOrder].
+
 
 These group parts are then used to define the region and precise bounds of the zone.
 
