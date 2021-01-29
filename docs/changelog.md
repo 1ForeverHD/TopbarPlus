@@ -15,7 +15,7 @@
 - Rich Text support
 - ``Icon.mimic(coreIconToMimic)`` constructor to replace functions like ``IconController.createFakeChat``
 - ``icon:Destroy()`` uppercase alias to assist developers who utilise PascalCase tools such as Maids
-- Referencing support for third parties, see [Third Parties]
+- Referencing support for third parties, see [Third Parties](https://1foreverhd.github.io/TopbarPlus/third_parties/)
 - ``icon:set(settingName, value)``
 - ``icon:get(settingName, value)``
 - ``icon:clearNotices()``
