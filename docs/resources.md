@@ -1,8 +1,8 @@
-- [Model](https://www.roblox.com/library/6245329519/ZonePlus)
-- [Playground](https://www.roblox.com/games/6166477769/ZonePlus-Playground)
-- [Discussion](https://devforum.roblox.com/t/zoneplus/397465)
-- [Repository](https://github.com/1ForeverHD/ZonePlus)
+- [Model](https://www.roblox.com/library/6311707237/TopbarPlus)
+- [Playground](https://www.roblox.com/games/6199274521/TopbarPlus-Playground)
+- [Discussion](https://devforum.roblox.com/t/topbar-add-additional-functionality-and-themes-to-your-topbar/573313)
+- [Repository](https://github.com/1ForeverHD/TopbarPlus)
 
 -------------------------------------
 
-If you would like to submit a resource (such as a video tutorial, port, etc), please see [contributing](https://1foreverhd.github.io/ZonePlus/contributing/).
+If you would like to submit a resource (such as a video tutorial, port, etc), please see [contributing](https://1foreverhd.github.io/TopbarPlus/contributing/).

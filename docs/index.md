@@ -1,47 +1,45 @@
-[BasePart.CanTouch]: https://developer.roblox.com/en-us/api-reference/property/BasePart/CanTouch
-[baseparts]: https://developer.roblox.com/en-us/api-reference/class/BasePart
-[zone]: https://1foreverhd.github.io/ZonePlus/zone/
-[Zone module docs]: https://1foreverhd.github.io/ZonePlus/zone/
-[zone:setOrder]: https://1foreverhd.github.io/TopbarPlus/API/Icon/#setorder
+[icon:setOrder]: https://1foreverhd.github.io/TopbarPlus/API/Icon/#setorder
+[Feature Guide]: https://1foreverhd.github.io/TopbarPlus/features
+[Icon API]: https://1foreverhd.github.io/TopbarPlus/API/Icon
 
-TopbarPlus is a module enabling the construction of dynamic topbar icons. These icons 
+TopbarPlus is a module enabling the construction of dynamic topbar icons. These icons can be enhanced with features and methods, like themes, dropdowns and menus, to enhance their appearance and behaviour.
+
+TopbarPlus fully supports PC, Mobile, Tablet and Console, and comes with internal features such as 'overflows' to ensure icons remain within suitable bounds.
 
 Creating an icon is as simple as:
 
 ``` lua
--- Assuming we place TopbarPlus in ReplicatedStorage
+-- Within a LocalScript and assuming TopbarPlus is placed in ReplicatedStorage
 local Icon = require(game:GetService("ReplicatedStorage").Icon)
 local icon = Icon.new()
 ```
 
 !!! info
-    The order icons appear are determined by their construction sequence. Icons constructed first will have a smaller order number, therefore will appear left of icons with a higher order. For instance, if you construct a shop icon then an inventory icon, the shop icon will appear furthest left. You can modify this behaviour using [zone:setOrder].
+    The order icons appear are determined by their construction sequence. Icons constructed first will have a smaller order number, therefore will appear left of icons with a higher order. For instance, if you construct a shop icon then an inventory icon, the shop icon will appear furthest left. You can modify this behaviour using [icon:setOrder].
 
-
-These group parts are then used to define the region and precise bounds of the zone.
-
-!!! info
-    Zones are dynamic. This means if a group part changes size or position, or if a basepart is added to or removed from the zone group, then an internal ``_update()`` method will be called to recalculate its bounds.
-
-Once constructed, you can utilise zone events to determine players, parts and the localplayer *entering* or *exiting* a zone. For instance, to listen for a *player* entering and exiting a zone, do:
-
+This constructs an empty ``32x32`` icon on the topbar. To add an image and label:
 ```lua
-zone.playerEntered:Connect(function(player)
-    print(("%s entered the zone!"):format(player.Name))
-end)
+icon:setImage(imageId)
+icon:setLabel("Label")
+```
 
-zone.playerExited:Connect(function(player)
-    print(("%s exited the zone!"):format(player.Name))
-end)
+These methods are 'chainable' therefore can alternatively be called by doing:
+```lua
+local icon = Icon.new()
+    :setImage(imageId)
+    :setLabel("Label")
 ```
 
 !!! info
-    On the client you may only wish to listen for the LocalPlayer (such as for an ambient system). To achieve this you would alternatively use the ``.localPlayer`` events.
+    Chainable methods will have the 'chainable' tag next to their name within the API Icon docs.
 
-If you don't intend to frequently check for items entering and exiting a zone, you can utilise zone methods:
-
+Sometimes you'll want an item to appear only when *deselected*, and similarily only when *selected*. You can achieve this by specifying ``"deselected"`` or ``"selected"`` within the ``toggleState`` parameter of icon methods. Leaving this parameter blank or with ``nil`` will default to applying to both states. For example:
 ```lua
-local playersArray = zone:getPlayers()
+local icon = Icon.new()
+    :setImage(closedImageId, "deselected")
+    :setImage(openedImageId, "selected")
+    :setLabel("Closed", "deselected")
+    :setLabel("Open", "selected")
 ```
 
-Discover the full set of methods, events and properties at the [Zone module docs].
+You may wish to enhance your icon further with features like themes, dropdowns and menus, or by binding GuiObjects and KeyCodes to their toggle. This and much more can be achieved by exploring the [Feature Guide] and [Icon API].
