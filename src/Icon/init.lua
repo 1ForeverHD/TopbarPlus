@@ -14,15 +14,18 @@ local Signal = require(script.Signal)
 local Maid = require(script.Maid)
 local TopbarPlusGui = require(script.TopbarPlusGui)
 local TopbarPlusReference = require(script.TopbarPlusReference)
+local referenceObject = TopbarPlusReference.getObject()
 local Themes = require(script.Themes)
 local activeItems = TopbarPlusGui.ActiveItems
 local topbarContainer = TopbarPlusGui.TopbarContainer
 local iconTemplate = topbarContainer["IconContainer"]
 local DEFAULT_THEME = Themes.Default
 local THUMB_OFFSET = 55
-local Icon = {}
+local Icon = (referenceObject and require(referenceObject.Value)) or {}
 Icon.__index = Icon
-TopbarPlusReference.addToReplicatedStorage()
+if not referenceObject then
+	TopbarPlusReference.addToReplicatedStorage()
+end
 
 
 
