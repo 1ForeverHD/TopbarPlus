@@ -1,4 +1,4 @@
-It's important only a singular TopbarPlus applications initiates at runtime otherwise issues such as overlapping icons will occur.
+It's important only a single TopbarPlus applications initiates at runtime otherwise issues such as overlapping icons will occur.
 
 A developer may rename and/or place their Icon module anywhere within ReplicatedStorage therefore it's important for third party runtime applications (such as admin commands) to check and reference this correctly.
 
