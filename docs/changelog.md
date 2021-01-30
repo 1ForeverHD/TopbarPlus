@@ -1,5 +1,6 @@
 ## [2.0.0] - January 29 2021
 ### Added
+Hello world test
 - Menus (dropdowns but horizontal and with scrolling support!)
 - Corners
 - Dropdowns v2
