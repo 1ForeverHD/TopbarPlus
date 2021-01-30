@@ -1,4 +1,4 @@
---[[ api/icon:header
+--[[ icon:header
 [Accuracy Enum]: https://github.com/1ForeverHD/ZonePlus/blob/main/src/Zone/Enum/Accuracy.lua
 [setAccuracy]: https://1foreverhd.github.io/ZonePlus/zone/#setaccuracy
 
