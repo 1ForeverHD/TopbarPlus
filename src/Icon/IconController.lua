@@ -190,7 +190,7 @@ IconController.iconAdded:Connect(function(icon)
 		local allIcons = IconController.getIcons()
 		for _, otherIcon in pairs(allIcons) do
 			if icon.deselectWhenOtherIconSelected and otherIcon ~= icon and otherIcon.deselectWhenOtherIconSelected and otherIcon:getToggleState() == "selected" then
-				otherIcon:deselect()
+				otherIcon:deselect(icon)
 			end
 		end
 	end)

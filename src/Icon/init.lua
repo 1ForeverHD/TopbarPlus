@@ -186,6 +186,20 @@ icon:setSize(XOffset, YOffset, toggleState)
 ```
 
 ----
+#### bindToggleItem
+{chainable}
+```lua
+icon:bindToggleItem(guiObjectOrLayerCollector)
+```
+
+----
+#### unbindToggleItem
+{chainable}
+```lua
+icon:unbindToggleItem(guiObjectOrLayerCollector)
+```
+
+----
 #### bindToggleKey
 {chainable}
 ```lua
@@ -218,13 +232,6 @@ icon:unlock()
 {chainable}
 ```lua
 icon:setTopPadding(offset, scale)
-```
-
-----
-#### setToggleItem
-{chainable}
-```lua
-icon:setToggleItem(guiObject)
 ```
 
 ----
@@ -850,6 +857,7 @@ function Icon.new()
 	self.locked = false
 	self.topPadding = UDim.new(0, 4)
 	self.targetPosition = nil
+	self.toggleItems = {}
 	
 	-- Private Properties
 	self._draggingFinger = false
@@ -1302,10 +1310,10 @@ function Icon:_playClickSound()
 	end
 end
 
-function Icon:select()
+function Icon:select(byIcon)
 	if self.locked then return self end
 	self.isSelected = true
-	self:_setToggleItemVisible(true)
+	self:_setToggleItemsVisible(true, byIcon)
 	if #self.dropdownIcons > 0 or #self.menuIcons > 0 then
 		self:_displayNotice(false)
 	end
@@ -1319,10 +1327,10 @@ function Icon:select()
 	return self
 end
 
-function Icon:deselect()
+function Icon:deselect(byIcon)
 	if self.locked then return self end
 	self.isSelected = false
-	self:_setToggleItemVisible(false)
+	self:_setToggleItemsVisible(false, byIcon)
 	if (#self.dropdownIcons > 0 or #self.menuIcons > 0) and self.totalNotices > 0 then
 		self:_displayNotice(true)
 	end
@@ -1612,23 +1620,29 @@ function Icon:setTopPadding(offset, scale)
 	return self
 end
 
--- Toggle Item
-function Icon:setToggleItem(guiObject)
-	if not guiObject:IsA("GuiObject") and not guiObject:IsA("LayerCollector") then
-		guiObject = nil
+function Icon:bindToggleItem(guiObjectOrLayerCollector)
+	if not guiObjectOrLayerCollector:IsA("GuiObject") and not guiObjectOrLayerCollector:IsA("LayerCollector") then
+		error("Toggle item must be a GuiObject or LayerCollector!")
 	end
-	self.toggleItem = guiObject
+	self.toggleItems[guiObjectOrLayerCollector] = true
 	return self
 end
 
-function Icon:_setToggleItemVisible(bool)
-	local toggleItem = self.toggleItem
-	local property = "Visible"
-	if not toggleItem then return end
-	if toggleItem:IsA("LayerCollector") then
-		property = "Enbaled"
+function Icon:unbindToggleItem(guiObjectOrLayerCollector)
+	self.toggleItems[guiObjectOrLayerCollector] = nil
+	return self
+end
+
+function Icon:_setToggleItemsVisible(bool, byIcon)
+	for toggleItem, _ in pairs(self.toggleItems) do
+		if not byIcon or byIcon.toggleItems[toggleItem] == nil then
+			local property = "Visible"
+			if toggleItem:IsA("LayerCollector") then
+				property = "Enbaled"
+			end
+			toggleItem[property] = bool
+		end
 	end
-	toggleItem[property] = bool
 end
 
 -- Tips

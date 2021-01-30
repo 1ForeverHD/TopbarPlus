@@ -20,6 +20,8 @@
 - ``icon:get(settingName, value)``
 - ``icon:clearNotices()``
 - ``icon:setMenu(arrayOfIcons)``
+- ``icon:bindToggleItem(guiObjectOrLayerCollector)``
+- ``icon:unbindToggleItem(guiObjectOrLayerCollector)``
 - ``icon:bindToggleKey(keyCodeEnum)``
 - ``icon:unbindToggleKey(keyCodeEnum)``
 - ``icon:lock()``
@@ -72,7 +74,7 @@
 - ``icon:removeDropdown``
 - ``icon:setImageSize`` (replaced with ``icon:setImageRatio`` and ``icon:setImageYScale``)
 - ``icon:setCellSize`` (replaced with ``icon:setSize``)
-- ``icon:setToggleMenu`` (replaced with ``icon:setToggleItem``)
+- ``icon:setToggleMenu`` (replaced with ``icon:bindToggleItem``)
 - ``icon:clearNotifications`` (replaced with ``icon:clearNotices``)
 - ``icon:applyThemeToObject``
 - ``icon:applyThemeToAllObjects``

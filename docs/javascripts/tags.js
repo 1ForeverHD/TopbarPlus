@@ -21,7 +21,7 @@ const style = `.tag {
 	background-color: rgb(89, 140, 206);
 }
 .server-only {
-	background-color: rgb(178, 92, 162);
+	background-color: rgb(89, 140, 206);
 }
 .toggleable {
 	background-color: rgb(178, 92, 162);
