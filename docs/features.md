@@ -3,11 +3,15 @@
 icon:setImage(shopImageId)
 ```
 
-<a><img src="https://i.imgur.com/rQUyEtO.png" width="100%"/></a>
+<a><img src="https://i.imgur.com/rQUyEtO.png" width="50%"/></a>
 
 ------------------------------
 
 ### Labels
+
+------------------------------
+
+### Notices
 
 ------------------------------
 
@@ -35,7 +39,7 @@ icon:setImage(shopImageId)
 
 ------------------------------
 
-### Toggle Item
+### Toggle Items
 
 ------------------------------
 
