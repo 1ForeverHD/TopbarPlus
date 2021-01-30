@@ -1,3 +1,4 @@
+## [2.0.0] - January 19 2021
 ### Added
 - Menus (dropdowns but horizontal and with scrolling support!)
 - Corners
