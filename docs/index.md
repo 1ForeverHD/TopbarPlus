@@ -2,7 +2,7 @@
 [Feature Guide]: https://1foreverhd.github.io/TopbarPlus/features
 [Icon API]: https://1foreverhd.github.io/TopbarPlus/API/Icon
 
-TopbarPlus is a module enabling the construction of dynamic topbar icons. These icons can be enhanced with features and methods, like themes, dropdowns and menus, to enhance their appearance and behaviour.
+TopbarPlus is a module enabling the construction of dynamic topbar icons. These icons can be enhanced with features and methods, like themes, dropdowns and menus, to expand upon their appearance and behaviour.
 
 TopbarPlus fully supports PC, Mobile, Tablet and Console, and comes with internal features such as 'overflows' to ensure icons remain within suitable bounds.
 
@@ -42,4 +42,4 @@ local icon = Icon.new()
     :setLabel("Open", "selected")
 ```
 
-You may wish to enhance your icon further with features like themes, dropdowns and menus, or by binding GuiObjects and KeyCodes to their toggle. This and much more can be achieved by exploring the [Feature Guide] and [Icon API].
+You may wish to enhance icons further with features like themes, dropdowns and menus, or by binding GuiObjects and KeyCodes to their toggle. This and much more can be achieved by exploring the [Feature Guide] and [Icon API].
