@@ -17,7 +17,7 @@ jobs:
       - name: Parse and generate documentation
         uses: p3lim/lua-doc-parser@v2
         with:
-          output: docs
+          output: docs/api
 
       - name: Push documentation changes
         run: |
