@@ -9,7 +9,7 @@ TopbarPlus fully supports PC, Mobile, Tablet and Console, and comes with interna
 Creating an icon is as simple as:
 
 ``` lua
--- Within a LocalScript and assuming TopbarPlus is placed in ReplicatedStorage
+-- Within a LocalScript in StarterPlayerScripts and assuming TopbarPlus is placed in ReplicatedStorage
 local Icon = require(game:GetService("ReplicatedStorage").Icon)
 local icon = Icon.new()
 ```
