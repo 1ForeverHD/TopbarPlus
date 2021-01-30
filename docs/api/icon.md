@@ -185,6 +185,20 @@ icon:setSize(XOffset, YOffset, toggleState)
 ```
 
 ----
+#### bindToggleItem
+{chainable}
+```lua
+icon:bindToggleItem(guiObjectOrLayerCollector)
+```
+
+----
+#### unbindToggleItem
+{chainable}
+```lua
+icon:unbindToggleItem(guiObjectOrLayerCollector)
+```
+
+----
 #### bindToggleKey
 {chainable}
 ```lua
@@ -217,13 +231,6 @@ icon:unlock()
 {chainable}
 ```lua
 icon:setTopPadding(offset, scale)
-```
-
-----
-#### setToggleItem
-{chainable}
-```lua
-icon:setToggleItem(guiObject)
 ```
 
 ----
