@@ -1,129 +1,472 @@
 --[[ icon:header
-[Accuracy Enum]: https://github.com/1ForeverHD/ZonePlus/blob/main/src/Zone/Enum/Accuracy.lua
-[setAccuracy]: https://1foreverhd.github.io/ZonePlus/zone/#setaccuracy
-
-Hello world this is a test 2
-
 ## Construtors
+
 #### new
 ```lua
-local zone = Zone.new(group)
+local icon = Icon.new()
 ```
-A group is used the define the boundaries of the zone. It can be any non-basepart instance (such as a Model, Folder, etc) that contain descendant baseparts. Alternatively a group can be a singular basepart instance, or a table containing an array of baseparts. 
+Constructs an empty ``32x32`` icon on the topbar.
+
 ----
+#### mimic
+{unstable}
+```lua
+local icon = Icon.mimic(coreIconName)
+```
+Constructs an icon to replace its CoreGui equivalent and accurately mimic its behaviour. This allows for the persistence of core gui items (such as the chatbar, leaderboard, emotes, etc) while having full control over the appearance and behaviour of the icon to toggle it.
+
+Mimicable Items: ``"PlayerList"``, ``"Backpack"``, ``"Chat"``, ``"EmotesMenu"``
+
+!!! danger
+    Due to recent unannounced changes Roblox have completely restricted the ability to accurately mimic core items such as Chat. Until this is resolved the ``mimic`` constructor will not work as intended.
+
+----
+
+
+
 ## Methods
-#### findLocalPlayer
+
+#### set
+{chainable} {toggleable}
 ```lua
-local isWithinZoneBool = zone:findLocalPlayer()
+icon:set(settingName, value, toggleState)
 ```
+
 ----
-#### findPlayer
+#### get
+{toggleable}
 ```lua
-local isWithinZoneBool = zone:findPlayer(player)
+local value = icon:get(settingName, toggleState)
 ```
+
 ----
-#### findPart
+#### getToggleState
 ```lua
-local isWithinZoneBool = zone:findPart(basePart)
+local selectedOrDeselectedString = icon:getToggleState()
 ```
+
 ----
-#### getPlayers
+#### setTheme
+{chainable}
 ```lua
-local playersArray = zone:getPlayers()
+icon:setTheme(theme)
 ```
+
 ----
-#### getParts
+#### setEnabled
+{chainable}
 ```lua
-local partsArray = zone:getParts()
+icon:setEnabled(bool)
 ```
+
 ----
-#### getRandomPoint
+#### setName
+{chainable}
 ```lua
-local randomVector, touchingGroupPartsArray = zone:getRandomPoint()
+icon:setName(string)
 ```
-Generates random points within the zones region until one falls within its bounds. It then returns this ``Vector3`` and a ``table array`` of group parts the point falls within.
+
 ----
-#### setAccuracy
+#### select
+{chainable}
 ```lua
-zone:setAccuracy(enumIdOrName)
+icon:select()
 ```
-Sets the frequency of checks based upon the [Accuracy Enum].
+
+----
+#### deselect
+{chainable}
+```lua
+icon:deselect()
+```
+
+----
+#### notify
+{chainable}
+```lua
+icon:notify(clearNoticeEvent)
+```
+
+----
+#### clearNotices
+{chainable}
+```lua
+icon:clearNotices()
+```
+
+----
+#### disableStateOverlay
+{chainable}
+```lua
+icon:disableStateOverlay(bool)
+```
+
+----
+#### setLabel
+{chainable} {toggleable}
+```lua
+icon:setLabel(text, toggleState)
+```
+
+----
+#### setCornerRadius
+{chainable} {toggleable}
+```lua
+icon:setCornerRadius(scale, offset, toggleState)
+```
+
+----
+#### setImage
+{chainable} {toggleable}
+```lua
+icon:setImage(imageId, toggleState)
+```
+
+----
+#### setOrder
+{chainable} {toggleable}
+```lua
+icon:setOrder(order, toggleState)
+```
+
+----
+#### setLeft
+{chainable} {toggleable}
+```lua
+icon:setLeft(toggleState)
+```
+
+----
+#### setMid
+{chainable} {toggleable}
+```lua
+icon:setMid(toggleState)
+```
+
+----
+#### setRight
+{chainable} {toggleable}
+```lua
+icon:setRight(toggleState)
+```
+
+----
+#### setImageYScale
+{chainable} {toggleable}
+```lua
+icon:setImageYScale(YScale, toggleState)
+```
+
+----
+#### setImageRatio
+{chainable} {toggleable}
+```lua
+icon:setImageRatio(ratio, toggleState)
+```
+
+----
+#### setLabelYScale
+{chainable} {toggleable}
+```lua
+icon:setLabelYScale(YScale, toggleState)
+```
+
+----
+#### setBaseZIndex
+{chainable} {toggleable}
+```lua
+icon:setBaseZIndex(ZIndex, toggleState)
+```
+
+----
+#### setSize
+{chainable} {toggleable}
+```lua
+icon:setSize(XOffset, YOffset, toggleState)
+```
+
+----
+#### bindToggleKey
+{chainable}
+```lua
+icon:bindToggleKey(keyCodeEnum)
+```
+
+----
+#### unbindToggleKey
+{chainable}
+```lua
+icon:unbindToggleKey(keyCodeEnum)
+```
+
+----
+#### lock
+{chainable}
+```lua
+icon:lock()
+```
+
+----
+#### unlock
+{chainable}
+```lua
+icon:unlock()
+```
+
+----
+#### setTopPadding
+{chainable}
+```lua
+icon:setTopPadding(offset, scale)
+```
+
+----
+#### setToggleItem
+{chainable}
+```lua
+icon:setToggleItem(guiObject)
+```
+
+----
+#### setTip
+{chainable}
+```lua
+icon:setTip(text)
+```
+
+----
+#### setCaption
+{chainable}
+```lua
+icon:setCaption(text)
+```
+
+----
+#### join
+{chainable}
+```lua
+icon:join(parentIcon, featureName)
+```
+
+----
+#### leave
+{chainable}
+```lua
+icon:leave()
+```
+
+----
+#### setDropdown
+{chainable}
+```lua
+icon:setDropdown(arrayOfIcons)
+```
+
+----
+#### setMenu
+{chainable}
+```lua
+icon:setMenu(arrayOfIcons)
+```
+
 ----
 #### destroy
+{chainable}
 ```lua
-zone:destroy()
+icon:destroy()
 ```
-Disconnects all connections within the zone.
+
 ----
+
+
+
 ## Events
-#### localPlayerEntered 
-{client-only}
+#### selected 
 ```lua
-zone.localPlayerEntered:Connect(function()
-    print("you entered the zone!")
+icon.selected:Connect(function()
+    print()
 end)
 ```
+
 ----
-#### localPlayerExited
-{client-only}
+#### deselected 
 ```lua
-zone.localPlayerExited:Connect(function()
-    print("you exited the zone!")
+icon.deselected:Connect(function()
+    print()
 end)
 ```
+
 ----
-#### playerEntered
+#### toggled 
 ```lua
-zone.playerEntered:Connect(function(player)
-    print(("player '%s' entered the zone!"):format(player.Name))
+icon.toggled:Connect(function(isSelected)
+    print()
 end)
 ```
+
 ----
-#### playerExited
+#### hoverStarted 
 ```lua
-zone.playerExited:Connect(function(player)
-    print(("player '%s' exited the zone!"):format(player.Name))
+icon.hoverStarted:Connect(function()
+    print()
 end)
 ```
+
 ----
-#### partEntered
+#### hoverEnded 
 ```lua
-zone.partEntered:Connect(function(part)
-    print(("part '%s' entered the zone!"):format(part.Name))
+icon.hoverEnded:Connect(function()
+    print()
 end)
 ```
+
 ----
-#### partExited
+#### dropdownOpened 
 ```lua
-zone.partExited:Connect(function(part)
-    print(("part '%s' exited the zone!"):format(part.Name))
+icon.dropdownOpened:Connect(function()
+    print()
 end)
 ```
+
 ----
+#### dropdownClosed 
+```lua
+icon.dropdownClosed:Connect(function()
+    print()
+end)
+```
+
+----
+#### menuOpened 
+```lua
+icon.menuOpened:Connect(function()
+    print()
+end)
+```
+
+----
+#### menuClosed 
+```lua
+icon.menuClosed:Connect(function()
+    print()
+end)
+```
+
+----
+#### notified 
+```lua
+icon.notified:Connect(function()
+    print()
+end)
+```
+
+----
+
+
+
 ## Properties
-#### accuracy
+#### deselectWhenOtherIconSelected
 ```lua
-local accuracyEnumId = zone.accuracy --[default: 'Enum.enums.Accuracy.High']
+local bool = icon.deselectWhenOtherIconSelected --[default: 'true']
 ```
-To change ``accuracy`` it's recommended you use [setAccuracy].
+
 ----
-#### autoUpdate
-```lua
-local bool = zone.autoUpdate --[default: 'true']
-```
-When ``true``, the zone will update when its group parts change size or position, or when a descendant group part is added or removed from the group.
-----
-#### respectUpdateQueue
-```lua
-local bool = zone.respectUpdateQueue --[default: 'true']
-```
-When ``true``, will prevent the internal ``_update()`` from being called multiple times within a 0.1 second period.
-----
-#### region
+#### name
 {read-only}
+```lua
+local string = icon.name --[default: '"Unnamed Icon"']
+```
+
 ----
-#### volume
+#### isSelected
 {read-only}
+```lua
+local bool = icon.isSelected
+```
+
+----
+#### enabled
+{read-only}
+```lua
+local bool = icon.enabled
+```
+
+----
+#### hovering
+{read-only}
+```lua
+local bool = icon.hovering
+```
+
+----
+#### tipText
+{read-only}
+```lua
+local stringOrNil = icon.tipText
+```
+
+----
+#### captionText
+{read-only}
+```lua
+local stringOrNil = icon.captionText
+```
+
+----
+#### totalNotices
+{read-only}
+```lua
+local BBB = icon.totalNotices
+```
+
+----
+#### dropdownIcons
+{read-only}
+```lua
+local arrayOfIcons = icon.dropdownIcons
+```
+
+----
+#### menuIcons
+{read-only}
+```lua
+local arrayOfIcons = icon.menuIcons
+```
+
+----
+#### dropdownOpen
+{read-only}
+```lua
+local bool = icon.dropdownOpen
+```
+
+----
+#### menuOpen
+{read-only}
+```lua
+local bool = icon.menuOpen
+```
+
+----
+#### locked
+{read-only}
+```lua
+local bool = icon.locked
+```
+
+----
+#### topPadding
+{read-only}
+```lua
+local udim = icon.topPadding
+```
+
+----
+#### targetPosition
+{read-only}
+```lua
+local udim2 = icon.targetPosition
+```
 --]]
 
 
@@ -504,9 +847,9 @@ function Icon.new()
 	self.menuIcons = {}
 	self.dropdownOpen = false
 	self.menuOpen = false
-	self.targetAbsolutePosition = nil
 	self.locked = false
 	self.topPadding = UDim.new(0, 4)
+	self.targetPosition = nil
 	
 	-- Private Properties
 	self._draggingFinger = false

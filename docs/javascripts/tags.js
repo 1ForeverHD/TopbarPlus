@@ -21,13 +21,19 @@ const style = `.tag {
 	background-color: rgb(89, 140, 206);
 }
 .server-only {
+	background-color: rgb(178, 92, 162);
+}
+.toggleable {
+	background-color: rgb(178, 92, 162);
+}
+.chainable {
+	background-color: rgb(122, 103, 231);
+}
+.unstable {
 	background-color: rgb(204, 134, 80);
 }
 .deprecated {
 	background-color: rgb(227, 87, 75);
-}
-.chainable {
-	background-color: rgb(122, 103, 231);
 }
 h4 {
 	display: inline;
@@ -40,6 +46,8 @@ inner = inner.replace(/{server-only}/g, '<p class="tag server-only">server-only<
 inner = inner.replace(/{client-only}/g, '<p class="tag client-only">client-only</p>');
 inner = inner.replace(/{deprecated}/g, '<p class="tag deprecated">deprecated</p>');
 inner = inner.replace(/{chainable}/g, '<p class="tag chainable">chainable</p>');
+inner = inner.replace(/{unstable}/g, '<p class="tag unstable">unstable</p>');
+inner = inner.replace(/{toggleable}/g, '<p class="tag toggleable">toggleable</p>');
 document.body.innerHTML = inner
 
 const styleElement = document.createElement("style")

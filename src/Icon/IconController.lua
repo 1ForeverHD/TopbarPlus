@@ -1,3 +1,83 @@
+--[[ icon_controller:header
+## Functions
+
+#### setGameTheme
+```lua
+IconController.setGameTheme(theme)
+```
+
+----
+#### setDisplayOrder
+```lua
+IconController.setDisplayOrder(number)
+```
+
+----
+#### setTopbarEnabled
+```lua
+IconController.setTopbarEnabled(bool)
+```
+
+----
+#### setGap
+```lua
+IconController.setGap(number, alignment)
+```
+
+----
+#### getIcons
+```lua
+local arrayOfIcons = IconController.getIcons()
+```
+
+----
+#### getIcon
+```lua
+local icon = IconController.getIcon(name)
+```
+
+----
+
+
+
+## Properties
+#### topbarEnabled
+{read-only}
+```lua
+local bool = IconController.topbarEnabled
+```
+
+----
+#### controllerModeEnabled
+{read-only}
+```lua
+local bool = IconController.controllerModeEnabled
+```
+
+----
+#### leftGap
+{read-only}
+```lua
+local gapNumber = IconController.leftGap --[default: '12']
+```
+
+----
+#### midGap
+{read-only}
+```lua
+local gapNumber = IconController.midGap --[default: '12']
+```
+
+----
+#### rightGap
+{read-only}
+```lua
+local gapNumber = IconController.rightGap --[default: '12']
+```
+--]]
+
+
+
 -- LOCAL
 local starterGui = game:GetService("StarterGui")
 local guiService = game:GetService("GuiService")
@@ -151,6 +231,14 @@ function IconController.setDisplayOrder(value)
 end
 IconController.setDisplayOrder(10)
 
+function IconController.getIcons()
+	local allIcons = {}
+	for otherIcon, _ in pairs(topbarIcons) do
+		table.insert(allIcons, otherIcon)
+	end
+	return allIcons
+end
+
 function IconController.getIcon(name)
 	for otherIcon, _ in pairs(topbarIcons) do
 		if otherIcon.name == name then
@@ -165,14 +253,6 @@ function IconController.canShowIconOnTopbar(icon)
 		return true
 	end
 	return false
-end
-
-function IconController.getIcons()
-	local allIcons = {}
-	for otherIcon, _ in pairs(topbarIcons) do
-		table.insert(allIcons, otherIcon)
-	end
-	return allIcons
 end
 
 function IconController.getMenuOffset(icon)
@@ -270,7 +350,7 @@ function IconController.updateTopbar(toggleTransitionInfo)
 					container.Position = newPositon
 				end
 				offsetX = offsetX + increment
-				otherIcon.targetAbsolutePosition = UDim2.new(0, (newPositon.X.Scale*viewportSize.X) + newPositon.X.Offset, 0, (newPositon.Y.Scale*viewportSize.Y) + newPositon.Y.Offset)
+				otherIcon.targetPosition = UDim2.new(0, (newPositon.X.Scale*viewportSize.X) + newPositon.X.Offset, 0, (newPositon.Y.Scale*viewportSize.Y) + newPositon.Y.Offset)
 			end
 		end
 
@@ -283,7 +363,7 @@ function IconController.updateTopbar(toggleTransitionInfo)
 			local sizeX = currentSize.X.Offset
 			local extendLeft, extendRight = IconController.getMenuOffset(iconToCheck)
 			local boundaryXOffset = (side == "left" and (-additionalGap-extendLeft)) or (side == "right" and sizeX+additionalGap+extendRight)
-			local boundaryX = iconToCheck.targetAbsolutePosition.X.Offset + boundaryXOffset
+			local boundaryX = iconToCheck.targetPosition.X.Offset + boundaryXOffset
 			return boundaryX
 		end
 		local function getSizeX(iconToCheck, usePrevious)

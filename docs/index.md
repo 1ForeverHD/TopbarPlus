@@ -33,7 +33,7 @@ local icon = Icon.new()
 !!! info
     Chainable methods have a ``chainable`` tag next to their name within the API Icon docs.
 
-Sometimes you'll want an item to appear only when *deselected*, and similarily only when *selected*. You can achieve this by specifying ``"deselected"`` or ``"selected"`` within the ``toggleState`` parameter of icon methods. Leaving this parameter blank or as ``nil`` will default to applying to both states. For example:
+Sometimes you'll want an item to appear only when *deselected*, and similarily only when *selected*. You can achieve this by specifying ``"deselected"`` or ``"selected"`` within the ``toggleState`` parameter of methods containing the ``toggleable`` tag. Leaving this parameter blank or as ``nil`` will default to applying to both states. For example:
 ```lua
 local icon = Icon.new()
     :setImage(closedImageId, "deselected")
