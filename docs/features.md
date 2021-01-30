@@ -1,4 +1,9 @@
 ### Images
+```lua
+icon:setImage(shopImageId)
+```
+
+<a><img src="https://i.imgur.com/rQUyEtO.png" width="100%"/></a>
 
 ------------------------------
 
