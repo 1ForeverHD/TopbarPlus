@@ -35,7 +35,9 @@ icon:notify()
 ### Themes
 Themes are configurable tables of information that can be applied to icons to enhance their appearance and behaviour.
 
-When constructed, an icon will automatically apply the 'Default' theme. To expand upon this, you can create your own theme modules under ``Icon -> Themes``) then apply these to your desired icons. The Default theme and all theme settings can be found [here](https://github.com/1ForeverHD/TopbarPlus/blob/main/src/Icon/Themes/Default.lua).
+When constructed, an icon will automatically apply the 'Default' theme. To expand upon this, you can create your own theme modules under ``Icon -> Themes``) then apply these to your desired icons.
+
+The Default theme and all theme settings can be found [here](https://github.com/1ForeverHD/TopbarPlus/blob/main/src/Icon/Themes/Default.lua).
 
 Themes can be applied in two ways:
 
@@ -51,7 +53,7 @@ Themes can be applied in two ways:
     icon:setTheme(Themes.YourThemeName)
     ```
 
-In this example, we will apply the [BlueGradient](https://github.com/1ForeverHD/TopbarPlus/blob/main/src/Icon/Themes/BlueGradient.lua) theme which automatically comes with TopbarPlus:
+In this example, we'll apply the [BlueGradient](https://github.com/1ForeverHD/TopbarPlus/blob/main/src/Icon/Themes/BlueGradient.lua) theme which automatically comes with TopbarPlus:
 
 ```lua
 local iconModule = game:GetService("ReplicatedStorage").Icon
@@ -60,10 +62,12 @@ local Themes = require(iconModule.Themes)
 IconController.setGameTheme(Themes["BlueGradient"])
 ```
 
-Deselected
+*Deselected*
+
 <a><img src="https://i.imgur.com/JNHC33R.png" width="50%"/></a>
 
-Selected
+*Selected*
+
 <a><img src="https://i.imgur.com/RZJ0bbj.png" width="50%"/></a>
 
 ------------------------------
@@ -114,9 +118,9 @@ icon:setMenu({
 })
 ```
 
-<a><img src="https://i.imgur.com/d2MOc20.png" width="100%"/></a>
+<a><img src="https://i.imgur.com/d2MOc20.png" width="75%"/></a>
 
-<a><img src="https://i.imgur.com/OjsMes9.png" width="100%"/></a>
+<a><img src="https://i.imgur.com/OjsMes9.png" width="75%"/></a>
 
 ------------------------------
 
@@ -135,6 +139,34 @@ icon:setTip("Open Shop (v)")
 ```
 
 <a><img src="https://i.imgur.com/ukNbqZx.png" width="50%"/></a>
+
+------------------------------
+
+### Toggle Items
+Binds a GuiObject (such as a frame) to appear or disappear when the icon is toggled
+```lua
+icon:bindToggleItem(shopFrame)
+```
+
+It is equivalent to doing:
+```lua
+icon.deselected:Connect(function()
+    shopFrame.Visible = false
+end)
+icon.selected:Connect(function()
+    shopFrame.Visible = true
+end)
+```
+
+------------------------------
+
+### Toggle Keys
+Binds a keycode which toggles the icon when pressed.
+```lua
+-- When the 'v' key is pressed, the shop icon will open
+-- When pressed again it will close
+icon:bindToggleKey(Enum.KeyCode.V)
+```
 
 ------------------------------
 
@@ -178,32 +210,14 @@ icon:setRight()
 
 ------------------------------
 
-### Toggle Items
-This binds a GuiObject (such as a frame) to appear or disappear when the icon is toggled
-```lua
-icon:bindToggleItem(shopFrame)
-```
+### Console Support
 
-It is equivalent to doing:
-```lua
-icon.deselected:Connect(function()
-    shopFrame.Visible = false
-end)
-icon.selected:Connect(function()
-    shopFrame.Visible = true
-end)
-```
-
-------------------------------
-
-### Toggle Keys
-Binds a keycode which toggles the icon when pressed.
-```lua
--- When the 'v' key is pressed, the shop icon will open
--- When pressed again it will close
-icon:bindToggleKey(Enum.KeyCode.V)
-```
 
 ------------------------------
 
 ### Overflows
+
+
+------------------------------
+
+These examples and more can be tested, viewed and edited at the [Playground](https://www.roblox.com/games/6199274521/TopbarPlus-Playground).
