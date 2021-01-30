@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-Autobuilt
-=======
 ## Construtors
 
 #### new
@@ -469,4 +466,3 @@ local udim = icon.topPadding
 ```lua
 local udim2 = icon.targetPosition
 ```
->>>>>>> 04c39b01086648ee090e6b05fdb4745517362d72
