@@ -1,7 +1,7 @@
 - [Theme Settings](https://github.com/1ForeverHD/TopbarPlus/blob/main/src/Icon/Themes/Default.lua)
 - [Model](https://www.roblox.com/library/6311707237/TopbarPlus)
 - [Playground](https://www.roblox.com/games/6199274521/TopbarPlus-Playground)
-- [Discussion](https://devforum.roblox.com/t/topbar-add-additional-functionality-and-themes-to-your-topbar/573313)
+- [Discussion](https://devforum.roblox.com/t/topbarplus-v2-construct-dynamic-and-intuitive-topbar-icons/1017485)
 - [Repository](https://github.com/1ForeverHD/TopbarPlus)
 
 -------------------------------------

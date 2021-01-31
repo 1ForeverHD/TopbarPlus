@@ -1,4 +1,4 @@
-[discussion thread]: https://devforum.roblox.com/t/topbar-add-additional-functionality-and-themes-to-your-topbar/573313
+[discussion thread]: https://devforum.roblox.com/t/topbarplus-v2-construct-dynamic-and-intuitive-topbar-icons/1017485
 [resources]: https://1foreverhd.github.io/TopbarPlus/resources/
 [Material for MKDocs]: https://squidfunk.github.io/mkdocs-material/
 [ForeverHD on the devforum]: https://devforum.roblox.com/u/ForeverHD/summary
