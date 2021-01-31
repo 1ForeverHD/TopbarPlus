@@ -411,6 +411,13 @@ local bool = icon.deselectWhenOtherIconSelected --[default: 'true']
 A bool deciding whether the icon will be deselected when another icon is selected. Defaults to ``true``.
 
 ----
+#### accountForWhenDisabled
+```lua
+local bool = icon.accountForWhenDisabled --[default: 'false']
+```
+A bool deciding whether to continue accounting for and updating the icons position on the topbar when disabled
+
+----
 #### name
 {read-only}
 ```lua
@@ -2111,7 +2118,7 @@ function Icon:_updateMenu()
 	local directionDetails = {
 		left = {
 			containerAnchorPoint = Vector2.new(1, 0),
-			containerPosition = UDim2.new(0, -4, 0, 0), --!!!
+			containerPosition = UDim2.new(0, -4, 0, 0),
 			canvasPosition = Vector2.new(canvasSize, 0)
 		},
 		right = {
