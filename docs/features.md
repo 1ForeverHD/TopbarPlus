@@ -215,7 +215,10 @@ icon:setRight()
 ------------------------------
 
 ### Overflows
-When accounting for many device types and screen sizes, icons may occassionally, particularly for smaller devices like phones, overlap with other icons or the bounds of the screen. TopbarPlus solves this problem with automatic overflows which prevent overlaps occuring. An overflow will appear when left-set or right-set icons exceed the boundary of the:
+When accounting for many device types and screen sizes, icons may occassionally, particularly for smaller devices like phones, overlap with other icons or the bounds of the screen. TopbarPlus solves this problem with automatic overflows which prevent overlaps occuring.
+
+An overflow will appear when left-set or right-set icons exceed the boundary of the:
+
 - Viewport
 - Closest enabled opposite-aligned icon
 - Closest enabled center-aligned icon
