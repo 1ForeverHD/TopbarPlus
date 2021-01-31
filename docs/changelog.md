@@ -1,11 +1,11 @@
 ## [2.0.0] - January 19 2021
 ### Added
 - Menus (dropdowns but horizontal and with scrolling support!)
-- Corners
 - Dropdowns v2
 - Labels v2
 - Tips v2
 - Captions v2
+- Corners v2
 - Chainable methods
 - Automatic overflows when left-set or right-set icons exceed the boundary of the:
     - Viewport
@@ -59,9 +59,9 @@
 - ``icon:setLabel(text)`` to ``icon:setLabel(text, toggleState)``
 - ``icon:setImage(imageId)`` to ``icon:setImage(imageId, toggleState)``
 - ``icon:setOrder(orderNumber)`` to ``icon:setOrder(orderNumber, toggleState)``
-- ``icon:setLeft(toggleState)`` to ``icon:setLeft(toggleState)``
-- ``icon:setMid(toggleState)`` to ``icon:setMid(toggleState)``
-- ``icon:setRight(toggleState)`` to ``icon:setRight(toggleState)``
+- ``icon:setLeft()`` to ``icon:setLeft(toggleState)``
+- ``icon:setMid()`` to ``icon:setMid(toggleState)``
+- ``icon:setRight()`` to ``icon:setRight(toggleState)``
 - ``icon:setBaseZIndex(zindex)`` to ``icon:setBaseZIndex(zindex, toggleState)``
 - ``icon.objects`` to ``icon.instances``
 - The names of almost all instances to be more obvious and accurate
