@@ -456,7 +456,6 @@ function IconController.updateTopbar(toggleTransitionInfo)
 									overflowContainer.Position = UDim2.new(0, appearX, yPos.Scale, yPos.Offset)
 									overflowIcon:setEnabled(true)
 								end
-								endIcon:join(overflowIcon, "dropdown")
 								if #endIcon.menuIcons > 0 and endIcon.menuOpen then
 									endIcon:deselect()
 									endIcon:select()
@@ -478,6 +477,7 @@ function IconController.updateTopbar(toggleTransitionInfo)
 										endIcon:select()
 									end
 								end
+								endIcon:join(overflowIcon, "dropdown")
 							end
 							break
 						end

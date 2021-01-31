@@ -163,7 +163,7 @@ end)
 ------------------------------
 
 ### Toggle Keys
-Binds a keycode which toggles the icon when pressed.
+Binds a [keycode](https://developer.roblox.com/en-us/api-reference/enum/KeyCode) which toggles the icon when pressed.
 ```lua
 -- When the 'v' key is pressed, the shop icon will open
 -- When pressed again it will close
@@ -214,11 +214,13 @@ icon:setRight()
 
 ### Console Support
 
+<a><img src="https://i.imgur.com/dJSC8rD.png" width="50%"/></a>
 
 ------------------------------
 
 ### Overflows
 
+<video src="https://thumbs.gfycat.com/SpiffyBeautifulAmericanbulldog-mobile.mp4" width="100%" controls></video>
 
 ------------------------------
 

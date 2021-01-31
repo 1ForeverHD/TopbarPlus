@@ -1383,11 +1383,13 @@ function Icon:notify(clearNoticeEvent, noticeId)
 		if not clearNoticeEvent then
 			clearNoticeEvent = self.deselected
 		end
+		--[[
 		if self._parentIcon then
 			self._parentIcon:notify(clearNoticeEvent)
 		end
 		self:_displayNotice(true)
-		
+		--]]
+
 		local notifComplete = Signal.new()
 		local endEvent = self._endNotices:Connect(function()
 			notifComplete:Fire()
@@ -1395,6 +1397,11 @@ function Icon:notify(clearNoticeEvent, noticeId)
 		local customEvent = clearNoticeEvent:Connect(function()
 			notifComplete:Fire()
 		end)
+
+		if self._parentIcon then
+			self._parentIcon:notify(notifComplete)
+		end
+		self:_displayNotice(true)
 		
 		noticeId = noticeId or httpService:GenerateGUID(true)
 		self.notices[noticeId] = {
@@ -1799,7 +1806,8 @@ function Icon:join(parentIcon, featureName, dontUpdate)
 	self._parentIcon = parentIcon
 	self.instances.iconContainer.Parent = parentFrame
 	for noticeId, noticeDetail in pairs(self.notices) do
-		parentIcon:notify(noticeDetail.clearNoticeEvent, noticeId)
+		--parentIcon:notify(noticeDetail.clearNoticeEvent, noticeId)
+		parentIcon:notify(noticeDetail.completeSignal, noticeId)
 	end
 	
 	if featureName == "dropdown" then
@@ -1860,6 +1868,7 @@ function Icon:leave()
 		local parentIconNoticeDetail = parentIcon.notices[noticeId]
 		if parentIconNoticeDetail then
 			parentIconNoticeDetail.completeSignal:Fire()
+			--parentIconNoticeDetail.clearNoticeEvent:Fire()
 		end
 	end
 	--
@@ -2016,7 +2025,6 @@ function Icon:_updateDropdown()
 	if not alignmentDetail then
 		alignmentDetail = alignmentDetails[values.iconAlignment:lower()]
 	end
-	--print(self.name, dropdownAlignment, values.iconAlignment:lower(), alignmentDetail)
 	dropdownContainer.AnchorPoint = alignmentDetail.AnchorPoint
 	dropdownContainer.Position = UDim2.new(alignmentDetail.PositionXScale, 0, 1, YPadding+0)
 	local scrollbarThickness = values.scrollBarThickness

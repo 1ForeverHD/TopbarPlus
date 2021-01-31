@@ -309,6 +309,7 @@ menuInvisBlocker.Active = false
 -- Click Sound
 local clickSound = Instance.new("Sound")
 clickSound.Name = "ClickSound"
+clickSound.Volume = 0
 clickSound.Parent = iconContainer
 
 
