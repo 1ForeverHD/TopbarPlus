@@ -1355,9 +1355,7 @@ function Icon:select(byIcon)
 	if self.locked then return self end
 	self.isSelected = true
 	self:_setToggleItemsVisible(true, byIcon)
-	if #self.dropdownIcons > 0 or #self.menuIcons > 0 then
-		self:_displayNotice(false)
-	end
+	self:_updateNotice()
 	self:_updateAll()
 	self:_playClickSound()
 	if #self.dropdownIcons > 0 or #self.menuIcons > 0 then
@@ -1372,9 +1370,7 @@ function Icon:deselect(byIcon)
 	if self.locked then return self end
 	self.isSelected = false
 	self:_setToggleItemsVisible(false, byIcon)
-	if (#self.dropdownIcons > 0 or #self.menuIcons > 0) and self.totalNotices > 0 then
-		self:_displayNotice(true)
-	end
+	self:_updateNotice()
 	self:_updateAll()
 	self:_playClickSound()
 	if #self.dropdownIcons > 0 or #self.menuIcons > 0 then
@@ -1390,13 +1386,10 @@ function Icon:notify(clearNoticeEvent, noticeId)
 		if not clearNoticeEvent then
 			clearNoticeEvent = self.deselected
 		end
-		--[[
 		if self._parentIcon then
 			self._parentIcon:notify(clearNoticeEvent)
 		end
-		self:_displayNotice(true)
-		--]]
-
+		
 		local notifComplete = Signal.new()
 		local endEvent = self._endNotices:Connect(function()
 			notifComplete:Fire()
@@ -1404,19 +1397,14 @@ function Icon:notify(clearNoticeEvent, noticeId)
 		local customEvent = clearNoticeEvent:Connect(function()
 			notifComplete:Fire()
 		end)
-
-		if self._parentIcon then
-			self._parentIcon:notify(notifComplete)
-		end
-		self:_displayNotice(true)
 		
 		noticeId = noticeId or httpService:GenerateGUID(true)
 		self.notices[noticeId] = {
 			completeSignal = notifComplete,
 			clearNoticeEvent = clearNoticeEvent,
 		}
-		self.totalNotices = self.totalNotices + 1
-		self.instances.noticeLabel.Text = (self.totalNotices < 100 and self.totalNotices) or "99+"
+		self.totalNotices += 1
+		self:_updateNotice()
 
 		self.notified:Fire(noticeId)
 		notifComplete:Wait()
@@ -1425,20 +1413,34 @@ function Icon:notify(clearNoticeEvent, noticeId)
 		customEvent:Disconnect()
 		notifComplete:Disconnect()
 		
-		self.totalNotices = self.totalNotices - 1
-		self.instances.noticeLabel.Text = self.totalNotices
+		self.totalNotices -= 1
 		self.notices[noticeId] = nil
-		if self.totalNotices < 1 then
-			self:_displayNotice(false)
-		end
+		self:_updateNotice()
 	end)()
 	return self
 end
 
-function Icon:_displayNotice(bool)
-	local value = (bool and 0) or 1
+function Icon:_updateNotice()
+	local enabled = true
+	if self.totalNotices < 1 then
+		enabled = false
+	end
+	-- Deselect
+	if not self.isSelected then
+		if (#self.dropdownIcons > 0 or #self.menuIcons > 0) and self.totalNotices > 0 then
+			enabled = true
+		end
+	end
+	-- Select
+	if self.isSelected then
+		if #self.dropdownIcons > 0 or #self.menuIcons > 0 then
+			enabled = false
+		end
+	end
+	local value = (enabled and 0) or 1
 	self:set("noticeImageTransparency", value)
 	self:set("noticeTextTransparency", value)
+	self.instances.noticeLabel.Text = (self.totalNotices < 100 and self.totalNotices) or "99+"
 end
 
 function Icon:clearNotices()
@@ -1813,8 +1815,8 @@ function Icon:join(parentIcon, featureName, dontUpdate)
 	self._parentIcon = parentIcon
 	self.instances.iconContainer.Parent = parentFrame
 	for noticeId, noticeDetail in pairs(self.notices) do
-		--parentIcon:notify(noticeDetail.clearNoticeEvent, noticeId)
-		parentIcon:notify(noticeDetail.completeSignal, noticeId)
+		parentIcon:notify(noticeDetail.clearNoticeEvent, noticeId)
+		--parentIcon:notify(noticeDetail.completeSignal, noticeId)
 	end
 	
 	if featureName == "dropdown" then
@@ -1875,7 +1877,6 @@ function Icon:leave()
 		local parentIconNoticeDetail = parentIcon.notices[noticeId]
 		if parentIconNoticeDetail then
 			parentIconNoticeDetail.completeSignal:Fire()
-			--parentIconNoticeDetail.clearNoticeEvent:Fire()
 		end
 	end
 	--
