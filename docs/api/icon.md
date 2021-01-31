@@ -1,3 +1,6 @@
+[themes]: https://1foreverhd.github.io/TopbarPlus/features/#themes
+[set method]: https://1foreverhd.github.io/TopbarPlus/api/icon/#set
+
 ## Construtors
 
 #### new
@@ -26,23 +29,25 @@ Mimicable Items: ``"PlayerList"``, ``"Backpack"``, ``"Chat"``, ``"EmotesMenu"``
 ## Methods
 
 #### set
-{chainable} {toggleable}
+{chainable}
 ```lua
 icon:set(settingName, value, toggleState)
 ```
+Applies a specific setting to an icon. All settings can be found [here](https://github.com/1ForeverHD/TopbarPlus/blob/main/src/Icon/Themes/Default.lua). If the setting falls under the 'toggleable' category then "deselected" or "selected" can be specified, otherwise if left empty or ``nil`` will apply to both states. For most scenarious, it's recommended instead to apply settings using [themes].
 
 ----
 #### get
-{toggleable}
 ```lua
 local value = icon:get(settingName, toggleState)
 ```
+Retrieves the given settings value. If the setting falls under the 'toggleable' category then "deselected" or "selected" can be specified, otherwise if left empty or ``nil`` will default to retrieving the deselected value.
 
 ----
 #### getToggleState
 ```lua
 local selectedOrDeselectedString = icon:getToggleState()
 ```
+Returns the current toggleState, either "deselected" or "selected".
 
 ----
 #### setTheme
@@ -50,6 +55,7 @@ local selectedOrDeselectedString = icon:getToggleState()
 ```lua
 icon:setTheme(theme)
 ```
+Applies a theme to the given icon. See [themes] for more information.
 
 ----
 #### setEnabled
@@ -57,6 +63,7 @@ icon:setTheme(theme)
 ```lua
 icon:setEnabled(bool)
 ```
+When set to ``false``, the icon will be disabled and hidden.
 
 ----
 #### setName
@@ -64,6 +71,7 @@ icon:setEnabled(bool)
 ```lua
 icon:setName(string)
 ```
+Associates the given name to the icon which enables it to be retrieved with ``IconController.getIcon(name)``.
 
 ----
 #### select
@@ -71,6 +79,7 @@ icon:setName(string)
 ```lua
 icon:select()
 ```
+Selects the icon (as if it were clicked once).
 
 ----
 #### deselect
@@ -78,6 +87,7 @@ icon:select()
 ```lua
 icon:deselect()
 ```
+Deselects the icon (as if it were clicked, then clicked again).
 
 ----
 #### notify
@@ -85,6 +95,7 @@ icon:deselect()
 ```lua
 icon:notify(clearNoticeEvent)
 ```
+Prompts a notice bubble which accumulates the further it is prompted. If the icon belongs to a dropdown or menu, then the notice will appear on the parent icon when the parent icon is deselected.
 
 ----
 #### clearNotices
@@ -99,6 +110,15 @@ icon:clearNotices()
 ```lua
 icon:disableStateOverlay(bool)
 ```
+When set to ``true``, disables the shade effect which appears when the icon is pressed and released.
+
+----
+#### setImage
+{chainable} {toggleable}
+```lua
+icon:setImage(imageId, toggleState)
+```
+Applies an image to the icon based on the given ``imaageId``. ``imageId`` can be an assetId or a complete asset string.
 
 ----
 #### setLabel
@@ -108,24 +128,17 @@ icon:setLabel(text, toggleState)
 ```
 
 ----
-#### setCornerRadius
-{chainable} {toggleable}
-```lua
-icon:setCornerRadius(scale, offset, toggleState)
-```
-
-----
-#### setImage
-{chainable} {toggleable}
-```lua
-icon:setImage(imageId, toggleState)
-```
-
-----
 #### setOrder
 {chainable} {toggleable}
 ```lua
 icon:setOrder(order, toggleState)
+```
+
+----
+#### setCornerRadius
+{chainable} {toggleable}
+```lua
+icon:setCornerRadius(scale, offset, toggleState)
 ```
 
 ----
@@ -155,6 +168,7 @@ icon:setRight(toggleState)
 ```lua
 icon:setImageYScale(YScale, toggleState)
 ```
+Defines the proportional space the icons image takes up within the icons container.
 
 ----
 #### setImageRatio
@@ -162,6 +176,7 @@ icon:setImageYScale(YScale, toggleState)
 ```lua
 icon:setImageRatio(ratio, toggleState)
 ```
+Defines the x:y ratio dimensions as a number. By default ``ratio`` is ``1.00``.
 
 ----
 #### setLabelYScale
@@ -169,6 +184,7 @@ icon:setImageRatio(ratio, toggleState)
 ```lua
 icon:setLabelYScale(YScale, toggleState)
 ```
+Defines how large label text appears.By default ``YScale`` is ``0.45``.
 
 ----
 #### setBaseZIndex
@@ -176,6 +192,7 @@ icon:setLabelYScale(YScale, toggleState)
 ```lua
 icon:setBaseZIndex(ZIndex, toggleState)
 ```
+Calculates the difference between the existing baseZIndex (i.e. ``instances.iconContainer.ZIndex``) and new value, then updates the ZIndex of all objects within the icon accoridngly using this difference.
 
 ----
 #### setSize
@@ -183,6 +200,7 @@ icon:setBaseZIndex(ZIndex, toggleState)
 ```lua
 icon:setSize(XOffset, YOffset, toggleState)
 ```
+Determines the icons container size. By default ``XOffset`` and ``YOffset`` are ``32``.
 
 ----
 #### bindToggleItem
@@ -190,6 +208,7 @@ icon:setSize(XOffset, YOffset, toggleState)
 ```lua
 icon:bindToggleItem(guiObjectOrLayerCollector)
 ```
+Binds a GuiObject or LayerCollector to appear and disappeared when the icon is toggled.
 
 ----
 #### unbindToggleItem
@@ -197,6 +216,7 @@ icon:bindToggleItem(guiObjectOrLayerCollector)
 ```lua
 icon:unbindToggleItem(guiObjectOrLayerCollector)
 ```
+Unbinds the given GuiObject or LayerCollector from the toggle.
 
 ----
 #### bindToggleKey
@@ -204,6 +224,7 @@ icon:unbindToggleItem(guiObjectOrLayerCollector)
 ```lua
 icon:bindToggleKey(keyCodeEnum)
 ```
+Binds a [keycode](https://developer.roblox.com/en-us/api-reference/enum/KeyCode) which toggles the icon when pressed.
 
 ----
 #### unbindToggleKey
@@ -211,6 +232,7 @@ icon:bindToggleKey(keyCodeEnum)
 ```lua
 icon:unbindToggleKey(keyCodeEnum)
 ```
+Unbinds the given keycode.
 
 ----
 #### lock
@@ -218,6 +240,7 @@ icon:unbindToggleKey(keyCodeEnum)
 ```lua
 icon:lock()
 ```
+Prevents the icon from being pressed and toggled.
 
 ----
 #### unlock
@@ -225,6 +248,7 @@ icon:lock()
 ```lua
 icon:unlock()
 ```
+Enables the icon to be pressed and toggled.
 
 ----
 #### setTopPadding
@@ -232,6 +256,7 @@ icon:unlock()
 ```lua
 icon:setTopPadding(offset, scale)
 ```
+The gap between the top of the screen and the icon.
 
 ----
 #### setTip
@@ -239,6 +264,7 @@ icon:setTopPadding(offset, scale)
 ```lua
 icon:setTip(text)
 ```
+Sets a tip. To remove, pass ``nil`` as ``text``.
 
 ----
 #### setCaption
@@ -246,6 +272,7 @@ icon:setTip(text)
 ```lua
 icon:setCaption(text)
 ```
+Sets a caption. To remove, pass ``nil`` as ``text``.
 
 ----
 #### join
@@ -253,6 +280,7 @@ icon:setCaption(text)
 ```lua
 icon:join(parentIcon, featureName)
 ```
+Parents the icon to the given parentIcon under the specified feature, either "dropdown" or "menu".
 
 ----
 #### leave
@@ -260,6 +288,7 @@ icon:join(parentIcon, featureName)
 ```lua
 icon:leave()
 ```
+Unparents an icon from a parentIcon if it belongs to a dropdown or menu.
 
 ----
 #### setDropdown
@@ -267,6 +296,7 @@ icon:leave()
 ```lua
 icon:setDropdown(arrayOfIcons)
 ```
+Creates a vertical dropdown based upon the given ``table array`` of ``icons``. Pass an empty table ``{}`` to remove the dropdown. Dropdown settings can be configured using [themes] or the [set method].
 
 ----
 #### setMenu
@@ -274,6 +304,7 @@ icon:setDropdown(arrayOfIcons)
 ```lua
 icon:setMenu(arrayOfIcons)
 ```
+Creates a horizontal menu based upon the given ``table array`` of ``icons``. Pass an empty table ``{}`` to remove the menu. Menu settings can be configured using [themes] or the [set method].
 
 ----
 #### destroy
@@ -281,6 +312,7 @@ icon:setMenu(arrayOfIcons)
 ```lua
 icon:destroy()
 ```
+Clears all connections and destroys all instances associated with the icon.
 
 ----
 
@@ -290,7 +322,7 @@ icon:destroy()
 #### selected 
 ```lua
 icon.selected:Connect(function()
-    print()
+    print("The icon was selected")
 end)
 ```
 
@@ -298,7 +330,7 @@ end)
 #### deselected 
 ```lua
 icon.deselected:Connect(function()
-    print()
+    print("The icon was deselected")
 end)
 ```
 
@@ -306,7 +338,7 @@ end)
 #### toggled 
 ```lua
 icon.toggled:Connect(function(isSelected)
-    print()
+    print(("The icon was %s"):format(icon:getToggleState(isSelected)))
 end)
 ```
 
@@ -314,7 +346,7 @@ end)
 #### hoverStarted 
 ```lua
 icon.hoverStarted:Connect(function()
-    print()
+    print("A mouse, finger or controller selection is hovering over the icon")
 end)
 ```
 
@@ -322,7 +354,7 @@ end)
 #### hoverEnded 
 ```lua
 icon.hoverEnded:Connect(function()
-    print()
+    print("The item is no longer hovering over the icon")
 end)
 ```
 
@@ -330,7 +362,7 @@ end)
 #### dropdownOpened 
 ```lua
 icon.dropdownOpened:Connect(function()
-    print()
+    print("The dropdown was opened")
 end)
 ```
 
@@ -338,7 +370,7 @@ end)
 #### dropdownClosed 
 ```lua
 icon.dropdownClosed:Connect(function()
-    print()
+    print("The dropdown was closed")
 end)
 ```
 
@@ -346,7 +378,7 @@ end)
 #### menuOpened 
 ```lua
 icon.menuOpened:Connect(function()
-    print()
+    print("The menu was opened")
 end)
 ```
 
@@ -354,7 +386,7 @@ end)
 #### menuClosed 
 ```lua
 icon.menuClosed:Connect(function()
-    print()
+    print("The menu was closed")
 end)
 ```
 
@@ -362,7 +394,7 @@ end)
 #### notified 
 ```lua
 icon.notified:Connect(function()
-    print()
+    print("New notice")
 end)
 ```
 
@@ -375,6 +407,14 @@ end)
 ```lua
 local bool = icon.deselectWhenOtherIconSelected --[default: 'true']
 ```
+A bool deciding whether the icon will be deselected when another icon is selected. Defaults to ``true``.
+
+----
+#### accountForWhenDisabled
+```lua
+local bool = icon.accountForWhenDisabled --[default: 'false']
+```
+A bool deciding whether to continue accounting for and updating the icons position on the topbar when disabled
 
 ----
 #### name
@@ -473,3 +513,4 @@ local udim = icon.topPadding
 ```lua
 local udim2 = icon.targetPosition
 ```
+The position the icon is at or aims to move to.
