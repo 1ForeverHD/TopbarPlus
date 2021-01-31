@@ -2,7 +2,7 @@
 This file is necessary for constructing the default Icon template
 Do not remove this module otherwise TopbarPlus will break
 Modifying this file may also cause TopbarPlus to break
-It's recommended instead to create a separate theme module and use this instead
+It's recommended instead to create a separate theme module and use that instead
 
 To apply your theme after creating it, do:
 ```lua

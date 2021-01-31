@@ -93,6 +93,7 @@ icon:setDropdown({
 })
 ```
 
+!!! Convert this to gif
 <a><img src="https://i.imgur.com/uRQLVVj.png" width="50%"/></a>
 
 ------------------------------
@@ -118,9 +119,10 @@ icon:setMenu({
 })
 ```
 
-<a><img src="https://i.imgur.com/d2MOc20.png" width="75%"/></a>
+!!! Convert this to gif
+<a><img src="https://i.imgur.com/d2MOc20.png" width="50%"/></a>
 
-<a><img src="https://i.imgur.com/OjsMes9.png" width="75%"/></a>
+<a><img src="https://i.imgur.com/OjsMes9.png" width="50%"/></a>
 
 ------------------------------
 
