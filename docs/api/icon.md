@@ -422,7 +422,7 @@ local stringOrNil = icon.captionText
 #### totalNotices
 {read-only}
 ```lua
-local BBB = icon.totalNotices
+local int = icon.totalNotices
 ```
 
 ----
