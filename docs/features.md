@@ -93,8 +93,7 @@ icon:setDropdown({
 })
 ```
 
-!!! Convert this to gif
-<a><img src="https://i.imgur.com/uRQLVVj.png" width="50%"/></a>
+<a><img src="https://i.imgur.com/iqKYfPP.gif" width="50%"/></a>
 
 ------------------------------
 
@@ -119,10 +118,7 @@ icon:setMenu({
 })
 ```
 
-!!! Convert this to gif
-<a><img src="https://i.imgur.com/d2MOc20.png" width="50%"/></a>
-
-<a><img src="https://i.imgur.com/OjsMes9.png" width="50%"/></a>
+<a><img src="https://i.imgur.com/t1jRleX.gif" width="100%"/></a>
 
 ------------------------------
 
@@ -219,8 +215,12 @@ icon:setRight()
 ------------------------------
 
 ### Overflows
+When accounting for many device types and screen sizes, icons may occassionally, particularly for smaller devices like phones, overlap with other icons or the bounds of the screen. TopbarPlus solves this problem with automatic overflows which prevent overlaps occuring. An overflow will appear when left-set or right-set icons exceed the boundary of the:
+- Viewport
+- Closest enabled opposite-aligned icon
+- Closest enabled center-aligned icon
 
-<video src="https://thumbs.gfycat.com/SpiffyBeautifulAmericanbulldog-mobile.mp4" width="100%" controls></video>
+<video src="https://thumbs.gfycat.com/BronzeFocusedCanadagoose-mobile.mp4" width="100%" controls></video>
 
 ------------------------------
 
