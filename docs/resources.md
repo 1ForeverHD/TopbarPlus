@@ -3,6 +3,7 @@
 - [Playground](https://www.roblox.com/games/6199274521/TopbarPlus-Playground)
 - [Discussion](https://devforum.roblox.com/t/topbarplus-v2-construct-dynamic-and-intuitive-topbar-icons/1017485)
 - [Repository](https://github.com/1ForeverHD/TopbarPlus)
+- [Roblox-TS Port](https://github.com/grilme99/TopbarPlus) by [grilme99](https://twitter.com/grilme99)
 
 -------------------------------------
 
