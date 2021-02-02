@@ -1,3 +1,10 @@
+## [2.1.0] - January 19 2021
+### Added
+- ``icon:bindEvent(iconEventName, eventFunction)``
+- ``icon:unbindEvent(iconEventName)``
+
+--------
+
 ## [2.0.0] - January 19 2021
 ### Added
 - Menus (dropdowns but horizontal and with scrolling support!)

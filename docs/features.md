@@ -89,6 +89,13 @@ icon:setDropdown({
 		,
 	Icon.new()
 		:setLabel("Category 4")
+		:setName("CategoryFourIcon")
+		:bindEvent("selected", function(self)
+			print(("%s was selected!"):format(self.name))
+		end)
+		:bindEvent("deselected", function(self)
+			print(("%s was deselected!"):format(self.name))
+		end)
 		,
 })
 ```
@@ -114,6 +121,13 @@ icon:setMenu({
 		,
 	Icon.new()
 		:setLabel("Category 4")
+		:setName("CategoryFourIcon")
+		:bindEvent("selected", function(self)
+			print(("%s was selected!"):format(self.name))
+		end)
+		:bindEvent("deselected", function(self)
+			print(("%s was deselected!"):format(self.name))
+		end)
 		,
 })
 ```
