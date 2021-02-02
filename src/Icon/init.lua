@@ -220,6 +220,22 @@ icon:unbindToggleItem(guiObjectOrLayerCollector)
 Unbinds the given GuiObject or LayerCollector from the toggle.
 
 ----
+#### bindEvent
+{chainable}
+```lua
+icon:bindEvent(iconEventName, eventFunction)
+```
+Connects to an [icon event](https://1foreverhd.github.io/TopbarPlus/api/icon/#events) based upon the given ``iconEventName`` and call ``eventFunction`` with arguments ``(self, ...)`` when the event is triggered.
+
+----
+#### unbindEvent
+{chainable}
+```lua
+icon:unbindEvent(iconEventName)
+```
+Unbinds the connection of the associated ``iconEventName``.
+
+----
 #### bindToggleKey
 {chainable}
 ```lua
@@ -906,6 +922,7 @@ function Icon.new()
 	self._previousDropdownOpen = false
 	self._previousMenuOpen = false
 	self._bindedToggleKeys = {}
+	self._bindedEvents = {}
 	
 	-- Apply start values
 	self:setName("UnnamedIcon")
@@ -1640,6 +1657,25 @@ end
 
 
 -- FEATURE METHODS
+function Icon:bindEvent(iconEventName, eventFunction)
+	local event = self[iconEventName]
+	assert(event and typeof(event) == "table" and event.Connect, "argument[1] must be a valid topbarplus icon event name!")
+	assert(typeof(eventFunction) == "function", "argument[2] must be a function!")
+	self._bindedEvents[iconEventName] = event:Connect(function(...)
+		eventFunction(self, ...)
+	end)
+	return self
+end
+
+function Icon:unbindEvent(iconEventName)
+	local eventConnection = self._bindedEvents[iconEventName]
+	if eventConnection then
+		eventConnection:Disconnect()
+		self._bindedEvents[iconEventName] = nil
+	end
+	return self
+end
+
 function Icon:bindToggleKey(keyCodeEnum)
 	assert(typeof(keyCodeEnum) == "EnumItem", "argument[1] must be a KeyCode EnumItem!")
 	self._bindedToggleKeys[keyCodeEnum] = true
