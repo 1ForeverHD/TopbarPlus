@@ -219,6 +219,22 @@ icon:unbindToggleItem(guiObjectOrLayerCollector)
 Unbinds the given GuiObject or LayerCollector from the toggle.
 
 ----
+#### bindEvent
+{chainable}
+```lua
+icon:bindEvent(iconEventName, eventFunction)
+```
+Connects to an [icon event](https://1foreverhd.github.io/TopbarPlus/api/icon/#events) based upon the given ``iconEventName`` and call ``eventFunction`` with arguments ``(self, ...)`` when the event is triggered.
+
+----
+#### unbindEvent
+{chainable}
+```lua
+icon:unbindEvent(iconEventName)
+```
+Unbinds the connection of the associated ``iconEventName``.
+
+----
 #### bindToggleKey
 {chainable}
 ```lua
