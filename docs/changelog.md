@@ -1,3 +1,12 @@
+## [2.1.0] - February 12 2021
+### Added
+- ``IconController.clearIconOnSpawn(icon)``
+
+### Improved
+- The cleanup process when ``icon:destroy()`` is called
+
+
+
 ## [2.0.0] - January 19 2021
 ### Added
 - Menus (dropdowns but horizontal and with scrolling support!)

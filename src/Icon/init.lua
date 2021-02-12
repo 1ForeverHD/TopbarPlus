@@ -817,7 +817,9 @@ function Icon.new()
 			end)
 			tween:Play()
 			if isOpen then
-				menuFrame.CanvasPosition = self._menuCanvasPos
+				if self._menuCanvasPos then
+					menuFrame.CanvasPosition = self._menuCanvasPos
+				end
 			else
 				self._menuCanvasPos = menuFrame.CanvasPosition
 			end
@@ -1550,6 +1552,7 @@ function Icon:setSize(XOffset, YOffset, toggleState)
 end
 
 function Icon:_updateIconSize(_, toggleState)
+	if self._destroyed then return end
 	-- This is responsible for handling the appearance and size of the icons label and image, in additon to its own size
 	local X_MARGIN = 12
 	local X_GAP = 8
@@ -1572,6 +1575,7 @@ function Icon:_updateIconSize(_, toggleState)
 	local iconLabel = self.instances.iconLabel
 	local iconImage = self.instances.iconImage
 	local noticeFrame = self.instances.noticeFrame
+	if not iconContainer.Parent then return end
 
 	-- We calculate the cells dimensions as apposed to reading because there's a possibility the cells dimensions were changed at the exact time and have not yet updated
 	-- this essentially saves us from waiting a heartbeat which causes additonal complications
@@ -1880,9 +1884,9 @@ function Icon:join(parentIcon, featureName, dontUpdate)
 end
 
 function Icon:leave()
+	if self._destroyed then return end
 	local settingsToReset = {"iconSize", "captionBlockerTransparency", "iconCornerRadius"}
 	local parentIcon = self._parentIcon
-	self.instances.iconContainer.Parent = topbarContainer
 	self.presentOnTopbar = true
 	self.joinedFeatureName = nil
 	local function scanFeature(t, prevReference, updateMethod)
@@ -1993,8 +1997,10 @@ function Icon:setDropdown(arrayOfIcons)
 		otherIcon:leave()
 	end
 	-- Apply new icons
-	for i, otherIcon in pairs(arrayOfIcons) do
-		otherIcon:join(self, "dropdown", true)
+	if type(arrayOfIcons) == "table" then
+		for i, otherIcon in pairs(arrayOfIcons) do
+			otherIcon:join(self, "dropdown", true)
+		end
 	end
 	-- Update dropdown
 	self:_updateDropdown()
@@ -2091,8 +2097,10 @@ function Icon:setMenu(arrayOfIcons)
 		otherIcon:leave()
 	end
 	-- Apply new icons
-	for i, otherIcon in pairs(arrayOfIcons) do
-		otherIcon:join(self, "menu", true)
+	if type(arrayOfIcons) == "table" then
+		for i, otherIcon in pairs(arrayOfIcons) do
+			otherIcon:join(self, "menu", true)
+		end
 	end
 	-- Update menu
 	self:_updateMenu()
@@ -2181,10 +2189,15 @@ end
 
 -- DESTROY/CLEANUP METHOD
 function Icon:destroy()
+	if self._destroyed then return end
 	IconController.iconRemoved:Fire(self)
 	self:clearNotices()
+	if self._parentIcon then
+		self:leave()
+	end
 	self:setDropdown()
 	self:setMenu()
+	self._destroyed = true
 	self._maid:clean()
 end
 Icon.Destroy = Icon.destroy -- an alias for you maid-using Pascal lovers
