@@ -28,6 +28,13 @@ IconController.setGap(integer, alignment)
 Defines the offset width (i.e. gap) between each icon for the given alignment, ``left``, ``mid``, ``right``, or all alignments if not specified. 
 
 ----
+#### updateTopbar
+```lua
+IconController.updateTopbar()
+```
+Determines how icons should be positioned on the topbar and moves them accordingly.  
+
+----
 #### clearIconOnSpawn
 ```lua
 IconController.clearIconOnSpawn(icon)
