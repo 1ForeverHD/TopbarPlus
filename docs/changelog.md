@@ -1,3 +1,11 @@
+## [2.2.1] - February 13 2021
+### Fixed
+- An overlapping icon bug caused by yielding after requiring the Icon module
+
+
+
+--------
+
 ## [2.2.0] - February 12 2021
 ### Added
 - ``IconController.clearIconOnSpawn(icon)``

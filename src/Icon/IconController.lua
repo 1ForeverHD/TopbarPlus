@@ -29,6 +29,13 @@ IconController.setGap(integer, alignment)
 Defines the offset width (i.e. gap) between each icon for the given alignment, ``left``, ``mid``, ``right``, or all alignments if not specified. 
 
 ----
+#### updateTopbar
+```lua
+IconController.updateTopbar()
+```
+Determines how icons should be positioned on the topbar and moves them accordingly.  
+
+----
 #### clearIconOnSpawn
 ```lua
 IconController.clearIconOnSpawn(icon)
@@ -301,6 +308,7 @@ function IconController.getMenuOffset(icon)
 end
 
 -- This is responsible for positioning the topbar icons
+local requestedTopbarUpdate = false
 function IconController.updateTopbar(toggleTransitionInfo)
 	local function getIncrement(otherIcon, alignment)
 		--local container = otherIcon.instances.iconContainer
@@ -319,6 +327,7 @@ function IconController.updateTopbar(toggleTransitionInfo)
 		return increment, preOffset
 	end
 	if topbarUpdating then -- This prevents the topbar updating and shifting icons more than it needs to
+		requestedTopbarUpdate = true
 		return false
 	end
 	coroutine.wrap(function()
@@ -548,6 +557,9 @@ function IconController.updateTopbar(toggleTransitionInfo)
 			end
 		end
 		--------
+		if requestedTopbarUpdate then
+			IconController.updateTopbar()
+		end
 		return true
 	end)()
 end
