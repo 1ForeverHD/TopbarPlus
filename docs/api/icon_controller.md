@@ -28,6 +28,21 @@ IconController.setGap(integer, alignment)
 Defines the offset width (i.e. gap) between each icon for the given alignment, ``left``, ``mid``, ``right``, or all alignments if not specified. 
 
 ----
+#### clearIconOnSpawn
+```lua
+IconController.clearIconOnSpawn(icon)
+```
+Calls destroy on the given icon when the player respawns. This is useful for scenarious where you wish to cleanup icons that are constructed within a Gui with ``ResetOnSpawn`` set to ``true``. For example:
+
+```lua
+-- Place at the bottom of your icon creator localscript
+local icons = IconController.getIcons()
+for _, icon in pairs(icons) do
+IconController.clearIconOnSpawn(icon)
+end
+```
+
+----
 #### getIcons
 ```lua
 local arrayOfIcons = IconController.getIcons()
