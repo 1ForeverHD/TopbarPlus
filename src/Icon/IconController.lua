@@ -29,6 +29,21 @@ IconController.setGap(integer, alignment)
 Defines the offset width (i.e. gap) between each icon for the given alignment, ``left``, ``mid``, ``right``, or all alignments if not specified. 
 
 ----
+#### clearIconOnSpawn
+```lua
+IconController.clearIconOnSpawn(icon)
+```
+Calls destroy on the given icon when the player respawns. This is useful for scenarious where you wish to cleanup icons that are constructed within a Gui with ``ResetOnSpawn`` set to ``true``. For example:
+
+```lua
+-- Place at the bottom of your icon creator localscript
+local icons = IconController.getIcons()
+for _, icon in pairs(icons) do
+	IconController.clearIconOnSpawn(icon)
+end
+```
+
+----
 #### getIcons
 ```lua
 local arrayOfIcons = IconController.getIcons()
@@ -488,7 +503,7 @@ function IconController.updateTopbar(toggleTransitionInfo)
 					-- This checks to see if the lowest/highest (depending on left/right) ordered overlapping icon is no longer overlapping, removes from the dropdown, and repeats if valid
 					local winningOrder, winningOverlappedIcon
 					local totalOverlappingIcons = #overflowIcon.dropdownIcons
-					if not (oppositeOverflowIcon.enabled and #alignmentInfo.records == 1 and #oppositeAlignmentInfo.records ~= 1) then
+					if not (oppositeOverflowIcon and oppositeOverflowIcon.enabled and #alignmentInfo.records == 1 and #oppositeAlignmentInfo.records ~= 1) then
 						for _, overlappedIcon in pairs(overflowIcon.dropdownIcons) do
 							local iconOrder = overlappedIcon:get("order")
 							if winningOverlappedIcon == nil or (alignment == "left" and iconOrder < winningOrder) or (alignment == "right" and iconOrder > winningOrder) then
@@ -652,6 +667,21 @@ function IconController.setGap(value, alignment)
 	IconController.midGap = newValue
 	IconController.rightGap = newValue
 	IconController.updateTopbar()
+end
+
+local localPlayer = players.LocalPlayer
+local iconsToClearOnSpawn = {}
+localPlayer.CharacterAdded:Connect(function()
+	for _, icon in pairs(iconsToClearOnSpawn) do
+		icon:destroy()
+	end
+	iconsToClearOnSpawn = {}
+end)
+function IconController.clearIconOnSpawn(icon)
+	coroutine.wrap(function()
+		local char = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+		table.insert(iconsToClearOnSpawn, icon)
+	end)()
 end
 
 
