@@ -1,3 +1,10 @@
+## [2.3.0] - February 14 2021
+### Added
+- ``icon:setProperty(propertName, value)`` - this will enable properties to be set within chained methods
+
+
+
+--------
 ## [2.2.1] - February 13 2021
 ### Fixed
 - An overlapping icon bug caused by yielding after requiring the Icon module
