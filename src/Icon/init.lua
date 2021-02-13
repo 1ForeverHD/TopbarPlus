@@ -75,6 +75,14 @@ icon:setName(string)
 Associates the given name to the icon which enables it to be retrieved with ``IconController.getIcon(name)``.
 
 ----
+#### setProperty
+{chainable}
+```lua
+icon:setProperty(propertyName, value)
+```
+An alternative way of doing ``zone[propertyName] = value``. This enables the easy-configuration of icon properties within chained methods.
+
+----
 #### select
 {chainable}
 ```lua
@@ -1357,6 +1365,11 @@ end
 function Icon:setName(string)
 	self.name = string
 	self.instances.iconContainer.Name = string
+	return self
+end
+
+function Icon:setProperty(propertyName, value)
+	self[propertyName] = value
 	return self
 end
 
