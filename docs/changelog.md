@@ -1,7 +1,7 @@
 ## [2.3.1] - March 16 2021
 ### Added
 - ``icon.lockedSettings`` - this is used internally to prevent overflow properties being accidentally overwritten
-- 
+
 ### Fixed
 - A critical bug with overflows that caused icons to disappear
 
