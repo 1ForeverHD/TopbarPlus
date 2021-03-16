@@ -558,6 +558,7 @@ function IconController.updateTopbar(toggleTransitionInfo)
 		end
 		--------
 		if requestedTopbarUpdate then
+			requestedTopbarUpdate = false
 			IconController.updateTopbar()
 		end
 		return true
@@ -894,29 +895,38 @@ coroutine.wrap(function()
 				overflowIcon:setRight()
 				overflowIcon:set("dropdownAlignment", "left")
 			end
+			overflowIcon.lockedSettings = {
+				["iconImage"] = true,
+				["order"] = true,
+				["alignment"] = true,
+			}
 		end
 	end
 end)()
 
 -- Mimic the enabling of the topbar when StarterGui:SetCore("TopbarEnabled", state) is called
 coroutine.wrap(function()
-	local ChatMain = require(players.LocalPlayer.PlayerScripts:WaitForChild("ChatScript").ChatMain)
-	ChatMain.CoreGuiEnabled:connect(function()
-		local topbarEnabled = checkTopbarEnabled()
-		if topbarEnabled == IconController.previousTopbarEnabled then
+	local ChatMain = require(players.LocalPlayer.PlayerScripts:WaitForChild("ChatScript", 5).ChatMain)
+	if not ChatMain then
+		ChatMain = require(game:GetService("Chat"):WaitForChild("ChatScript", 5).ChatMain)
+	end
+	if ChatMain then
+		ChatMain.CoreGuiEnabled:connect(function()
+			local topbarEnabled = checkTopbarEnabled()
+			if topbarEnabled == IconController.previousTopbarEnabled then
+				IconController.updateTopbar()
+				return "SetCoreGuiEnabled was called instead of SetCore"
+			end
+			IconController.previousTopbarEnabled = topbarEnabled
+			if IconController.controllerModeEnabled then
+				IconController.setTopbarEnabled(false,false)
+			else
+				IconController.setTopbarEnabled(topbarEnabled,false)
+			end
 			IconController.updateTopbar()
-			return "SetCoreGuiEnabled was called instead of SetCore"
-		end
-		IconController.previousTopbarEnabled = topbarEnabled
-		if IconController.controllerModeEnabled then
-			IconController.setTopbarEnabled(false,false)
-		else
-			IconController.setTopbarEnabled(topbarEnabled,false)
-		end
-		IconController.updateTopbar()
-	end)
-	IconController.setTopbarEnabled(checkTopbarEnabled(),false)
-	
+		end)
+		IconController.setTopbarEnabled(checkTopbarEnabled(),false)
+	end
 end)()
 
 -- Mimic roblox menu when opened and closed
