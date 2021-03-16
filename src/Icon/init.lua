@@ -925,6 +925,7 @@ function Icon.new()
 	self.topPadding = UDim.new(0, 4)
 	self.targetPosition = nil
 	self.toggleItems = {}
+	self.lockedSettings = {}
 	
 	-- Private Properties
 	self._draggingFinger = false
@@ -1337,14 +1338,20 @@ function Icon:setTheme(theme, updateAfterSettingAll)
 	for settingsType, settingsDetails in pairs(theme) do
 		if settingsType == "toggleable" then
 			for settingName, settingValue in pairs(settingsDetails.deselected) do
-				self:set(settingName, settingValue, "both")
+				if not self.lockedSettings[settingName] then
+					self:set(settingName, settingValue, "both")
+				end
 			end
 			for settingName, settingValue in pairs(settingsDetails.selected) do
-				self:set(settingName, settingValue, "selected")
+				if not self.lockedSettings[settingName] then
+					self:set(settingName, settingValue, "selected")
+				end
 			end
 		else
 			for settingName, settingValue in pairs(settingsDetails) do
-				self:set(settingName, settingValue)
+				if not self.lockedSettings[settingName] then
+					self:set(settingName, settingValue)
+				end
 			end
 		end
 	end
@@ -1900,6 +1907,7 @@ function Icon:leave()
 	if self._destroyed then return end
 	local settingsToReset = {"iconSize", "captionBlockerTransparency", "iconCornerRadius"}
 	local parentIcon = self._parentIcon
+	self.instances.iconContainer.Parent = topbarContainer
 	self.presentOnTopbar = true
 	self.joinedFeatureName = nil
 	local function scanFeature(t, prevReference, updateMethod)
