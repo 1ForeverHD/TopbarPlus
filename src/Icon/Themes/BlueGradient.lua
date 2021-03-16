@@ -27,7 +27,7 @@ return {
             iconBackgroundTransparency = 0.1,
             iconGradientColor = ColorSequence.new(selectedColor, selectedColorDarker),
             iconGradientRotation = 90,
-            iconImageColor =Color3.fromRGB(255, 255, 255),
+            iconImageColor = Color3.fromRGB(255, 255, 255),
             iconTextColor = Color3.fromRGB(255, 255, 255),
             noticeCircleColor = neutralColor,
             noticeTextColor = selectedColor,
