@@ -16,9 +16,22 @@ theme:
     #- navigation.instant
     #- navigation.sections
   palette:
-    primary: blue
-    accent: blue
-    scheme: preference
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
   highlightjs: true
   hljs_languages:
     - lua
