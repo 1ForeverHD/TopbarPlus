@@ -3,25 +3,26 @@
 [Material for MKDocs]: https://squidfunk.github.io/mkdocs-material/
 [ForeverHD on the devforum]: https://devforum.roblox.com/u/ForeverHD/summary
 [TopbarPlus repository]: https://github.com/1ForeverHD/TopbarPlus
+[open an issue]: https://github.com/1ForeverHD/TopbarPlus/issues
 
 ## Bug Reports
-- To submit a bug report, open an issue with label ``Type: Bug`` or create a response at the [discussion thread].
+- To submit a bug report, [open an issue] with label ``Type: Bug`` or create a response at the [discussion thread].
 - Ensure your report includes a detailed explanation of the problem with any relavent images, videos, etc (such as console errors).
 - Make sure to include a link to a stipped-down uncopylocked Roblox place which reproduces the bug.
 
 ## Questions and Feedback
 - Be sure to check out the documentation and [resources] first before asking a question.
 - We recommend submitting all questions and feedback to the [discussion thread].
-- You can also open an issue with label ``Type: Question``.
+- You can also [open an issue] with label ``Type: Question``.
 
 ## Submitting a resource (video tutorial, port, etc)
 - Fancy making a tutorial or resource for TopbarPlus? Feel free to get in touch and we can provide tips, best practices, etc.
 - We'll feature approved resources on the [resources] page and often the [discussion thread].
-- To submit a resource, open an issue, or reach out on the [discussion thread] or to [ForeverHD on the devforum].
+- To submit a resource, [open an issue], or reach out on the [discussion thread] or to [ForeverHD on the devforum].
 
 ## Suggestions and Code
 - TopbarPlus is completely free and open source; any suggestions and code contributions are greatly appreciated!
-- To make a suggestion, open an issue with label ``Type: Enhancement`` or create a response at the [discussion thread].
+- To make a suggestion, [open an issue] with label ``Type: Enhancement`` or create a response at the [discussion thread].
 - Please open a suggestion before beginning a code contribution to ensure it's discussed through fully (we wouldn't want to waste your time!).
 - Some tools you'll find useful when working on this project:
     - [Rojo](https://rojo.space/docs/)
