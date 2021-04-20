@@ -10,9 +10,6 @@
 2. Under *Assets*, download ``TopbarPlus.rbxm``.
 3. Within studio, navigate to MODEL -> Model and insert the file anywhere within ``ReplicatedStorage``. 
 
-!!! warning
-    The release notes may not contain the most up-to-date version of TopbarPlus. Use a different installation method if this is necessary.
-
 -------------------------------------
 
 ## Method 3 - With Rojo
