@@ -1,3 +1,10 @@
+## [2.3.2] - April 24 2021
+### Fixed
+- A bug where the topbar was not always updated when an icon was constructed
+
+
+
+--------
 ## [2.3.1] - March 16 2021
 ### Added
 - ``icon.lockedSettings`` - this is used internally to prevent overflow properties being accidentally overwritten
