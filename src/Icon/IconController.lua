@@ -232,6 +232,7 @@ IconController.iconAdded:Connect(function(icon)
 		IconController._enableControllerModeForIcon(icon, true)
 	end
 	IconController:_updateSelectionGroup()
+	IconController.updateTopbar()
 end)
 
 IconController.iconRemoved:Connect(function(icon)
