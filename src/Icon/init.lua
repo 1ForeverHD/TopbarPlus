@@ -626,6 +626,7 @@ function Icon.new()
 	self._settings = {
 		action = {
 			["toggleTransitionInfo"] = {},
+			["resizeTransitionInfo"] = {},
 			["captionFadeInfo"] = {},
 			["tipFadeInfo"] = {},
 			["dropdownSlideInfo"] = {},
@@ -641,7 +642,8 @@ function Icon.new()
 			["iconImageColor"] = {instanceNames = {"iconImage"}, propertyName = "ImageColor3"},
 			["iconImageTransparency"] = {instanceNames = {"iconImage"}, propertyName = "ImageTransparency"},
 			["iconScale"] = {instanceNames = {"iconButton"}, propertyName = "Size"},
-			["iconSize"] = {callMethods = {self._updateIconSize}, instanceNames = {"iconContainer"}, propertyName = "Size"},
+			--["iconSize"] = {callMethods = {self._updateIconSize}, instanceNames = {"iconContainer"}, propertyName = "Size"},
+			["iconSize"] = {callMethods = {self._updateIconSize, self._tweenIconSize}},
 			["iconOffset"] = {instanceNames = {"iconButton"}, propertyName = "Position"},
 			["iconText"] = {callMethods = {self._updateIconSize}, instanceNames = {"iconLabel"}, propertyName = "Text"},
 			["iconTextColor"] = {instanceNames = {"iconLabel"}, propertyName = "TextColor3"},
@@ -1060,12 +1062,12 @@ function Icon.new()
 			heartbeatConnection:Disconnect()
 		end)
 	end)
-	instances.iconButton.MouseButton1Up:Connect(function() -- TouchPad (ended)
-		if self.hovering then
-			self.hoverEnded:Fire()
-		end
-	end)
 	if userInputService.TouchEnabled then
+		instances.iconButton.MouseButton1Up:Connect(function() -- TouchPad (ended), this was originally enabled for non-touchpads too
+			if self.hovering then
+				self.hoverEnded:Fire()
+			end
+		end)
 		-- This is used to highlight when a mobile/touch device is dragging their finger accross the screen
 		-- this is important for determining the hoverStarted and hoverEnded events on mobile
 		local dragCount = 0
@@ -1676,6 +1678,13 @@ function Icon:_updateIconSize(_, toggleState)
 	end
 
 	self._updatingIconSize = false
+end
+
+function Icon:_tweenIconSize()
+	local iconContainer = self.instances.iconContainer
+	local iconSize = self:get("iconSize")
+	local resizeTransitionInfo = self:get("resizeTransitionInfo") or TweenInfo.new(0.1)
+	tweenService:Create(iconContainer, resizeTransitionInfo, {Size = iconSize}):Play()
 end
 
 

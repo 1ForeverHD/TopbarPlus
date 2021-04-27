@@ -907,27 +907,26 @@ end)()
 
 -- Mimic the enabling of the topbar when StarterGui:SetCore("TopbarEnabled", state) is called
 coroutine.wrap(function()
-	local ChatMain = require(players.LocalPlayer.PlayerScripts:WaitForChild("ChatScript", 5).ChatMain)
-	if not ChatMain then
-		ChatMain = require(game:GetService("Chat"):WaitForChild("ChatScript", 5).ChatMain)
-	end
-	if ChatMain then
-		ChatMain.CoreGuiEnabled:connect(function()
-			local topbarEnabled = checkTopbarEnabled()
-			if topbarEnabled == IconController.previousTopbarEnabled then
-				IconController.updateTopbar()
-				return "SetCoreGuiEnabled was called instead of SetCore"
-			end
-			IconController.previousTopbarEnabled = topbarEnabled
-			if IconController.controllerModeEnabled then
-				IconController.setTopbarEnabled(false,false)
-			else
-				IconController.setTopbarEnabled(topbarEnabled,false)
-			end
+	local chatScript = players.LocalPlayer.PlayerScripts:WaitForChild("ChatScript", 4) or game:GetService("Chat"):WaitForChild("ChatScript", 4)
+	if not chatScript then return end
+	local chatMain = chatScript:FindFirstChild("ChatMain")
+	if not chatMain then return end
+	local ChatMain = require(chatMain)
+	ChatMain.CoreGuiEnabled:connect(function()
+		local topbarEnabled = checkTopbarEnabled()
+		if topbarEnabled == IconController.previousTopbarEnabled then
 			IconController.updateTopbar()
-		end)
-		IconController.setTopbarEnabled(checkTopbarEnabled(),false)
-	end
+			return "SetCoreGuiEnabled was called instead of SetCore"
+		end
+		IconController.previousTopbarEnabled = topbarEnabled
+		if IconController.controllerModeEnabled then
+			IconController.setTopbarEnabled(false,false)
+		else
+			IconController.setTopbarEnabled(topbarEnabled,false)
+		end
+		IconController.updateTopbar()
+	end)
+	IconController.setTopbarEnabled(checkTopbarEnabled(),false)
 end)()
 
 -- Mimic roblox menu when opened and closed
