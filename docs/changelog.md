@@ -1,3 +1,13 @@
+## [2.3.3] - April 27 2021
+### Added
+- ``resizeTransitionInfo`` action theme property
+
+### Fixed
+- Error checking for ChatMain
+
+
+
+--------
 ## [2.3.2] - April 24 2021
 ### Fixed
 - A bug where the topbar was not always updated when an icon was constructed
