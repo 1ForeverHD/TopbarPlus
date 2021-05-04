@@ -1,1 +1,1 @@
---test
+-- ${VERSION}
