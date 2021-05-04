@@ -1,17 +1,17 @@
-name: Write Version to File
+name: export version file
+
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [released]
 
 jobs:
-  write-version:
+  export-version-file-action:
     runs-on: ubuntu-latest
-    name: Write Version to File
     steps:
-    - uses: actions/checkout@master
-    - name: Update version
-      id: version
-      uses: brettdorrans/write-version-to-file@master
-      with:
-        filename: 'src/Icon/VERSION.lua'
+      - name: export version file action
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # this is added for you by default
+        uses: nickatnight/export-version-file-action@master
+        with:
+          branch: "main"            # optional...defaults to 'master'
+          filename: "tag"           # optional...defaults to '__version__'
