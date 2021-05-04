@@ -1,3 +1,26 @@
+## [2.4.1] - May 4 2021
+### Added
+- ``hovering`` icon state (see https://1foreverhd.github.io/TopbarPlus/ for more info), e.g. ``icon:setLabel("Nanoblox", "hovering")``
+- ``repositionInfo`` action theme property
+- ``Icon:give(userdata)``
+
+### Changed
+- ``toggleState`` to ``iconState`` for toggleable methods
+- ``resizeTransitionInfo `` to ``resizeInfo``
+
+### Improved
+- The internal orgnisation and writing of captions and tips
+- Playground examples
+- The BlueGradient theme with bounces
+- API and Introduction documentation
+
+### Fixed
+- A minor overflow appearance bug
+- Appearance bugs with tips and captions
+
+
+
+--------
 ## [2.3.3] - April 27 2021
 ### Added
 - ``resizeTransitionInfo`` action theme property
