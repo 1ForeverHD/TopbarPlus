@@ -1,4 +1,4 @@
-name: export version file
+name: AutoVersion
 
 on:
   push:
@@ -15,4 +15,4 @@ jobs:
         uses: nickatnight/export-version-file-action@master
         with:
           branch: "main"            # optional...defaults to 'master'
-          filename: "VERSION.lua"           # optional...defaults to '__version__'
+          filename: "src/Icon/VERSION.lua"           # optional...defaults to '__version__'
