@@ -11,19 +11,6 @@ local icon = Icon.new()
 Constructs an empty ``32x32`` icon on the topbar.
 
 ----
-#### mimic
-{unstable}
-```lua
-local icon = Icon.mimic(coreIconName)
-```
-Constructs an icon to replace its CoreGui equivalent and accurately mimic its behaviour. This allows for the persistence of core gui items (such as the chatbar, leaderboard, emotes, etc) while having full control over the appearance and behaviour of the icon to toggle it.
-
-Mimicable Items: ``"PlayerList"``, ``"Backpack"``, ``"Chat"``, ``"EmotesMenu"``
-
-!!! danger
-    Due to recent unannounced changes Roblox have completely restricted the ability to accurately mimic core items such as Chat. Until this is resolved the ``mimic`` constructor will not work as intended.
-
-----
 
 
 
@@ -32,16 +19,16 @@ Mimicable Items: ``"PlayerList"``, ``"Backpack"``, ``"Chat"``, ``"EmotesMenu"``
 #### set
 {chainable}
 ```lua
-icon:set(settingName, value, toggleState)
+icon:set(settingName, value, iconState)
 ```
-Applies a specific setting to an icon. All settings can be found [here](https://github.com/1ForeverHD/TopbarPlus/blob/main/src/Icon/Themes/Default.lua). If the setting falls under the 'toggleable' category then "deselected" or "selected" can be specified, otherwise if left empty or ``nil`` will apply to both states. For most scenarious, it's recommended instead to apply settings using [themes].
+Applies a specific setting to an icon. All settings can be found [here](https://github.com/1ForeverHD/TopbarPlus/blob/main/src/Icon/Themes/Default.lua). If the setting falls under the 'toggleable' category then an iconState can be specified. For most scenarious it's recommended instead to apply settings using [themes].
 
 ----
 #### get
 ```lua
-local value = icon:get(settingName, toggleState)
+local value = icon:get(settingName, iconState)
 ```
-Retrieves the given settings value. If the setting falls under the 'toggleable' category then "deselected" or "selected" can be specified, otherwise if left empty or ``nil`` will default to retrieving the deselected value.
+Retrieves the given settings value. If the setting falls under the 'toggleable' category then an iconState can be specified.
 
 ----
 #### getToggleState
@@ -125,7 +112,7 @@ When set to ``true``, disables the shade effect which appears when the icon is p
 #### setImage
 {chainable} {toggleable}
 ```lua
-icon:setImage(imageId, toggleState)
+icon:setImage(imageId, iconState)
 ```
 Applies an image to the icon based on the given ``imaageId``. ``imageId`` can be an assetId or a complete asset string.
 
@@ -133,49 +120,49 @@ Applies an image to the icon based on the given ``imaageId``. ``imageId`` can be
 #### setLabel
 {chainable} {toggleable}
 ```lua
-icon:setLabel(text, toggleState)
+icon:setLabel(text, iconState)
 ```
 
 ----
 #### setOrder
 {chainable} {toggleable}
 ```lua
-icon:setOrder(order, toggleState)
+icon:setOrder(order, iconState)
 ```
 
 ----
 #### setCornerRadius
 {chainable} {toggleable}
 ```lua
-icon:setCornerRadius(scale, offset, toggleState)
+icon:setCornerRadius(scale, offset, iconState)
 ```
 
 ----
 #### setLeft
 {chainable} {toggleable}
 ```lua
-icon:setLeft(toggleState)
+icon:setLeft(iconState)
 ```
 
 ----
 #### setMid
 {chainable} {toggleable}
 ```lua
-icon:setMid(toggleState)
+icon:setMid(iconState)
 ```
 
 ----
 #### setRight
 {chainable} {toggleable}
 ```lua
-icon:setRight(toggleState)
+icon:setRight(iconState)
 ```
 
 ----
 #### setImageYScale
 {chainable} {toggleable}
 ```lua
-icon:setImageYScale(YScale, toggleState)
+icon:setImageYScale(YScale, iconState)
 ```
 Defines the proportional space the icons image takes up within the icons container.
 
@@ -183,7 +170,7 @@ Defines the proportional space the icons image takes up within the icons contain
 #### setImageRatio
 {chainable} {toggleable}
 ```lua
-icon:setImageRatio(ratio, toggleState)
+icon:setImageRatio(ratio, iconState)
 ```
 Defines the x:y ratio dimensions as a number. By default ``ratio`` is ``1.00``.
 
@@ -191,7 +178,7 @@ Defines the x:y ratio dimensions as a number. By default ``ratio`` is ``1.00``.
 #### setLabelYScale
 {chainable} {toggleable}
 ```lua
-icon:setLabelYScale(YScale, toggleState)
+icon:setLabelYScale(YScale, iconState)
 ```
 Defines how large label text appears.By default ``YScale`` is ``0.45``.
 
@@ -199,7 +186,7 @@ Defines how large label text appears.By default ``YScale`` is ``0.45``.
 #### setBaseZIndex
 {chainable} {toggleable}
 ```lua
-icon:setBaseZIndex(ZIndex, toggleState)
+icon:setBaseZIndex(ZIndex, iconState)
 ```
 Calculates the difference between the existing baseZIndex (i.e. ``instances.iconContainer.ZIndex``) and new value, then updates the ZIndex of all objects within the icon accoridngly using this difference.
 
@@ -207,7 +194,7 @@ Calculates the difference between the existing baseZIndex (i.e. ``instances.icon
 #### setSize
 {chainable} {toggleable}
 ```lua
-icon:setSize(XOffset, YOffset, toggleState)
+icon:setSize(XOffset, YOffset, iconState)
 ```
 Determines the icons container size. By default ``XOffset`` and ``YOffset`` are ``32``.
 
@@ -258,6 +245,14 @@ Binds a [keycode](https://developer.roblox.com/en-us/api-reference/enum/KeyCode)
 icon:unbindToggleKey(keyCodeEnum)
 ```
 Unbinds the given keycode.
+
+----
+#### give
+{chainable}
+```lua
+icon:give(userdata)
+```
+Passes the given userdata to the Icons maid to be destroyed/disconnected on the icons destruction. If a function is passed, it will be executed right away with its self (the icon) being passed as the first argument. The return value is then given to the maid (instead of the function).
 
 ----
 #### lock
@@ -566,6 +561,7 @@ local topbarContainer = TopbarPlusGui.TopbarContainer
 local iconTemplate = topbarContainer["IconContainer"]
 local DEFAULT_THEME = Themes.Default
 local THUMB_OFFSET = 55
+local DEFAULT_FORCED_GROUP_VALUES = {}
 local Icon = (referenceObject and require(referenceObject.Value)) or {}
 Icon.__index = Icon
 if not referenceObject then
@@ -626,7 +622,8 @@ function Icon.new()
 	self._settings = {
 		action = {
 			["toggleTransitionInfo"] = {},
-			["resizeTransitionInfo"] = {},
+			["resizeInfo"] = {},
+			["repositionInfo"] = {},
 			["captionFadeInfo"] = {},
 			["tipFadeInfo"] = {},
 			["dropdownSlideInfo"] = {},
@@ -642,8 +639,8 @@ function Icon.new()
 			["iconImageColor"] = {instanceNames = {"iconImage"}, propertyName = "ImageColor3"},
 			["iconImageTransparency"] = {instanceNames = {"iconImage"}, propertyName = "ImageTransparency"},
 			["iconScale"] = {instanceNames = {"iconButton"}, propertyName = "Size"},
-			--["iconSize"] = {callMethods = {self._updateIconSize}, instanceNames = {"iconContainer"}, propertyName = "Size"},
-			["iconSize"] = {callMethods = {self._updateIconSize, self._tweenIconSize}},
+			["forcedIconSize"] = {},
+			["iconSize"] = {callSignals = {self.updated}, callMethods = {self._updateIconSize}, instanceNames = {"iconContainer"}, propertyName = "Size", tweenAction = "resizeInfo"},
 			["iconOffset"] = {instanceNames = {"iconButton"}, propertyName = "Position"},
 			["iconText"] = {callMethods = {self._updateIconSize}, instanceNames = {"iconLabel"}, propertyName = "Text"},
 			["iconTextColor"] = {instanceNames = {"iconLabel"}, propertyName = "TextColor3"},
@@ -661,13 +658,13 @@ function Icon.new()
 			["alignment"] = {callSignals = {self.updated}, callMethods = {self._updateDropdown}},
 			["iconImageVisible"] = {instanceNames = {"iconImage"}, propertyName = "Visible"},
 			["iconImageAnchorPoint"] = {instanceNames = {"iconImage"}, propertyName = "AnchorPoint"},
-			["iconImagePosition"] = {instanceNames = {"iconImage"}, propertyName = "Position"},
-			["iconImageSize"] = {instanceNames = {"iconImage"}, propertyName = "Size"},
+			["iconImagePosition"] = {instanceNames = {"iconImage"}, propertyName = "Position", tweenAction = "resizeInfo"},
+			["iconImageSize"] = {instanceNames = {"iconImage"}, propertyName = "Size", tweenAction = "resizeInfo"},
 			["iconImageTextXAlignment"] = {instanceNames = {"iconImage"}, propertyName = "TextXAlignment"},
 			["iconLabelVisible"] = {instanceNames = {"iconLabel"}, propertyName = "Visible"},
 			["iconLabelAnchorPoint"] = {instanceNames = {"iconLabel"}, propertyName = "AnchorPoint"},
-			["iconLabelPosition"] = {instanceNames = {"iconLabel"}, propertyName = "Position"},
-			["iconLabelSize"] = {instanceNames = {"iconLabel"}, propertyName = "Size"},
+			["iconLabelPosition"] = {instanceNames = {"iconLabel"}, propertyName = "Position", tweenAction = "resizeInfo"},
+			["iconLabelSize"] = {instanceNames = {"iconLabel"}, propertyName = "Size", tweenAction = "resizeInfo"},
 			["iconLabelTextXAlignment"] = {instanceNames = {"iconLabel"}, propertyName = "TextXAlignment"},
 			["iconLabelTextSize"] = {instanceNames = {"iconLabel"}, propertyName = "TextSize"},
 			["noticeFramePosition"] = {instanceNames = {"noticeFrame"}, propertyName = "Position"},
@@ -678,18 +675,18 @@ function Icon.new()
 		},
 		other = {
 			["captionBackgroundColor"] = {instanceNames = {"captionFrame"}, propertyName = "BackgroundColor3"},
-			["captionBackgroundTransparency"] = {instanceNames = {"captionFrame"}, propertyName = "BackgroundTransparency", unique = "caption"},
-			["captionBlockerTransparency"] = {instanceNames = {"captionVisibilityBlocker"}, propertyName = "BackgroundTransparency", unique = "caption"},
+			["captionBackgroundTransparency"] = {instanceNames = {"captionFrame"}, propertyName = "BackgroundTransparency", group = "caption"},
+			["captionBlockerTransparency"] = {instanceNames = {"captionVisibilityBlocker"}, propertyName = "BackgroundTransparency", group = "caption"},
 			["captionOverlineColor"] = {instanceNames = {"captionOverline"}, propertyName = "BackgroundColor3"},
-			["captionOverlineTransparency"] = {instanceNames = {"captionOverline"}, propertyName = "BackgroundTransparency", unique = "caption"},
+			["captionOverlineTransparency"] = {instanceNames = {"captionOverline"}, propertyName = "BackgroundTransparency", group = "caption"},
 			["captionTextColor"] = {instanceNames = {"captionLabel"}, propertyName = "TextColor3"},
-			["captionTextTransparency"] = {instanceNames = {"captionLabel"}, propertyName = "TextTransparency", unique = "caption"},
+			["captionTextTransparency"] = {instanceNames = {"captionLabel"}, propertyName = "TextTransparency", group = "caption"},
 			["captionFont"] = {instanceNames = {"captionLabel"}, propertyName = "Font"},
 			["captionCornerRadius"] = {instanceNames = {"captionCorner", "captionOverlineCorner", "captionVisibilityCorner"}, propertyName = "CornerRadius"},
 			["tipBackgroundColor"] = {instanceNames = {"tipFrame"}, propertyName = "BackgroundColor3"},
-			["tipBackgroundTransparency"] = {instanceNames = {"tipFrame"}, propertyName = "BackgroundTransparency", unique = "tip"},
+			["tipBackgroundTransparency"] = {instanceNames = {"tipFrame"}, propertyName = "BackgroundTransparency", group = "tip"},
 			["tipTextColor"] = {instanceNames = {"tipLabel"}, propertyName = "TextColor3"},
-			["tipTextTransparency"] = {instanceNames = {"tipLabel"}, propertyName = "TextTransparency", unique = "tip"},
+			["tipTextTransparency"] = {instanceNames = {"tipLabel"}, propertyName = "TextTransparency", group = "tip"},
 			["tipFont"] = {instanceNames = {"tipLabel"}, propertyName = "Font"},
 			["tipCornerRadius"] = {instanceNames = {"tipCorner"}, propertyName = "CornerRadius"},
 			["dropdownSize"] = {instanceNames = {"dropdownContainer"}, propertyName = "Size", unique = "dropdown"},
@@ -723,6 +720,26 @@ function Icon.new()
 			["menuIgnoreClipping"] = {callMethods = {self._menuIgnoreClipping}},
 		}
 	}
+
+	---------------------------------
+	self._groupSettings = {}
+	for _, settingsDetails in pairs(self._settings) do
+		for settingName, settingDetail in pairs(settingsDetails) do
+			local group = settingDetail.group
+			if group then
+				local groupSettings = self._groupSettings[group]
+				if not groupSettings then
+					groupSettings = {}
+					self._groupSettings[group] = groupSettings
+				end
+				table.insert(groupSettings, settingName)
+				settingDetail.forcedGroupValue = DEFAULT_FORCED_GROUP_VALUES[group]
+				settingDetail.useForcedGroupValue = true
+			end
+		end
+	end
+	---------------------------------
+
 	-- The setting values themselves will be set within _settings
 	-- Setup a dictionary to make it quick and easy to reference setting by name
 	self._settingsDictionary = {}
@@ -730,23 +747,8 @@ function Icon.new()
 	-- for instance, we only want caption transparency effects to be applied on hovering
 	self._uniqueSettings = {}
 	self._uniqueSettingsDictionary = {}
+	self.uniqueValues = {}
 	local uniqueBehaviours = {
-		["caption"] = function(settingName, instance, propertyName, value)
-			local tweenInfo = self:get("captionFadeInfo")
-			local newValue = value
-			if not self.hovering or self.captionText == nil then
-				newValue = 1
-			end
-			tweenService:Create(instance, tweenInfo, {[propertyName] = newValue}):Play()
-		end,
-		["tip"] = function(settingName, instance, propertyName, value)
-			local tweenInfo = self:get("tipFadeInfo")
-			local newValue = value
-			if not self.hovering or self.tipText == nil then
-				newValue = 1
-			end
-			tweenService:Create(instance, tweenInfo, {[propertyName] = newValue}):Play()
-		end,
 		["dropdown"] = function(settingName, instance, propertyName, value)
 			local tweenInfo = self:get("dropdownSlideInfo")
 			local bindToggleToIcon = self:get("dropdownBindToggleToIcon")
@@ -1010,17 +1012,13 @@ function Icon.new()
 		if not self.locked then
 			self:_updateStateOverlay(0.9, Color3.fromRGB(255, 255, 255))
 		end
-		if not self.isSelected then
-			self:_displayTip(true)
-			self:_displayCaption(true)
-		end
+		self:_updateHovering()
 	end)
 	self.hoverEnded:Connect(function()
 		self.hovering = false
 		self:_updateStateOverlay(1)
-		self:_displayTip(false)
-		self:_displayCaption(false)
 		self._hoveringMaid:clean()
+		self:_updateHovering()
 	end)
 	instances.iconButton.MouseEnter:Connect(function(x, y) -- Mouse (started)
 		self.hoverStarted:Fire(x, y)
@@ -1084,7 +1082,6 @@ function Icon.new()
 
 	-- Finish
 	self._updatingIconSize = false
-	self._orderWasSet = (order and true) or nil
 	self:_updateIconSize()
 	IconController.iconAdded:Fire(self)
 	
@@ -1203,59 +1200,75 @@ end
 
 
 -- CORE UTILITY METHODS
-function Icon:set(settingName, value, toggleState, setAdditional)
+function Icon:set(settingName, value, iconState, setAdditional)
 	local settingDetail = self._settingsDictionary[settingName]
 	assert(settingDetail ~= nil, ("setting '%s' does not exist"):format(settingName))
-
-	-- Update the settings value
-	if type(toggleState) == "string" then
-		toggleState = toggleState:lower()
+	if type(iconState) == "string" then
+		iconState = iconState:lower()
 	end
-	local previousValue = self:get(settingName, toggleState)
-	local settingType = settingDetail.type
-	if settingType == "toggleable" then
-		local valuesToSet = {}
-		if toggleState == "deselected" or toggleState == "selected" then
-			table.insert(valuesToSet, toggleState)
-		else
-			table.insert(valuesToSet, "deselected")
-			table.insert(valuesToSet, "selected")
-			toggleState = nil
+	local previousValue = self:get(settingName, iconState)
+
+	if iconState == "hovering" then
+		-- Apply hovering state if valid
+		settingDetail.hoveringValue = value
+		if setAdditional ~= "_ignorePrevious" then
+			settingDetail.additionalValues["previous_"..iconState] = previousValue
 		end
-		for i, v in pairs(valuesToSet) do
-			settingDetail.values[v] = value
-			if setAdditional ~= "_ignorePrevious" then
-				settingDetail.additionalValues["previous_"..v] = previousValue
-			end
-			if type(setAdditional) == "string" then
-				settingDetail.additionalValues[setAdditional.."_"..v] = previousValue
-			end
-		end
-	else
-		settingDetail.value = value
 		if type(setAdditional) == "string" then
-			if setAdditional ~= "_ignorePrevious" then
-				settingDetail.additionalValues["previous"] = previousValue
-			end
-			settingDetail.additionalValues[setAdditional] = previousValue
+			settingDetail.additionalValues[setAdditional.."_"..iconState] = previousValue
 		end
-	end
+		self:_update(settingName)
 
-	-- Check previous and new are not the same
-	if previousValue == value then
-		return self, "Value was already set"
-	end
+	else
+		-- Update the settings value
+		local toggleState = iconState
+		local settingType = settingDetail.type
+		if settingType == "toggleable" then
+			local valuesToSet = {}
+			if toggleState == "deselected" or toggleState == "selected" then
+				table.insert(valuesToSet, toggleState)
+			else
+				table.insert(valuesToSet, "deselected")
+				table.insert(valuesToSet, "selected")
+				toggleState = nil
+			end
+			for i, v in pairs(valuesToSet) do
+				settingDetail.values[v] = value
+				if setAdditional ~= "_ignorePrevious" then
+					settingDetail.additionalValues["previous_"..v] = previousValue
+				end
+				if type(setAdditional) == "string" then
+					settingDetail.additionalValues[setAdditional.."_"..v] = previousValue
+				end
+			end
+		else
+			settingDetail.value = value
+			if type(setAdditional) == "string" then
+				if setAdditional ~= "_ignorePrevious" then
+					settingDetail.additionalValues["previous"] = previousValue
+				end
+				settingDetail.additionalValues[setAdditional] = previousValue
+			end
+		end
 
-	-- Update appearances of associated instances
-	local currentToggleState = self:getToggleState()
-	if not self._updateAfterSettingAll and settingDetail.instanceNames and (currentToggleState == toggleState or toggleState == nil) then
-		self:_update(settingName, currentToggleState, true)
+		-- Check previous and new are not the same
+		if previousValue == value then
+			return self, "Value was already set"
+		end
+
+		-- Update appearances of associated instances
+		local currentToggleState = self:getToggleState()
+		if not self._updateAfterSettingAll and settingDetail.instanceNames and (currentToggleState == toggleState or toggleState == nil) then
+			local ignoreTweenAction = (settingName == "iconSize" and previousValue and previousValue.X.Scale == 1)
+			local tweenInfo = (settingDetail.tweenAction and not ignoreTweenAction and self:get(settingDetail.tweenAction)) or TweenInfo.new(0)
+			self:_update(settingName, currentToggleState, tweenInfo)
+		end
 	end
 
 	-- Call any methods present
 	if settingDetail.callMethods then
 		for _, callMethod in pairs(settingDetail.callMethods) do
-			callMethod(self, value, toggleState)
+			callMethod(self, value, iconState)
 		end
 	end
 	
@@ -1268,17 +1281,46 @@ function Icon:set(settingName, value, toggleState, setAdditional)
 	return self
 end
 
-function Icon:get(settingName, toggleState, getAdditional)
+function Icon:get(settingName, iconState, getAdditional)
 	local settingDetail = self._settingsDictionary[settingName]
 	assert(settingDetail ~= nil, ("setting '%s' does not exist"):format(settingName))
+	local valueToReturn, additionalValueToReturn
+	if typeof(iconState) == "string" then
+		iconState = iconState:lower()
+	end
+
+	--if ((self.hovering and settingDetail.hoveringValue) or iconState == "hovering") and getAdditional == nil then
+	if (iconState == "hovering") and getAdditional == nil then
+		valueToReturn = settingDetail.hoveringValue
+		additionalValueToReturn = type(getAdditional) == "string" and settingDetail.additionalValues[getAdditional.."_"..iconState]
+	end
+
 	local settingType = settingDetail.type
 	if settingType == "toggleable" then
-		toggleState = toggleState or self:getToggleState()
-		local additionalValue = type(getAdditional) == "string" and settingDetail.additionalValues[getAdditional.."_"..toggleState]
-		return settingDetail.values[toggleState], additionalValue
+		local toggleState = ((iconState == "deselected" or iconState == "selected") and iconState) or self:getToggleState()
+		if additionalValueToReturn == nil then
+			additionalValueToReturn = type(getAdditional) == "string" and settingDetail.additionalValues[getAdditional.."_"..toggleState]
+		end
+		if valueToReturn == nil then
+			valueToReturn = settingDetail.values[toggleState]
+		end
+	
+	else
+		if additionalValueToReturn == nil then
+			additionalValueToReturn = type(getAdditional) == "string" and settingDetail.additionalValues[getAdditional]
+		end
+		if valueToReturn == nil then
+			valueToReturn = settingDetail.value
+		end
 	end
-	local additionalValue = type(getAdditional) == "string" and settingDetail.additionalValues[getAdditional]
-	return settingDetail.value, additionalValue
+
+	return valueToReturn, additionalValueToReturn
+end
+
+function Icon:getHovering(settingName)
+	local settingDetail = self._settingsDictionary[settingName]
+	assert(settingDetail ~= nil, ("setting '%s' does not exist"):format(settingName))
+	return settingDetail.hoveringValue
 end
 
 function Icon:getToggleState(isSelected)
@@ -1286,13 +1328,24 @@ function Icon:getToggleState(isSelected)
 	return (isSelected and "selected") or "deselected"
 end
 
-function Icon:_update(settingName, toggleState, applyInstantly)
+function Icon:getIconState()
+	if self.hovering then
+		return "hovering"
+	else
+		return self:getToggleState()
+	end
+end
+
+function Icon:_update(settingName, toggleState, customTweenInfo)
 	local settingDetail = self._settingsDictionary[settingName]
 	assert(settingDetail ~= nil, ("setting '%s' does not exist"):format(settingName))
 	toggleState = toggleState or self:getToggleState()
 	local value = settingDetail.value or (settingDetail.values and settingDetail.values[toggleState])
+	if self.hovering and settingDetail.hoveringValue then
+		value = settingDetail.hoveringValue
+	end
 	if value == nil then return end
-	local tweenInfo = (applyInstantly and TweenInfo.new(0)) or self._settings.action.toggleTransitionInfo.value
+	local tweenInfo = customTweenInfo or (settingDetail.tweenAction and self:get(settingDetail.tweenAction)) or self:get("toggleTransitionInfo") or TweenInfo.new(0.15)
 	local propertyName = settingDetail.propertyName
 	local invalidPropertiesTypes = {
 		["string"] = true,
@@ -1302,29 +1355,43 @@ function Icon:_update(settingName, toggleState, applyInstantly)
 		["ColorSequence"] = true,
 	}
 	local uniqueSetting = self._uniqueSettingsDictionary[settingName]
-	for _, instanceName in pairs(settingDetail.instanceNames) do
-		local instance = self.instances[instanceName]
-		local propertyType = typeof(instance[propertyName])
-		local cannotTweenProperty = invalidPropertiesTypes[propertyType]
-		if uniqueSetting then
-			uniqueSetting(settingName, instance, propertyName, value)
-		elseif cannotTweenProperty then
-			instance[propertyName] = value
-		else
-			tweenService:Create(instance, tweenInfo, {[propertyName] = value}):Play()
+	local newValue = value
+	if settingDetail.useForcedGroupValue then
+		newValue = settingDetail.forcedGroupValue
+	end
+	if settingDetail.instanceNames then
+		for _, instanceName in pairs(settingDetail.instanceNames) do
+			local instance = self.instances[instanceName]
+			local propertyType = typeof(instance[propertyName])
+			local cannotTweenProperty = invalidPropertiesTypes[propertyType]
+			if uniqueSetting then
+				uniqueSetting(settingName, instance, propertyName, newValue)
+			elseif cannotTweenProperty then
+				instance[propertyName] = value
+			else
+				tweenService:Create(instance, tweenInfo, {[propertyName] = newValue}):Play()
+			end
+			--
+			if settingName == "iconSize" and instance[propertyName] ~= newValue then
+				self.updated:Fire()
+			end
+			--
 		end
-		--
-		if settingName == "iconSize" and instance[propertyName] ~= value then
-			self.updated:Fire()
-		end
-		--
 	end
 end
 
-function Icon:_updateAll(toggleState, applyInstantly)
+function Icon:_updateAll(iconState, customTweenInfo)
 	for settingName, settingDetail in pairs(self._settingsDictionary) do
 		if settingDetail.instanceNames then
-			self:_update(settingName, toggleState, applyInstantly)
+			self:_update(settingName, iconState, customTweenInfo)
+		end
+	end
+end
+
+function Icon:_updateHovering(customTweenInfo)
+	for settingName, settingDetail in pairs(self._settingsDictionary) do
+		if settingDetail.instanceNames and settingDetail.hoveringValue ~= nil then
+			self:_update(settingName, nil, customTweenInfo)
 		end
 	end
 end
@@ -1501,59 +1568,59 @@ end
 
 
 -- TOGGLEABLE METHODS
-function Icon:setLabel(text, toggleState)
+function Icon:setLabel(text, iconState)
 	text = text or ""
-	self:set("iconText", text, toggleState)
+	self:set("iconText", text, iconState)
 	return self
 end
 
-function Icon:setCornerRadius(scale, offset, toggleState)
+function Icon:setCornerRadius(scale, offset, iconState)
 	local oldCornerRadius = self.instances.iconCorner.CornerRadius
 	local newCornerRadius = UDim.new(scale or oldCornerRadius.Scale, offset or oldCornerRadius.Offset)
-	self:set("iconCornerRadius", newCornerRadius, toggleState)
+	self:set("iconCornerRadius", newCornerRadius, iconState)
 	return self
 end
 
-function Icon:setImage(imageId, toggleState)
+function Icon:setImage(imageId, iconState)
 	local textureId = (tonumber(imageId) and "http://www.roblox.com/asset/?id="..imageId) or imageId or ""
-	return self:set("iconImage", textureId, toggleState)
+	return self:set("iconImage", textureId, iconState)
 end
 
-function Icon:setOrder(order, toggleState)
+function Icon:setOrder(order, iconState)
 	local newOrder = tonumber(order) or 1
-	return self:set("order", newOrder, toggleState)
+	return self:set("order", newOrder, iconState)
 end
 
-function Icon:setLeft(toggleState)
-	return self:set("alignment", "left", toggleState)
+function Icon:setLeft(iconState)
+	return self:set("alignment", "left", iconState)
 end
 
-function Icon:setMid(toggleState)
-	return self:set("alignment", "mid", toggleState)
+function Icon:setMid(iconState)
+	return self:set("alignment", "mid", iconState)
 end
 
-function Icon:setRight(toggleState)
-	return self:set("alignment", "right", toggleState)
+function Icon:setRight(iconState)
+	return self:set("alignment", "right", iconState)
 end
 
-function Icon:setImageYScale(YScale, toggleState)
+function Icon:setImageYScale(YScale, iconState)
 	local newYScale = tonumber(YScale) or 0.63
-	return self:set("iconImageYScale", newYScale, toggleState)
+	return self:set("iconImageYScale", newYScale, iconState)
 end
 
-function Icon:setImageRatio(ratio, toggleState)
+function Icon:setImageRatio(ratio, iconState)
 	local newRatio = tonumber(ratio) or 1
-	return self:set("iconImageRatio", newRatio, toggleState)
+	return self:set("iconImageRatio", newRatio, iconState)
 end
 
-function Icon:setLabelYScale(YScale, toggleState)
+function Icon:setLabelYScale(YScale, iconState)
 	local newYScale = tonumber(YScale) or 0.45
-	return self:set("iconLabelYScale", newYScale, toggleState)
+	return self:set("iconLabelYScale", newYScale, iconState)
 end
 	
-function Icon:setBaseZIndex(ZIndex, toggleState)
+function Icon:setBaseZIndex(ZIndex, iconState)
 	local newBaseZIndex = tonumber(ZIndex) or 1
-	return self:set("baseZIndex", newBaseZIndex, toggleState)
+	return self:set("baseZIndex", newBaseZIndex, iconState)
 end
 
 function Icon:_updateBaseZIndex(baseValue)
@@ -1567,25 +1634,28 @@ function Icon:_updateBaseZIndex(baseValue)
 	return true
 end
 
-function Icon:setSize(XOffset, YOffset, toggleState)
+function Icon:setSize(XOffset, YOffset, iconState)
 	local newXOffset = tonumber(XOffset) or 32
 	local newYOffset = tonumber(YOffset) or newXOffset
-	return self:set("iconSize", UDim2.new(0, newXOffset, 0, newYOffset), toggleState)
+	self:set("forcedIconSize", UDim2.new(0, newXOffset, 0, newYOffset), iconState)
+	self:set("iconSize", UDim2.new(0, newXOffset, 0, newYOffset), iconState)
+	return self
 end
 
-function Icon:_updateIconSize(_, toggleState)
+function Icon:_updateIconSize(_, iconState)
 	if self._destroyed then return end
 	-- This is responsible for handling the appearance and size of the icons label and image, in additon to its own size
 	local X_MARGIN = 12
 	local X_GAP = 8
 
 	local values = {
-		iconImage = self:get("iconImage", toggleState) or "_NIL",
-		iconText = self:get("iconText", toggleState) or "_NIL",
-		iconSize = self:get("iconSize", toggleState) or "_NIL",
-		iconImageYScale = self:get("iconImageYScale", toggleState) or "_NIL",
-		iconImageRatio = self:get("iconImageRatio", toggleState) or "_NIL",
-		iconLabelYScale = self:get("iconLabelYScale", toggleState) or "_NIL",
+		iconImage = self:get("iconImage", iconState) or "_NIL",
+		iconText = self:get("iconText", iconState) or "_NIL",
+		iconSize = self:get("iconSize", iconState) or "_NIL",
+		forcedIconSize = self:get("forcedIconSize", iconState) or "_NIL",
+		iconImageYScale = self:get("iconImageYScale", iconState) or "_NIL",
+		iconImageRatio = self:get("iconImageRatio", iconState) or "_NIL",
+		iconLabelYScale = self:get("iconLabelYScale", iconState) or "_NIL",
 	}
 	for k,v in pairs(values) do
 		if v == "_NIL" then
@@ -1595,8 +1665,6 @@ function Icon:_updateIconSize(_, toggleState)
 
 	local iconContainer = self.instances.iconContainer
 	local iconLabel = self.instances.iconLabel
-	local iconImage = self.instances.iconImage
-	local noticeFrame = self.instances.noticeFrame
 	if not iconContainer.Parent then return end
 
 	-- We calculate the cells dimensions as apposed to reading because there's a possibility the cells dimensions were changed at the exact time and have not yet updated
@@ -1604,7 +1672,7 @@ function Icon:_updateIconSize(_, toggleState)
 	local cellSizeXOffset = values.iconSize.X.Offset
 	local cellSizeXScale = values.iconSize.X.Scale
 	local cellWidth = cellSizeXOffset + (cellSizeXScale * iconContainer.Parent.AbsoluteSize.X)
-	local minCellWidth = cellWidth
+	local minCellWidth = values.forcedIconSize.X.Offset--cellWidth
 	local maxCellWidth = (cellSizeXScale > 0 and cellWidth) or 9999
 	local cellSizeYOffset = values.iconSize.Y.Offset
 	local cellSizeYScale = values.iconSize.Y.Scale
@@ -1620,46 +1688,46 @@ function Icon:_updateIconSize(_, toggleState)
 	
 	if usingImage and not usingText then
 		notifPosYScale = 0.45
-		self:set("iconImageVisible", true, toggleState)
-		self:set("iconImageAnchorPoint", Vector2.new(0.5, 0.5), toggleState)
-		self:set("iconImagePosition", UDim2.new(0.5, 0, 0.5, 0), toggleState)
-		self:set("iconImageSize", UDim2.new(values.iconImageYScale*values.iconImageRatio, 0, values.iconImageYScale, 0), toggleState)
-		self:set("iconLabelVisible", false, toggleState)
+		self:set("iconImageVisible", true, iconState)
+		self:set("iconImageAnchorPoint", Vector2.new(0.5, 0.5), iconState)
+		self:set("iconImagePosition", UDim2.new(0.5, 0, 0.5, 0), iconState)
+		self:set("iconImageSize", UDim2.new(values.iconImageYScale*values.iconImageRatio, 0, values.iconImageYScale, 0), iconState)
+		self:set("iconLabelVisible", false, iconState)
 
 	elseif not usingImage and usingText then
 		desiredCellWidth = labelWidth+(X_MARGIN*2)
-		self:set("iconLabelVisible", true, toggleState)
-		self:set("iconLabelAnchorPoint", Vector2.new(0, 0.5), toggleState)
-		self:set("iconLabelPosition", UDim2.new(0, X_MARGIN, 0.5, 0), toggleState)
-		self:set("iconLabelSize", UDim2.new(1, -X_MARGIN*2, values.iconLabelYScale, 0), toggleState)
-		self:set("iconLabelTextXAlignment", Enum.TextXAlignment.Center, toggleState)
-		self:set("iconImageVisible", false, toggleState)
+		self:set("iconLabelVisible", true, iconState)
+		self:set("iconLabelAnchorPoint", Vector2.new(0, 0.5), iconState)
+		self:set("iconLabelPosition", UDim2.new(0, X_MARGIN, 0.5, 0), iconState)
+		self:set("iconLabelSize", UDim2.new(1, -X_MARGIN*2, values.iconLabelYScale, 0), iconState)
+		self:set("iconLabelTextXAlignment", Enum.TextXAlignment.Center, iconState)
+		self:set("iconImageVisible", false, iconState)
 
 	elseif usingImage and usingText then
 		local labelGap = X_MARGIN + imageWidth + X_GAP
 		desiredCellWidth = labelGap + labelWidth + X_MARGIN
-		self:set("iconImageVisible", true, toggleState)
-		self:set("iconImageAnchorPoint", Vector2.new(0, 0.5), toggleState)
-		self:set("iconImagePosition", UDim2.new(0, X_MARGIN, 0.5, 0), toggleState)
-		self:set("iconImageSize", UDim2.new(0, imageWidth, values.iconImageYScale, 0), toggleState)
+		self:set("iconImageVisible", true, iconState)
+		self:set("iconImageAnchorPoint", Vector2.new(0, 0.5), iconState)
+		self:set("iconImagePosition", UDim2.new(0, X_MARGIN, 0.5, 0), iconState)
+		self:set("iconImageSize", UDim2.new(0, imageWidth, values.iconImageYScale, 0), iconState)
 		----
-		self:set("iconLabelVisible", true, toggleState)
-		self:set("iconLabelAnchorPoint", Vector2.new(0, 0.5), toggleState)
-		self:set("iconLabelPosition", UDim2.new(0, labelGap, 0.5, 0), toggleState)
-		self:set("iconLabelSize", UDim2.new(1, -labelGap-X_MARGIN, values.iconLabelYScale, 0), toggleState)
-		self:set("iconLabelTextXAlignment", Enum.TextXAlignment.Left, toggleState)
+		self:set("iconLabelVisible", true, iconState)
+		self:set("iconLabelAnchorPoint", Vector2.new(0, 0.5), iconState)
+		self:set("iconLabelPosition", UDim2.new(0, labelGap, 0.5, 0), iconState)
+		self:set("iconLabelSize", UDim2.new(1, -labelGap-X_MARGIN, values.iconLabelYScale, 0), iconState)
+		self:set("iconLabelTextXAlignment", Enum.TextXAlignment.Left, iconState)
 	end
 	if desiredCellWidth then
 		if not self._updatingIconSize then
 			self._updatingIconSize = true
 			local widthScale = (cellSizeXScale > 0 and cellSizeXScale) or 0
 			local widthOffset = (cellSizeXScale > 0 and 0) or math.clamp(desiredCellWidth, minCellWidth, maxCellWidth)
-			self:set("iconSize", UDim2.new(widthScale, widthOffset, values.iconSize.Y.Scale, values.iconSize.Y.Offset), toggleState, "_ignorePrevious")
+			self:set("iconSize", UDim2.new(widthScale, widthOffset, values.iconSize.Y.Scale, values.iconSize.Y.Offset), iconState, "_ignorePrevious")
 			self._updatingIconSize = false
 		end
 	end
-	self:set("iconLabelTextSize", labelHeight, toggleState)
-	self:set("noticeFramePosition", UDim2.new(notifPosYScale, 0, 0, -2), toggleState)
+	self:set("iconLabelTextSize", labelHeight, iconState)
+	self:set("noticeFramePosition", UDim2.new(notifPosYScale, 0, 0, -2), iconState)
 
 	-- Caption
 	if self.captionText then
@@ -1677,14 +1745,11 @@ function Icon:_updateIconSize(_, toggleState)
 		captionContainer.Size = UDim2.new(0, textWidth + CAPTION_X_MARGIN*2, 0, cellHeight*CAPTION_CONTAINER_Y_SIZE_SCALE)
 	end
 
-	self._updatingIconSize = false
-end
+	if iconState ~= "hovering" then
+		self:_updateIconSize(nil, "hovering")
+	end
 
-function Icon:_tweenIconSize()
-	local iconContainer = self.instances.iconContainer
-	local iconSize = self:get("iconSize")
-	local resizeTransitionInfo = self:get("resizeTransitionInfo") or TweenInfo.new(0.1)
-	tweenService:Create(iconContainer, resizeTransitionInfo, {Size = iconSize}):Play()
+	self._updatingIconSize = false
 end
 
 
@@ -1764,7 +1829,21 @@ function Icon:_setToggleItemsVisible(bool, byIcon)
 	end
 end
 
+function Icon:give(userdata)
+	local valueToGive = userdata
+	if typeof(userdata) == "function" then
+		local returnValue = userdata(self)
+		if typeof(userdata) ~= "function" then
+			valueToGive = returnValue
+		end
+	end
+	self._maid:give(valueToGive)
+	return self
+end
+
 -- Tips
+DEFAULT_FORCED_GROUP_VALUES["tip"] = 1
+
 function Icon:setTip(text)
 	assert(typeof(text) == "string" or text == nil, "Expected string, got "..typeof(text))
 	local textSize = textService:GetTextSize(text, 12, Enum.Font.GothamSemibold, Vector2.new(1000, 20-6))
@@ -1772,21 +1851,39 @@ function Icon:setTip(text)
 	self.instances.tipFrame.Size = UDim2.new(0, textSize.X+6, 0, 20)
 	self.instances.tipFrame.Parent = (text and activeItems) or self.instances.iconContainer
 	self.tipText = text
-	if self.hovering then
-		self:_displayTip(true)
-	end
+	
+	local tipMaid = Maid.new()
+	self._maid.tipMaid = tipMaid
+	tipMaid:give(self.hoverStarted:Connect(function()
+		if not self.isSelected then
+			self:displayTip(true)
+		end
+	end))
+	tipMaid:give(self.hoverEnded:Connect(function()
+		self:displayTip(false)
+	end))
+	tipMaid:give(self.selected:Connect(function()
+		if self.hovering then
+			self:displayTip(false)
+		end
+	end))
+	self:displayTip(self.hovering)
 	return self
 end
 
-function Icon:_displayTip(visibility)
-	local newVisibility = visibility
-	local tipFrame = self.instances.tipFrame
-	if self.tipText == nil then
-		return
-	elseif userInputService.TouchEnabled and not self._draggingFinger then
-		return
+function Icon:displayTip(bool)
+	if userInputService.TouchEnabled and not self._draggingFinger then return end
+
+	-- Determine caption visibility
+	local isVisible = self.tipVisible or false
+	if typeof(bool) == "boolean" then
+		isVisible = bool
 	end
-	if newVisibility == true then
+	self.tipVisible = isVisible
+
+	-- Have tip position track mouse or finger
+	local tipFrame = self.instances.tipFrame
+	if isVisible then
 		-- When the user moves their cursor/finger, update tip to match the position
 		local function updateTipPositon(x, y)
 			local newX = x
@@ -1831,33 +1928,59 @@ function Icon:_displayTip(visibility)
 		end
 		self._hoveringMaid:give(self.instances.iconButton.MouseMoved:Connect(updateTipPositon))
 	end
+
 	-- Change transparency of relavent tip instances
-	for _, settingName in pairs(self._uniqueSettings.tip) do
+	for _, settingName in pairs(self._groupSettings.tip) do
+		local settingDetail = self._settingsDictionary[settingName]
+		settingDetail.useForcedGroupValue = not isVisible
 		self:_update(settingName)
 	end
 end
 
 -- Captions
+DEFAULT_FORCED_GROUP_VALUES["caption"] = 1
+
 function Icon:setCaption(text)
 	assert(typeof(text) == "string" or text == nil, "Expected string, got "..typeof(text))
 	self.captionText = text
 	self.instances.captionLabel.Text = text
 	self.instances.captionContainer.Parent = (text and activeItems) or self.instances.iconContainer
-	self:_updateIconSize(nil, self:getToggleState())
-	if self.hovering then
-		self:_displayCaption(true)
-	end
+	self:_updateIconSize(nil, self:getIconState())
+	local captionMaid = Maid.new()
+	self._maid.captionMaid = captionMaid
+	captionMaid:give(self.hoverStarted:Connect(function()
+		if not self.isSelected then
+			self:displayCaption(true)
+		end
+	end))
+	captionMaid:give(self.hoverEnded:Connect(function()
+		self:displayCaption(false)
+	end))
+	captionMaid:give(self.selected:Connect(function()
+		if self.hovering then
+			self:displayCaption(false)
+		end
+	end))
+	local iconContainer = self.instances.iconContainer
+	captionMaid:give(iconContainer:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+		if self.hovering then
+			self:displayCaption()
+		end
+	end))
+	captionMaid:give(iconContainer:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+		if self.hovering then
+			self:displayCaption()
+		end
+	end))
+	self:displayCaption(self.hovering)
 	return self
 end
 
-function Icon:_displayCaption(visibility)
-	local newVisibility = visibility
-	if self.captionText == nil then
-		return
-	elseif userInputService.TouchEnabled and not self._draggingFinger then
-		return
-	end
+function Icon:displayCaption(bool)
+	if userInputService.TouchEnabled and not self._draggingFinger then return end
 	local yOffset = 8
+	
+	-- Determine caption position
 	if self._draggingFinger then
 		yOffset = yOffset + THUMB_OFFSET
 	end
@@ -1865,8 +1988,19 @@ function Icon:_displayCaption(visibility)
 	local captionContainer = self.instances.captionContainer
 	local newPos = UDim2.new(0, iconContainer.AbsolutePosition.X+iconContainer.AbsoluteSize.X/2-captionContainer.AbsoluteSize.X/2, 0, iconContainer.AbsolutePosition.Y+(iconContainer.AbsoluteSize.Y*2)+yOffset)
 	captionContainer.Position = newPos
+
+	-- Determine caption visibility
+	local isVisible = self.captionVisible or false
+	if typeof(bool) == "boolean" then
+		isVisible = bool
+	end
+	self.captionVisible = isVisible
+
 	-- Change transparency of relavent caption instances
-	for _, settingName in pairs(self._uniqueSettings.caption) do
+	local captionFadeInfo = self:get("captionFadeInfo")
+	for _, settingName in pairs(self._groupSettings.caption) do
+		local settingDetail = self._settingsDictionary[settingName]
+		settingDetail.useForcedGroupValue = not isVisible
 		self:_update(settingName)
 	end
 end

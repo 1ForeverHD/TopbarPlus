@@ -57,6 +57,7 @@ iconLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 iconLabel.Text = ""
 iconLabel.RichText = true
 iconLabel.TextScaled = false
+iconLabel.ClipsDescendants = true
 iconLabel.ZIndex = 11--3
 iconLabel.Parent = iconButton
 iconLabel.Active = false

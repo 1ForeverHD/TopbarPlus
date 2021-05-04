@@ -210,8 +210,7 @@ IconController.iconAdded:Connect(function(icon)
 		icon:setTheme(IconController.gameTheme)
 	end
 	icon.updated:Connect(function()
-		local toggleTransitionInfo = icon:get("toggleTransitionInfo")
-		IconController.updateTopbar(toggleTransitionInfo)
+		IconController.updateTopbar()
 	end)
 	-- When this icon is selected, deselect other icons if necessary
 	icon.selected:Connect(function()
@@ -224,9 +223,7 @@ IconController.iconAdded:Connect(function(icon)
 	end)
 	-- Order by creation if no order specified
 	iconCreationCount = iconCreationCount + 1
-	if not icon._orderWasSet then
-		icon:setOrder(iconCreationCount)
-	end
+	icon:setOrder(iconCreationCount)
 	-- Apply controller view if enabled
 	if IconController.controllerModeEnabled then
 		IconController._enableControllerModeForIcon(icon, true)
@@ -310,11 +307,11 @@ end
 
 -- This is responsible for positioning the topbar icons
 local requestedTopbarUpdate = false
-function IconController.updateTopbar(toggleTransitionInfo)
+function IconController.updateTopbar()
 	local function getIncrement(otherIcon, alignment)
 		--local container = otherIcon.instances.iconContainer
 		--local sizeX = container.Size.X.Offset
-		local iconSize = otherIcon:get("iconSize") or UDim2.new(0, 32, 0, 32)
+		local iconSize = otherIcon:get("iconSize", otherIcon:getIconState()) or UDim2.new(0, 32, 0, 32)
 		local sizeX = iconSize.X.Offset
 		local alignmentGap = IconController[alignment.."Gap"]
 		local iconWidthAndGap = (sizeX + alignmentGap)
@@ -375,8 +372,9 @@ function IconController.updateTopbar(toggleTransitionInfo)
 				local topPadding = otherIcon.topPadding
 				local newPositon = UDim2.new(alignmentInfo.startScale, offsetX+preOffset, topPadding.Scale, topPadding.Offset)
 				local isAnOverflowIcon = string.match(otherIcon.name, "_overflowIcon-")
-				if toggleTransitionInfo then
-					tweenService:Create(container, toggleTransitionInfo, {Position = newPositon}):Play()
+				local repositionInfo = otherIcon:get("repositionInfo")
+				if repositionInfo then
+					tweenService:Create(container, repositionInfo, {Position = newPositon}):Play()
 				else
 					container.Position = newPositon
 				end
@@ -390,7 +388,7 @@ function IconController.updateTopbar(toggleTransitionInfo)
 		local START_LEEWAY = 10 -- The additional offset where the end icon will be converted to ... without an apparant change in position
 		local function getBoundaryX(iconToCheck, side, gap)
 			local additionalGap = gap or 0
-			local currentSize = iconToCheck:get("iconSize")
+			local currentSize = iconToCheck:get("iconSize", iconToCheck:getIconState())
 			local sizeX = currentSize.X.Offset
 			local extendLeft, extendRight = IconController.getMenuOffset(iconToCheck)
 			local boundaryXOffset = (side == "left" and (-additionalGap-extendLeft)) or (side == "right" and sizeX+additionalGap+extendRight)
@@ -398,7 +396,7 @@ function IconController.updateTopbar(toggleTransitionInfo)
 			return boundaryX
 		end
 		local function getSizeX(iconToCheck, usePrevious)
-			local currentSize, previousSize = iconToCheck:get("iconSize", nil, "beforeDropdown")
+			local currentSize, previousSize = iconToCheck:get("iconSize", iconToCheck:getIconState(), "beforeDropdown")
 			local newSize = (usePrevious and previousSize) or currentSize
 			local extendLeft, extendRight = IconController.getMenuOffset(iconToCheck)
 			local sizeX = newSize.X.Offset + extendLeft + extendRight
@@ -466,7 +464,7 @@ function IconController.updateTopbar(toggleTransitionInfo)
 						local endIcon = (alignment == "left" and recordToCheck[totalIcons+1 - i]) or (alignment == "right" and recordToCheck[i])
 						if endIcon ~= overflowIcon and IconController.canShowIconOnTopbar(endIcon) then
 							local additionalGap = alignmentGap
-							local overflowIconSizeX = overflowIcon:get("iconSize").X.Offset
+							local overflowIconSizeX = overflowIcon:get("iconSize", overflowIcon:getIconState()).X.Offset
 							if overflowIcon.enabled then
 								additionalGap += alignmentGap + overflowIconSizeX
 							end
@@ -786,20 +784,24 @@ function IconController._enableControllerModeForIcon(icon, bool)
 		local scaleMultiplier = getScaleMultiplier()
 		local currentSizeDeselected = icon:get("iconSize", "deselected")
 		local currentSizeSelected = icon:get("iconSize", "selected")
+		local currentSizeHovering = icon:getHovering("iconSize")
 		icon:set("iconSize", UDim2.new(0, currentSizeDeselected.X.Offset*scaleMultiplier, 0, currentSizeDeselected.Y.Offset*scaleMultiplier), "deselected", "controllerMode")
 		icon:set("iconSize", UDim2.new(0, currentSizeSelected.X.Offset*scaleMultiplier, 0, currentSizeSelected.Y.Offset*scaleMultiplier), "selected", "controllerMode")
+		if currentSizeHovering then
+			icon:set("iconSize", UDim2.new(0, currentSizeSelected.X.Offset*scaleMultiplier, 0, currentSizeSelected.Y.Offset*scaleMultiplier), "hovering", "controllerMode")
+		end
 		icon:set("alignment", "mid", "deselected", "controllerMode")
 		icon:set("alignment", "mid", "selected", "controllerMode")
 	else
-		local states = {"deselected", "selected"}
-		for _, toggleState in pairs(states) do
-			local _, previousAlignment = icon:get("alignment", toggleState, "controllerMode")
+		local states = {"deselected", "selected", "hovering"}
+		for _, iconState in pairs(states) do
+			local _, previousAlignment = icon:get("alignment", iconState, "controllerMode")
 			if previousAlignment then
-				icon:set("alignment", previousAlignment, toggleState)
+				icon:set("alignment", previousAlignment, iconState)
 			end
-			local currentSize, previousSize = icon:get("iconSize", toggleState, "controllerMode")
+			local currentSize, previousSize = icon:get("iconSize", iconState, "controllerMode")
 			if previousSize then
-				icon:set("iconSize", previousSize, toggleState)
+				icon:set("iconSize", previousSize, iconState)
 			end
 		end
 	end

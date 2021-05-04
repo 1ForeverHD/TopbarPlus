@@ -10,19 +10,6 @@ local icon = Icon.new()
 Constructs an empty ``32x32`` icon on the topbar.
 
 ----
-#### mimic
-{unstable}
-```lua
-local icon = Icon.mimic(coreIconName)
-```
-Constructs an icon to replace its CoreGui equivalent and accurately mimic its behaviour. This allows for the persistence of core gui items (such as the chatbar, leaderboard, emotes, etc) while having full control over the appearance and behaviour of the icon to toggle it.
-
-Mimicable Items: ``"PlayerList"``, ``"Backpack"``, ``"Chat"``, ``"EmotesMenu"``
-
-!!! danger
-    Due to recent unannounced changes Roblox have completely restricted the ability to accurately mimic core items such as Chat. Until this is resolved the ``mimic`` constructor will not work as intended.
-
-----
 
 
 
@@ -31,16 +18,16 @@ Mimicable Items: ``"PlayerList"``, ``"Backpack"``, ``"Chat"``, ``"EmotesMenu"``
 #### set
 {chainable}
 ```lua
-icon:set(settingName, value, toggleState)
+icon:set(settingName, value, iconState)
 ```
-Applies a specific setting to an icon. All settings can be found [here](https://github.com/1ForeverHD/TopbarPlus/blob/main/src/Icon/Themes/Default.lua). If the setting falls under the 'toggleable' category then "deselected" or "selected" can be specified, otherwise if left empty or ``nil`` will apply to both states. For most scenarious, it's recommended instead to apply settings using [themes].
+Applies a specific setting to an icon. All settings can be found [here](https://github.com/1ForeverHD/TopbarPlus/blob/main/src/Icon/Themes/Default.lua). If the setting falls under the 'toggleable' category then an iconState can be specified. For most scenarious it's recommended instead to apply settings using [themes].
 
 ----
 #### get
 ```lua
-local value = icon:get(settingName, toggleState)
+local value = icon:get(settingName, iconState)
 ```
-Retrieves the given settings value. If the setting falls under the 'toggleable' category then "deselected" or "selected" can be specified, otherwise if left empty or ``nil`` will default to retrieving the deselected value.
+Retrieves the given settings value. If the setting falls under the 'toggleable' category then an iconState can be specified.
 
 ----
 #### getToggleState
@@ -124,7 +111,7 @@ When set to ``true``, disables the shade effect which appears when the icon is p
 #### setImage
 {chainable} {toggleable}
 ```lua
-icon:setImage(imageId, toggleState)
+icon:setImage(imageId, iconState)
 ```
 Applies an image to the icon based on the given ``imaageId``. ``imageId`` can be an assetId or a complete asset string.
 
@@ -132,49 +119,49 @@ Applies an image to the icon based on the given ``imaageId``. ``imageId`` can be
 #### setLabel
 {chainable} {toggleable}
 ```lua
-icon:setLabel(text, toggleState)
+icon:setLabel(text, iconState)
 ```
 
 ----
 #### setOrder
 {chainable} {toggleable}
 ```lua
-icon:setOrder(order, toggleState)
+icon:setOrder(order, iconState)
 ```
 
 ----
 #### setCornerRadius
 {chainable} {toggleable}
 ```lua
-icon:setCornerRadius(scale, offset, toggleState)
+icon:setCornerRadius(scale, offset, iconState)
 ```
 
 ----
 #### setLeft
 {chainable} {toggleable}
 ```lua
-icon:setLeft(toggleState)
+icon:setLeft(iconState)
 ```
 
 ----
 #### setMid
 {chainable} {toggleable}
 ```lua
-icon:setMid(toggleState)
+icon:setMid(iconState)
 ```
 
 ----
 #### setRight
 {chainable} {toggleable}
 ```lua
-icon:setRight(toggleState)
+icon:setRight(iconState)
 ```
 
 ----
 #### setImageYScale
 {chainable} {toggleable}
 ```lua
-icon:setImageYScale(YScale, toggleState)
+icon:setImageYScale(YScale, iconState)
 ```
 Defines the proportional space the icons image takes up within the icons container.
 
@@ -182,7 +169,7 @@ Defines the proportional space the icons image takes up within the icons contain
 #### setImageRatio
 {chainable} {toggleable}
 ```lua
-icon:setImageRatio(ratio, toggleState)
+icon:setImageRatio(ratio, iconState)
 ```
 Defines the x:y ratio dimensions as a number. By default ``ratio`` is ``1.00``.
 
@@ -190,7 +177,7 @@ Defines the x:y ratio dimensions as a number. By default ``ratio`` is ``1.00``.
 #### setLabelYScale
 {chainable} {toggleable}
 ```lua
-icon:setLabelYScale(YScale, toggleState)
+icon:setLabelYScale(YScale, iconState)
 ```
 Defines how large label text appears.By default ``YScale`` is ``0.45``.
 
@@ -198,7 +185,7 @@ Defines how large label text appears.By default ``YScale`` is ``0.45``.
 #### setBaseZIndex
 {chainable} {toggleable}
 ```lua
-icon:setBaseZIndex(ZIndex, toggleState)
+icon:setBaseZIndex(ZIndex, iconState)
 ```
 Calculates the difference between the existing baseZIndex (i.e. ``instances.iconContainer.ZIndex``) and new value, then updates the ZIndex of all objects within the icon accoridngly using this difference.
 
@@ -206,7 +193,7 @@ Calculates the difference between the existing baseZIndex (i.e. ``instances.icon
 #### setSize
 {chainable} {toggleable}
 ```lua
-icon:setSize(XOffset, YOffset, toggleState)
+icon:setSize(XOffset, YOffset, iconState)
 ```
 Determines the icons container size. By default ``XOffset`` and ``YOffset`` are ``32``.
 
@@ -257,6 +244,14 @@ Binds a [keycode](https://developer.roblox.com/en-us/api-reference/enum/KeyCode)
 icon:unbindToggleKey(keyCodeEnum)
 ```
 Unbinds the given keycode.
+
+----
+#### give
+{chainable}
+```lua
+icon:give(userdata)
+```
+Passes the given userdata to the Icons maid to be destroyed/disconnected on the icons destruction. If a function is passed, it will be executed right away with its self (the icon) being passed as the first argument. The return value is then given to the maid (instead of the function).
 
 ----
 #### lock
