@@ -33,13 +33,24 @@ local icon = Icon.new()
 !!! info
     Chainable methods have a ``chainable`` tag next to their name within the API Icon docs.
 
-Sometimes you'll want an item to appear only when *deselected*, and similarily only when *selected*. You can achieve this by specifying ``"deselected"`` or ``"selected"`` within the ``toggleState`` parameter of methods containing the ``toggleable`` tag. Leaving this parameter blank or as ``nil`` will default to applying to both states. For example:
+Sometimes you'll want an item to appear only when *deselected*, and similarily only when *selected*. You can achieve this by specifying a string value within the ``iconState`` parameter of methods containing the ``toggleable`` tag. These are:
+
 ```lua
-local icon = Icon.new()
-    :setImage(closedImageId, "deselected")
-    :setImage(openedImageId, "selected")
-    :setLabel("Closed", "deselected")
-    :setLabel("Open", "selected")
+"deselected" -- Applies the value when the icon is deselected (i.e. not pressed)
+"selected" -- Applies the value when the icon is selected (i.e. pressed)
+"hovering" -- Applies the value when a cursor, finger or controller is hovering over the icon
 ```
+
+If no argument is specified, the value will be applied to both ``deselected`` and ``selected`` states. For example:
+
+```lua
+Icon.new()
+	:setImage(4882429582)
+	:setLabel("Closed", "deselected")
+	:setLabel("Open", "selected")
+	:setLabel("Hovering", "hovering")
+```
+
+<a><img src="https://i.imgur.com/z1oCYMQ.gif" width="50%"/></a>
 
 You may wish to enhance icons further with features like themes, dropdowns and menus, or by binding GuiObjects and KeyCodes to their toggle. This and much more can be achieved by exploring the [Feature Guide] and [Icon API].

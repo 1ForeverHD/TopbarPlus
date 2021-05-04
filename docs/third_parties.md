@@ -8,7 +8,6 @@ To achieve this:
 2. Check for this. If present, require its value otherwise initiate your own TopbarPlus.
 
 ```lua
-local runService = game:GetService("RunService")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 
 -- This checks for the reference module under ReplicatedStorage

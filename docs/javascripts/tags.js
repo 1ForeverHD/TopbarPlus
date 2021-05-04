@@ -45,9 +45,9 @@ var replaceStuff = [
 	["{server-only}", '<p class="tag server-only">server-only</p>'],
 	["{client-only}", '<p class="tag client-only">client-only</p>'],
 	["{deprecated}", '<p class="tag deprecated">deprecated</p>'],
+    ["{toggleable}", '<p class="tag toggleable">toggleable</p>'],
 	["{chainable}", '<p class="tag chainable">chainable</p>'],
 	["{unstable}", '<p class="tag unstable">unstable</p>'],
-	["{toggleable}", '<p class="tag toggleable">toggleable</p>'],
 ];
 
 function replace(element, from, to) {

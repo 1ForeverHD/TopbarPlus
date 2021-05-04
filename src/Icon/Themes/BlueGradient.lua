@@ -6,7 +6,8 @@ return {
     
     -- Settings which describe how an item behaves or transitions between states
     action =  {
-        --toggleTransitionInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        resizeInfo = TweenInfo.new(0.2, Enum.EasingStyle.Back),
+        repositionInfo = TweenInfo.new(0.2, Enum.EasingStyle.Back),
     },
     
     -- Settings which describe how an item appears when 'deselected' and 'selected'
