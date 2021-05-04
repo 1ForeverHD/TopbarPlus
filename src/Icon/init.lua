@@ -1745,10 +1745,6 @@ function Icon:_updateIconSize(_, iconState)
 		captionContainer.Size = UDim2.new(0, textWidth + CAPTION_X_MARGIN*2, 0, cellHeight*CAPTION_CONTAINER_Y_SIZE_SCALE)
 	end
 
-	if iconState ~= "hovering" then
-		self:_updateIconSize(nil, "hovering")
-	end
-
 	self._updatingIconSize = false
 end
 
