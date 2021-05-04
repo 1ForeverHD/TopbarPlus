@@ -1,8 +1,9 @@
 name: export version file
 
 on:
-  release:
-    types: [released]
+  push:
+    branches:
+      - main
 
 jobs:
   export-version-file-action:
