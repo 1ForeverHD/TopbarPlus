@@ -1,9 +1,8 @@
 name: AutoVersion
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [released]
 
 jobs:
   export-version-file-action:
