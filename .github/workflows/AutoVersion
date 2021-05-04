@@ -1,0 +1,17 @@
+name: Write Version to File
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  write-version:
+    runs-on: ubuntu-latest
+    name: Write Version to File
+    steps:
+    - uses: actions/checkout@master
+    - name: Update version
+      id: version
+      uses: brettdorrans/write-version-to-file@master
+      with:
+        filename: 'src/Icon/.VERSION'
