@@ -14,5 +14,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # this is added for you by default
         uses: nickatnight/export-version-file-action@master
         with:
-          branch: "main"            # optional...defaults to 'master'
-          filename: "src/Icon/VERSION.lua"           # optional...defaults to '__version__'
+          branch: "main"
+          filename: "src/Icon/VERSION.lua"
