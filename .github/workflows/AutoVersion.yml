@@ -15,4 +15,4 @@ jobs:
         uses: nickatnight/export-version-file-action@master
         with:
           branch: "main"            # optional...defaults to 'master'
-          filename: "tag"           # optional...defaults to '__version__'
+          filename: "VERSION.lua"           # optional...defaults to '__version__'
