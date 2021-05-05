@@ -1,6 +1,6 @@
-[icon:setOrder]: https://1foreverhd.github.io/TopbarPlus/API/Icon/#setorder
+[icon:setOrder]: https://1foreverhd.github.io/TopbarPlus/api/icon//#setorder
 [Feature Guide]: https://1foreverhd.github.io/TopbarPlus/features
-[Icon API]: https://1foreverhd.github.io/TopbarPlus/API/Icon
+[Icon API]: https://1foreverhd.github.io/TopbarPlus/api/icon/
 
 TopbarPlus is a module enabling the construction of dynamic topbar icons. These icons can be enhanced with features and methods, like themes, dropdowns and menus, to expand upon their appearance and behaviour.
 
