@@ -1,4 +1,4 @@
-[icon:setOrder]: https://1foreverhd.github.io/TopbarPlus/api/icon//#setorder
+[icon:setOrder]: https://1foreverhd.github.io/TopbarPlus/api/icon/#setorder
 [Feature Guide]: https://1foreverhd.github.io/TopbarPlus/features
 [Icon API]: https://1foreverhd.github.io/TopbarPlus/api/icon/
 
