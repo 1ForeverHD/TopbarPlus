@@ -35,39 +35,44 @@ const style = `.tag {
 .deprecated {
     background-color: rgb(227, 87, 75);
 }
+.critical {
+    background-color: rgb(255, 0, 0);
+}
 h4 {
     display: inline;
 }`
 
 var replaceStuff = [
-	["{read-only}", '<p class="tag read-only">read-only</p>'],
-	["{static}", '<p class="tag static">static</p>'],
-	["{server-only}", '<p class="tag server-only">server-only</p>'],
-	["{client-only}", '<p class="tag client-only">client-only</p>'],
-	["{deprecated}", '<p class="tag deprecated">deprecated</p>'],
+    ["{read-only}", '<p class="tag read-only">read-only</p>'],
+    ["{static}", '<p class="tag static">static</p>'],
+    ["{server-only}", '<p class="tag server-only">server-only</p>'],
+    ["{client-only}", '<p class="tag client-only">client-only</p>'],
+    ["{deprecated}", '<p class="tag deprecated">deprecated</p>'],
+    ["{critical}", '<p class="tag critical">critical</p>'],
+    ["{chainable}", '<p class="tag chainable">chainable</p>'],
+    ["{unstable}", '<p class="tag unstable">unstable</p>'],
     ["{toggleable}", '<p class="tag toggleable">toggleable</p>'],
-	["{chainable}", '<p class="tag chainable">chainable</p>'],
-	["{unstable}", '<p class="tag unstable">unstable</p>'],
 ];
 
-function replace(element, from, to) {
-	if (element.childNodes.length) {
-		element.childNodes.forEach(child => replace(child, from, to));
-	} else {
-		const cont = element.textContent;
-		if (cont && cont.includes(from)) {
-			var newElement = document.createElement("p");
-			element.parentNode.replaceWith(newElement);
-			newElement.outerHTML = to;
-		}
-	}
-};
-
-for (var i = 0; i < replaceStuff.length; i++) {
-	replace(document.body, replaceStuff[i][0], replaceStuff[i][1]);
+function replace(element) {
+    for (var i = 0; i < replaceStuff.length; i++) {
+        var from = replaceStuff[i][0]
+        var to = replaceStuff[i][1]
+        if ((element.innerHTML && element.innerHTML.includes(from))) {
+            element.innerHTML = element.innerHTML.replace(from, to)
+            element.style.display = "inline"
+        }
+    }
 }
 
 const styleElement = document.createElement("style")
 styleElement.innerHTML = style
 
 document.head.appendChild(styleElement)
+
+window.onload = function WindowLoad(event) {
+    var elems = document.body.getElementsByTagName("p")
+    for (var i = 0; i < elems.length; i++) {
+        replace(elems.item(i))
+    }
+}
