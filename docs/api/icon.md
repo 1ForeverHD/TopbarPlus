@@ -108,6 +108,37 @@ icon:disableStateOverlay(bool)
 When set to ``true``, disables the shade effect which appears when the icon is pressed and released.
 
 ----
+#### convertLabelToNumberSpinner
+{chainable}
+```lua
+icon:convertLabelToNumberSpinner(numberSpinner)
+```
+Takes a [NumberSpinner](https://devforum.roblox.com/t/numberspinner-module/1105961) object (by boatbomber) and converts it into the icons label.
+
+Example usage:
+
+```lua
+Icon.new()
+:setName("CashSpinnerIcon")
+:setRight()
+:lock()
+:setSize(100, 32)
+:give(function(icon)
+local NumberSpinner = require(replicatedStorage.NumberSpinner)
+local labelSpinner = NumberSpinner.new()
+icon:convertLabelToNumberSpinner(labelSpinner)
+labelSpinner.Name = "LabelSpinner"
+labelSpinner.Decimals = 3
+labelSpinner.Duration = 0.25
+coroutine.wrap(function()
+while wait(0.5) do
+labelSpinner.Value = math.random(100000)/1000
+end
+end)()
+end)
+```
+
+----
 #### setImage
 {chainable} {toggleable}
 ```lua
