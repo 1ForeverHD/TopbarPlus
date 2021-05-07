@@ -1,3 +1,13 @@
+## [2.5.1] - May 7 2021
+### Added
+- ``Icon:convertLabelToNumberSpinner(numberSpinner)`` - see the API for [details and example usage](https://1foreverhd.github.io/TopbarPlus/api/icon/#convertlabeltonumberspinner).
+
+### Improved
+- Internals to support the new ``convertLabelToNumberSpinner`` method.
+
+
+
+--------
 ## [2.4.1] - May 4 2021
 ### Added
 - ``hovering`` icon state (see https://1foreverhd.github.io/TopbarPlus/ for more info), e.g. ``icon:setLabel("Nanoblox", "hovering")``

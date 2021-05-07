@@ -109,6 +109,37 @@ icon:disableStateOverlay(bool)
 When set to ``true``, disables the shade effect which appears when the icon is pressed and released.
 
 ----
+#### convertLabelToNumberSpinner
+{chainable}
+```lua
+icon:convertLabelToNumberSpinner(numberSpinner)
+```
+Takes a [NumberSpinner](https://devforum.roblox.com/t/numberspinner-module/1105961) object (by boatbomber) and converts it into the icons label.
+
+Example usage:
+
+```lua
+Icon.new()
+	:setName("CashSpinnerIcon")
+	:setRight()
+	:lock()
+	:setSize(100, 32)
+	:give(function(icon)
+		local NumberSpinner = require(replicatedStorage.NumberSpinner)
+		local labelSpinner = NumberSpinner.new()
+		icon:convertLabelToNumberSpinner(labelSpinner)
+		labelSpinner.Name = "LabelSpinner"
+		labelSpinner.Decimals = 3
+		labelSpinner.Duration = 0.25
+		coroutine.wrap(function()
+			while wait(0.5) do
+				labelSpinner.Value = math.random(100000)/1000
+			end
+		end)()
+	end)
+```
+
+----
 #### setImage
 {chainable} {toggleable}
 ```lua
@@ -1363,7 +1394,7 @@ function Icon:_update(settingName, toggleState, customTweenInfo)
 		for _, instanceName in pairs(settingDetail.instanceNames) do
 			local instance = self.instances[instanceName]
 			local propertyType = typeof(instance[propertyName])
-			local cannotTweenProperty = invalidPropertiesTypes[propertyType]
+			local cannotTweenProperty = invalidPropertiesTypes[propertyType] or typeof(instance) == "table"
 			if uniqueSetting then
 				uniqueSetting(settingName, instance, propertyName, newValue)
 			elseif cannotTweenProperty then
@@ -1428,6 +1459,69 @@ function Icon:setTheme(theme, updateAfterSettingAll)
 	if updateAfterSettingAll then
 		self:_updateAll()
 	end
+	return self
+end
+
+function Icon:getInstance(instanceName)
+	return self.instances[instanceName]
+end
+
+function Icon:setInstance(instanceName, instance)
+	local originalInstance = self.instances[instanceName]
+	self.instances[instanceName] = instance
+	if originalInstance then
+		originalInstance:Destroy()
+	end
+	return self
+end
+
+function Icon:getSettingDetail(targetSettingName)
+	for _, settingsDetails in pairs(self._settings) do
+		for settingName, settingDetail in pairs(settingsDetails) do
+			if settingName == targetSettingName then
+				return settingDetail
+			end
+		end
+	end
+	return false
+end
+
+function Icon:modifySetting(settingName, dictionary)
+	local settingDetail = self:getSettingDetail(settingName)
+	for key, value in pairs(dictionary) do
+		settingDetail[key] = value
+	end
+	return self
+end
+
+function Icon:convertLabelToNumberSpinner(numberSpinner)
+	-- This updates the number spinners appearance
+	self:set("iconLabelSize", UDim2.new(1,0,1,0))
+	numberSpinner.Parent = self:getInstance("iconButton")
+
+	-- This creates a fake iconLabel which updates the property of all descendant spinner TextLabels when indexed
+	local textLabel = {}
+	setmetatable(textLabel, {__newindex = function(_, index, value)
+		for _, label in pairs(numberSpinner.Frame:GetDescendants()) do
+			if label:IsA("TextLabel") then
+				label[index] = value
+			end
+		end
+	end})
+
+	-- This overrides existing instances and settings so that they update the spinners properties (instead of the old textlabel)
+	local iconButton = self:getInstance("iconButton")
+	iconButton.ZIndex = 0
+	self:setInstance("iconLabel", textLabel)
+	self:modifySetting("iconText", {instanceNames = {}}) -- We do this to prevent text being modified within the metatable above
+	self:setInstance("iconLabelSpinner", numberSpinner.Frame)
+	local settingsToConvert = {"iconLabelVisible", "iconLabelAnchorPoint", "iconLabelPosition", "iconLabelSize"}
+	for _, settingName in pairs(settingsToConvert) do
+		self:modifySetting(settingName, {instanceNames = {"iconLabelSpinner"}})
+	end
+
+	-- This applies all the values we just updated
+	self:_updateAll()
 	return self
 end
 
@@ -1651,6 +1745,7 @@ function Icon:_updateIconSize(_, iconState)
 	local values = {
 		iconImage = self:get("iconImage", iconState) or "_NIL",
 		iconText = self:get("iconText", iconState) or "_NIL",
+		iconFont = self:get("iconFont", iconState) or "_NIL",
 		iconSize = self:get("iconSize", iconState) or "_NIL",
 		forcedIconSize = self:get("forcedIconSize", iconState) or "_NIL",
 		iconImageYScale = self:get("iconImageYScale", iconState) or "_NIL",
@@ -1678,7 +1773,7 @@ function Icon:_updateIconSize(_, iconState)
 	local cellSizeYScale = values.iconSize.Y.Scale
 	local cellHeight = cellSizeYOffset + (cellSizeYScale * iconContainer.Parent.AbsoluteSize.Y)
 	local labelHeight = cellHeight * values.iconLabelYScale
-	local labelWidth = textService:GetTextSize(values.iconText, labelHeight, iconLabel.Font, Vector2.new(10000, labelHeight)).X
+	local labelWidth = textService:GetTextSize(values.iconText, labelHeight, values.iconFont, Vector2.new(10000, labelHeight)).X
 	local imageWidth = cellHeight * values.iconImageYScale * values.iconImageRatio
 	
 	local usingImage = values.iconImage ~= ""
