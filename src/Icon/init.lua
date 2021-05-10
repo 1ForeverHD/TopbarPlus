@@ -1780,6 +1780,7 @@ function Icon:_updateIconSize(_, iconState)
 	local usingText = values.iconText ~= ""
 	local notifPosYScale = 0.5
 	local desiredCellWidth
+	local preventClippingOffset = labelHeight/2
 	
 	if usingImage and not usingText then
 		notifPosYScale = 0.45
@@ -1794,7 +1795,7 @@ function Icon:_updateIconSize(_, iconState)
 		self:set("iconLabelVisible", true, iconState)
 		self:set("iconLabelAnchorPoint", Vector2.new(0, 0.5), iconState)
 		self:set("iconLabelPosition", UDim2.new(0, X_MARGIN, 0.5, 0), iconState)
-		self:set("iconLabelSize", UDim2.new(1, -X_MARGIN*2, values.iconLabelYScale, 0), iconState)
+		self:set("iconLabelSize", UDim2.new(1, -X_MARGIN*2, values.iconLabelYScale, preventClippingOffset), iconState)
 		self:set("iconLabelTextXAlignment", Enum.TextXAlignment.Center, iconState)
 		self:set("iconImageVisible", false, iconState)
 
@@ -1809,7 +1810,7 @@ function Icon:_updateIconSize(_, iconState)
 		self:set("iconLabelVisible", true, iconState)
 		self:set("iconLabelAnchorPoint", Vector2.new(0, 0.5), iconState)
 		self:set("iconLabelPosition", UDim2.new(0, labelGap, 0.5, 0), iconState)
-		self:set("iconLabelSize", UDim2.new(1, -labelGap-X_MARGIN, values.iconLabelYScale, 0), iconState)
+		self:set("iconLabelSize", UDim2.new(1, -labelGap-X_MARGIN, values.iconLabelYScale, preventClippingOffset), iconState)
 		self:set("iconLabelTextXAlignment", Enum.TextXAlignment.Left, iconState)
 	end
 	if desiredCellWidth then

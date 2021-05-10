@@ -1,3 +1,10 @@
+## [2.5.2] - May 10 2021
+### Fixed
+- The clipping of some letters within the iconLabel.
+
+
+
+--------
 ## [2.5.1] - May 7 2021
 ### Added
 - ``Icon:convertLabelToNumberSpinner(numberSpinner)`` - see the API for [details and example usage](https://1foreverhd.github.io/TopbarPlus/api/icon/#convertlabeltonumberspinner).
