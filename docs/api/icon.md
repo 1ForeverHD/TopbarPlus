@@ -119,23 +119,23 @@ Example usage:
 
 ```lua
 Icon.new()
-:setName("CashSpinnerIcon")
-:setRight()
-:lock()
-:setSize(100, 32)
-:give(function(icon)
-local NumberSpinner = require(replicatedStorage.NumberSpinner)
-local labelSpinner = NumberSpinner.new()
-icon:convertLabelToNumberSpinner(labelSpinner)
-labelSpinner.Name = "LabelSpinner"
-labelSpinner.Decimals = 3
-labelSpinner.Duration = 0.25
-coroutine.wrap(function()
-while wait(0.5) do
-labelSpinner.Value = math.random(100000)/1000
-end
-end)()
-end)
+    :setName("CashSpinnerIcon")
+    :setRight()
+    :lock()
+    :setSize(100, 32)
+    :give(function(icon)
+        local NumberSpinner = require(replicatedStorage.NumberSpinner)
+        local labelSpinner = NumberSpinner.new()
+        icon:convertLabelToNumberSpinner(labelSpinner)
+        labelSpinner.Name = "LabelSpinner"
+        labelSpinner.Decimals = 3
+        labelSpinner.Duration = 0.25
+        coroutine.wrap(function()
+            while wait(0.5) do
+                labelSpinner.Value = math.random(100000)/1000
+            end
+        end)()
+    end)
 ```
 
 ----
