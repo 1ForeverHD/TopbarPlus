@@ -7,7 +7,7 @@
 
 ## Bug Reports
 - To submit a bug report, [open an issue] with label ``Type: Bug`` or create a response at the [discussion thread].
-- Ensure your report includes a detailed explanation of the problem with any relavent images, videos, etc (such as console errors).
+- Ensure your report includes a detailed explanation of the problem with any relevant images, videos, etc (such as console errors).
 - Make sure to include a link to a stipped-down uncopylocked Roblox place which reproduces the bug.
 
 ## Questions and Feedback
