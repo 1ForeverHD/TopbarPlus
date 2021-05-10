@@ -1,7 +1,7 @@
 [themes]: https://1foreverhd.github.io/TopbarPlus/features/#themes
 [set method]: https://1foreverhd.github.io/TopbarPlus/api/icon/#set
 
-## Constructors
+## Construtors
 
 #### new
 ```lua
@@ -20,7 +20,7 @@ Constructs an empty ``32x32`` icon on the topbar.
 ```lua
 icon:set(settingName, value, iconState)
 ```
-Applies a specific setting to an icon. All settings can be found [here](https://github.com/1ForeverHD/TopbarPlus/blob/main/src/Icon/Themes/Default.lua). If the setting falls under the 'toggleable' category then an iconState can be specified. For most scenarios it's recommended instead to apply settings using [themes].
+Applies a specific setting to an icon. All settings can be found [here](https://github.com/1ForeverHD/TopbarPlus/blob/main/src/Icon/Themes/Default.lua). If the setting falls under the 'toggleable' category then an iconState can be specified. For most scenarious it's recommended instead to apply settings using [themes].
 
 ----
 #### get
@@ -144,7 +144,7 @@ Icon.new()
 ```lua
 icon:setImage(imageId, iconState)
 ```
-Applies an image to the icon based on the given ``imageId``. ``imageId`` can be an assetId or a complete asset string.
+Applies an image to the icon based on the given ``imaageId``. ``imageId`` can be an assetId or a complete asset string.
 
 ----
 #### setLabel
@@ -218,7 +218,7 @@ Defines how large label text appears.By default ``YScale`` is ``0.45``.
 ```lua
 icon:setBaseZIndex(ZIndex, iconState)
 ```
-Calculates the difference between the existing baseZIndex (i.e. ``instances.iconContainer.ZIndex``) and new value, then updates the ZIndex of all objects within the icon accordingly using this difference.
+Calculates the difference between the existing baseZIndex (i.e. ``instances.iconContainer.ZIndex``) and new value, then updates the ZIndex of all objects within the icon accoridngly using this difference.
 
 ----
 #### setSize
