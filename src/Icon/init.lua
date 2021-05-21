@@ -1759,7 +1759,6 @@ function Icon:_updateIconSize(_, iconState)
 	end
 
 	local iconContainer = self.instances.iconContainer
-	local iconLabel = self.instances.iconLabel
 	if not iconContainer.Parent then return end
 
 	-- We calculate the cells dimensions as apposed to reading because there's a possibility the cells dimensions were changed at the exact time and have not yet updated
@@ -1824,22 +1823,6 @@ function Icon:_updateIconSize(_, iconState)
 	end
 	self:set("iconLabelTextSize", labelHeight, iconState)
 	self:set("noticeFramePosition", UDim2.new(notifPosYScale, 0, 0, -2), iconState)
-
-	-- Caption
-	if self.captionText then
-		local CAPTION_X_MARGIN = 6
-		local CAPTION_CONTAINER_Y_SIZE_SCALE = 0.8
-		local CAPTION_LABEL_Y_SCALE = 0.58
-		local captionContainer = self.instances.captionContainer
-		local captionLabel = self.instances.captionLabel
-		local captionContainerHeight = cellHeight * CAPTION_CONTAINER_Y_SIZE_SCALE
-		local captionLabelHeight = captionContainerHeight * CAPTION_LABEL_Y_SCALE
-		local labelFont = self:get("captionFont")
-		local textWidth = textService:GetTextSize(self.captionText, captionLabelHeight, labelFont, Vector2.new(10000, captionLabelHeight)).X
-		captionLabel.TextSize = captionLabelHeight
-		captionLabel.Size = UDim2.new(0, textWidth, CAPTION_LABEL_Y_SCALE, 0)
-		captionContainer.Size = UDim2.new(0, textWidth + CAPTION_X_MARGIN*2, 0, cellHeight*CAPTION_CONTAINER_Y_SIZE_SCALE)
-	end
 
 	self._updatingIconSize = false
 end
@@ -1938,28 +1921,32 @@ DEFAULT_FORCED_GROUP_VALUES["tip"] = 1
 
 function Icon:setTip(text)
 	assert(typeof(text) == "string" or text == nil, "Expected string, got "..typeof(text))
-	local textSize = textService:GetTextSize(text, 12, Enum.Font.GothamSemibold, Vector2.new(1000, 20-6))
-	self.instances.tipLabel.Text = text
-	self.instances.tipFrame.Size = UDim2.new(0, textSize.X+6, 0, 20)
-	self.instances.tipFrame.Parent = (text and activeItems) or self.instances.iconContainer
+	local realText = text or ""
+	local isVisible = realText ~= ""
+	local textSize = textService:GetTextSize(realText, 12, Enum.Font.GothamSemibold, Vector2.new(1000, 20-6))
+	self.instances.tipLabel.Text = realText
+	self.instances.tipFrame.Size = (isVisible and UDim2.new(0, textSize.X+6, 0, 20)) or UDim2.new(0, 0, 0, 0)
+	self.instances.tipFrame.Parent = (isVisible and activeItems) or self.instances.iconContainer
 	self.tipText = text
 	
 	local tipMaid = Maid.new()
 	self._maid.tipMaid = tipMaid
-	tipMaid:give(self.hoverStarted:Connect(function()
-		if not self.isSelected then
-			self:displayTip(true)
-		end
-	end))
-	tipMaid:give(self.hoverEnded:Connect(function()
-		self:displayTip(false)
-	end))
-	tipMaid:give(self.selected:Connect(function()
-		if self.hovering then
+	if isVisible then
+		tipMaid:give(self.hoverStarted:Connect(function()
+			if not self.isSelected then
+				self:displayTip(true)
+			end
+		end))
+		tipMaid:give(self.hoverEnded:Connect(function()
 			self:displayTip(false)
-		end
-	end))
-	self:displayTip(self.hovering)
+		end))
+		tipMaid:give(self.selected:Connect(function()
+			if self.hovering then
+				self:displayTip(false)
+			end
+		end))
+	end
+	self:displayTip(self.hovering and isVisible)
 	return self
 end
 
@@ -2034,37 +2021,67 @@ DEFAULT_FORCED_GROUP_VALUES["caption"] = 1
 
 function Icon:setCaption(text)
 	assert(typeof(text) == "string" or text == nil, "Expected string, got "..typeof(text))
+	local realText = text or ""
+	local isVisible = realText ~= ""
 	self.captionText = text
-	self.instances.captionLabel.Text = text
-	self.instances.captionContainer.Parent = (text and activeItems) or self.instances.iconContainer
+	self.instances.captionLabel.Text = realText
+	self.instances.captionContainer.Parent = (isVisible and activeItems) or self.instances.iconContainer
 	self:_updateIconSize(nil, self:getIconState())
 	local captionMaid = Maid.new()
 	self._maid.captionMaid = captionMaid
-	captionMaid:give(self.hoverStarted:Connect(function()
-		if not self.isSelected then
-			self:displayCaption(true)
-		end
-	end))
-	captionMaid:give(self.hoverEnded:Connect(function()
-		self:displayCaption(false)
-	end))
-	captionMaid:give(self.selected:Connect(function()
-		if self.hovering then
+	if isVisible then
+		captionMaid:give(self.hoverStarted:Connect(function()
+			if not self.isSelected then
+				self:displayCaption(true)
+			end
+		end))
+		captionMaid:give(self.hoverEnded:Connect(function()
 			self:displayCaption(false)
+		end))
+		captionMaid:give(self.selected:Connect(function()
+			if self.hovering then
+				self:displayCaption(false)
+			end
+		end))
+		local iconContainer = self.instances.iconContainer
+		captionMaid:give(iconContainer:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+			if self.hovering then
+				self:displayCaption()
+			end
+		end))
+		captionMaid:give(iconContainer:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+			if self.hovering then
+				self:displayCaption()
+			end
+		end))
+	end
+
+	-- This adapts the caption size
+	local CAPTION_X_MARGIN = 6
+	local CAPTION_CONTAINER_Y_SIZE_SCALE = 0.8
+	local CAPTION_LABEL_Y_SCALE = 0.58
+	local iconSize = self:get("iconSize")
+	local labelFont = self:get("captionFont")
+	if iconSize and labelFont then
+		local cellSizeYOffset = iconSize.Y.Offset
+		local cellSizeYScale = iconSize.Y.Scale
+		local iconContainer = self.instances.iconContainer
+		local captionContainer = self.instances.captionContainer
+		if isVisible then
+			local cellHeight = cellSizeYOffset + (cellSizeYScale * iconContainer.Parent.AbsoluteSize.Y)
+			local captionLabel = self.instances.captionLabel
+			local captionContainerHeight = cellHeight * CAPTION_CONTAINER_Y_SIZE_SCALE
+			local captionLabelHeight = captionContainerHeight * CAPTION_LABEL_Y_SCALE
+			local textWidth = textService:GetTextSize(self.captionText, captionLabelHeight, labelFont, Vector2.new(10000, captionLabelHeight)).X
+			captionLabel.TextSize = captionLabelHeight
+			captionLabel.Size = UDim2.new(0, textWidth, CAPTION_LABEL_Y_SCALE, 0)
+			captionContainer.Size = UDim2.new(0, textWidth + CAPTION_X_MARGIN*2, 0, cellHeight*CAPTION_CONTAINER_Y_SIZE_SCALE)
+		else
+			captionContainer.Size = UDim2.new(0, 0, 0, 0)
 		end
-	end))
-	local iconContainer = self.instances.iconContainer
-	captionMaid:give(iconContainer:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
-		if self.hovering then
-			self:displayCaption()
-		end
-	end))
-	captionMaid:give(iconContainer:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
-		if self.hovering then
-			self:displayCaption()
-		end
-	end))
-	self:displayCaption(self.hovering)
+	end
+
+	self:displayCaption(self.hovering and isVisible)
 	return self
 end
 

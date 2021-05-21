@@ -1,3 +1,13 @@
+## [2.6.1] - May 21 2021
+### Added
+- Compatibility for Deferred Events.
+
+### Fixed
+- The setting of captions and tips to ``nil``.
+
+
+
+--------
 ## [2.5.2] - May 10 2021
 ### Fixed
 - The clipping of some letters within the iconLabel.
