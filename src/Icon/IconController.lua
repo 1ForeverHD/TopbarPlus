@@ -673,6 +673,7 @@ function IconController.setGap(value, alignment)
 	local newAlignment = tostring(alignment):lower()
 	if newAlignment == "left" or newAlignment == "mid" or newAlignment == "right" then
 		IconController[newAlignment.."Gap"] = newValue
+		IconController.updateTopbar()
 		return
 	end
 	IconController.leftGap = newValue
