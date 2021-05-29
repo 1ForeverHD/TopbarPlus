@@ -1,3 +1,15 @@
+## [2.7.1] - May 29 2021
+### Added
+- ``IconController.mimicCoreGui``, default is ``true``. Set to ``false`` to have the topbar persist even when ``game:GetService("StarterGui"):SetCore("TopbarEnabled", false)`` is called.
+- ``IconController.setLeftOffset(number)``, defaults to 0.
+- ``IconController.setRightOffset(number)``, defaults to 0.
+
+### Fixed
+- A bug which caused ``IconController.setGap`` to update incorrectly.
+
+
+
+--------
 ## [2.6.1] - May 21 2021
 ### Added
 - Compatibility for Deferred Events.
