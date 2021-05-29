@@ -29,6 +29,20 @@ IconController.setGap(integer, alignment)
 Defines the offset width (i.e. gap) between each icon for the given alignment, ``left``, ``mid``, ``right``, or all alignments if not specified. 
 
 ----
+#### setLeftOffset
+```lua
+IconController.setLeftOffset(integer)
+```
+Defines the offset from the left side of the screen to the nearest left-set icon. 
+
+----
+#### setRightOffset
+```lua
+IconController.setRightOffset(integer)
+```
+Defines the offset from the right side of the screen to the nearest right-set icon. 
+
+----
 #### updateTopbar
 ```lua
 IconController.updateTopbar()
@@ -69,11 +83,11 @@ Returns the icon with the given name (or ``false`` if not found). If multiple ic
 
 
 ## Properties
-#### topbarEnabled
-{read-only}
+#### mimicCoreGui
 ```lua
-local bool = IconController.topbarEnabled
+local bool = IconController.mimicCoreGui --[default: 'true']
 ```
+Set to ``false`` to have the topbar persist even when ``game:GetService("StarterGui"):SetCore("TopbarEnabled", false)`` is called.
 
 ----
 #### controllerModeEnabled
@@ -102,6 +116,20 @@ local gapNumber = IconController.midGap --[default: '12']
 ```lua
 local gapNumber = IconController.rightGap --[default: '12']
 ```
+
+----
+#### leftOffset
+{read-only}
+```lua
+local offset = IconController.leftGap --[default: '0']
+```
+
+----
+#### rightOffset
+{read-only}
+```lua
+local offset = IconController.rightGap --[default: '0']
+```
 --]]
 
 
@@ -124,12 +152,34 @@ local forceTopbarDisabled = false
 local menuOpen
 local topbarUpdating = false
 local STUPID_CONTROLLER_OFFSET = 32
+
+
+
+-- LOCAL FUNCTIONS
+local function checkTopbarEnabled()
+	local success, bool = xpcall(function()
+		return starterGui:GetCore("TopbarEnabled")
+	end,function(err)
+		--has not been registered yet, but default is that is enabled
+		return true	
+	end)
+	return (success and bool)
+end
+
+local function checkTopbarEnabledAccountingForMimic()
+	local topbarEnabledAccountingForMimic = (checkTopbarEnabled() or not IconController.mimicCoreGui)
+	return topbarEnabledAccountingForMimic
+end
+
+
+
+-- OFFSET HANDLERS
 local alignmentDetails = {}
 alignmentDetails["left"] = {
 	startScale = 0,
 	getOffset = function()
-		local offset = 48
-		if starterGui:GetCoreGuiEnabled("Chat") then
+		local offset = 48 + IconController.leftOffset
+		if checkTopbarEnabled() and starterGui:GetCoreGuiEnabled("Chat") then
 			offset += 12 + 32
 		end
 		return offset
@@ -155,8 +205,8 @@ alignmentDetails["mid"] = {
 alignmentDetails["right"] = {
 	startScale = 1,
 	getOffset = function()
-		local offset = 0
-		if starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Backpack) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu) then
+		local offset = IconController.rightOffset
+		if checkTopbarEnabled() and (starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Backpack) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu)) then
 			offset += 48
 		end
 		return offset
@@ -171,19 +221,6 @@ alignmentDetails["right"] = {
 
 
 
--- LOCAL METHODS
-local function checkTopbarEnabled()
-	local success, bool = xpcall(function()
-		return starterGui:GetCore("TopbarEnabled")
-	end,function(err)
-		--has not been registered yet, but default is that is enabled
-		return true	
-	end)
-	return (success and bool)
-end
-
-
-
 -- PROPERTIES
 IconController.topbarEnabled = true
 IconController.controllerModeEnabled = false
@@ -191,6 +228,9 @@ IconController.previousTopbarEnabled = checkTopbarEnabled()
 IconController.leftGap = 12
 IconController.midGap = 12
 IconController.rightGap = 12
+IconController.leftOffset = 0
+IconController.rightOffset = 0
+IconController.mimicCoreGui = true
 
 
 
@@ -574,11 +614,12 @@ function IconController.setTopbarEnabled(bool, forceBool)
 	elseif forceBool and bool then
 		forceTopbarDisabled = false
 	end
+	local topbarEnabledAccountingForMimic = checkTopbarEnabledAccountingForMimic()
 	if IconController.controllerModeEnabled then
 		if bool then
-			if TopbarPlusGui.TopbarContainer.Visible or forceTopbarDisabled or menuOpen or not checkTopbarEnabled() then return end
+			if TopbarPlusGui.TopbarContainer.Visible or forceTopbarDisabled or menuOpen or not topbarEnabledAccountingForMimic then return end
 			if forceBool then
-				indicator.Visible = checkTopbarEnabled()
+				indicator.Visible = topbarEnabledAccountingForMimic
 			else
 				if hapticService:IsVibrationSupported(Enum.UserInputType.Gamepad1) and hapticService:IsMotorSupported(Enum.UserInputType.Gamepad1,Enum.VibrationMotor.Small) then
 					hapticService:SetMotor(Enum.UserInputType.Gamepad1,Enum.VibrationMotor.Small,1)
@@ -634,7 +675,7 @@ function IconController.setTopbarEnabled(bool, forceBool)
 			if forceBool then
 				indicator.Visible = false
 			else
-				indicator.Visible = checkTopbarEnabled()
+				indicator.Visible = topbarEnabledAccountingForMimic
 			end
 			if not TopbarPlusGui.TopbarContainer.Visible then return end
 			guiService.AutoSelectGuiEnabled = true
@@ -660,7 +701,7 @@ function IconController.setTopbarEnabled(bool, forceBool)
 		end
 	else
 		local topbarContainer = TopbarPlusGui.TopbarContainer
-		if checkTopbarEnabled() then
+		if topbarEnabledAccountingForMimic then
 			topbarContainer.Visible = bool
 		else
 			topbarContainer.Visible = false
@@ -673,11 +714,22 @@ function IconController.setGap(value, alignment)
 	local newAlignment = tostring(alignment):lower()
 	if newAlignment == "left" or newAlignment == "mid" or newAlignment == "right" then
 		IconController[newAlignment.."Gap"] = newValue
+		IconController.updateTopbar()
 		return
 	end
 	IconController.leftGap = newValue
 	IconController.midGap = newValue
 	IconController.rightGap = newValue
+	IconController.updateTopbar()
+end
+
+function IconController.setLeftOffset(value)
+	IconController.leftOffset = tonumber(value) or 0
+	IconController.updateTopbar()
+end
+
+function IconController.setRightOffset(value)
+	IconController.rightOffset = tonumber(value) or 0
 	IconController.updateTopbar()
 end
 
@@ -761,11 +813,11 @@ function IconController._enableControllerMode(bool)
 		indicator.Position = UDim2.new(0.5,0,0,5)
 		indicator.Size = UDim2.new(0, 18*scaleMultiplier, 0, 18*scaleMultiplier)
 		indicator.Image = "rbxassetid://5278151556"
-		indicator.Visible = checkTopbarEnabled()
+		indicator.Visible = checkTopbarEnabledAccountingForMimic()
 		indicator.Position = UDim2.new(0.5,0,0,5)
 	else
 		TopbarPlusGui.TopbarContainer.Position = UDim2.new(0,0,0,0)
-		TopbarPlusGui.TopbarContainer.Visible = checkTopbarEnabled()
+		TopbarPlusGui.TopbarContainer.Visible = checkTopbarEnabledAccountingForMimic()
 		indicator.Visible = false
 		IconController._setControllerSelectedObject(nil)
 	end
@@ -868,7 +920,7 @@ coroutine.wrap(function()
 	userInputService.InputBegan:Connect(function(input,gpe)
 		if not IconController.controllerModeEnabled then return end
 		if input.KeyCode == Enum.KeyCode.DPadDown then
-			if not guiService.SelectedObject and checkTopbarEnabled() then
+			if not guiService.SelectedObject and checkTopbarEnabledAccountingForMimic() then
 				IconController.setTopbarEnabled(true,false)
 			end
 		elseif input.KeyCode == Enum.KeyCode.ButtonB then
@@ -920,15 +972,21 @@ coroutine.wrap(function()
 			IconController.updateTopbar()
 			return "SetCoreGuiEnabled was called instead of SetCore"
 		end
-		IconController.previousTopbarEnabled = topbarEnabled
-		if IconController.controllerModeEnabled then
-			IconController.setTopbarEnabled(false,false)
-		else
-			IconController.setTopbarEnabled(topbarEnabled,false)
+		if IconController.mimicCoreGui then
+			IconController.previousTopbarEnabled = topbarEnabled
+			if IconController.controllerModeEnabled then
+				IconController.setTopbarEnabled(false,false)
+			else
+				IconController.setTopbarEnabled(topbarEnabled,false)
+			end
 		end
 		IconController.updateTopbar()
 	end)
-	IconController.setTopbarEnabled(checkTopbarEnabled(),false)
+	local makeVisible = checkTopbarEnabled()
+	if not makeVisible and not IconController.mimicCoreGui then
+		makeVisible = true
+	end
+	IconController.setTopbarEnabled(makeVisible, false)
 end)()
 
 -- Mimic roblox menu when opened and closed
