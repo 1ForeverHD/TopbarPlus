@@ -28,6 +28,20 @@ IconController.setGap(integer, alignment)
 Defines the offset width (i.e. gap) between each icon for the given alignment, ``left``, ``mid``, ``right``, or all alignments if not specified. 
 
 ----
+#### setLeftOffset
+```lua
+IconController.setLeftOffset(integer)
+```
+Defines the offset from the left side of the screen to the nearest left-set icon. 
+
+----
+#### setRightOffset
+```lua
+IconController.setRightOffset(integer)
+```
+Defines the offset from the right side of the screen to the nearest right-set icon. 
+
+----
 #### updateTopbar
 ```lua
 IconController.updateTopbar()
@@ -68,11 +82,11 @@ Returns the icon with the given name (or ``false`` if not found). If multiple ic
 
 
 ## Properties
-#### topbarEnabled
-{read-only}
+#### mimicCoreGui
 ```lua
-local bool = IconController.topbarEnabled
+local bool = IconController.mimicCoreGui --[default: 'true']
 ```
+Set to ``false`` to have the topbar persist even when ``game:GetService("StarterGui"):SetCore("TopbarEnabled", false)`` is called.
 
 ----
 #### controllerModeEnabled
@@ -100,4 +114,18 @@ local gapNumber = IconController.midGap --[default: '12']
 {read-only}
 ```lua
 local gapNumber = IconController.rightGap --[default: '12']
+```
+
+----
+#### leftOffset
+{read-only}
+```lua
+local offset = IconController.leftGap --[default: '0']
+```
+
+----
+#### rightOffset
+{read-only}
+```lua
+local offset = IconController.rightGap --[default: '0']
 ```
