@@ -437,6 +437,11 @@ function IconController.updateTopbar()
 		end
 		local function getSizeX(iconToCheck, usePrevious)
 			local currentSize, previousSize = iconToCheck:get("iconSize", iconToCheck:getIconState(), "beforeDropdown")
+			local hoveringSize = iconToCheck:get("iconSize", "hovering")
+			if iconToCheck.wasHoveringBeforeOverflow and previousSize and hoveringSize and hoveringSize.X.Offset > previousSize.X.Offset then
+				-- This prevents hovering icons flicking back and forth, demonstrated at thread/1017485/191.
+				previousSize = hoveringSize
+			end
 			local newSize = (usePrevious and previousSize) or currentSize
 			local extendLeft, extendRight = IconController.getMenuOffset(iconToCheck)
 			local sizeX = newSize.X.Offset + extendLeft + extendRight
@@ -473,7 +478,7 @@ function IconController.updateTopbar()
 						local endIcon = recordToCheck[totalIcons+1 - i]
 						if IconController.canShowIconOnTopbar(endIcon) then
 							local isAnOverflowIcon = string.match(endIcon.name, "_overflowIcon-")
-							if isAnOverflowIcon and totalIcons ~= 1 then --!!!
+							if isAnOverflowIcon and totalIcons ~= 1 then
 								break
 							elseif isAnOverflowIcon and not endIcon.enabled then
 								continue
@@ -535,6 +540,9 @@ function IconController.updateTopbar()
 										endIcon:select()
 									end
 								end
+								if endIcon.hovering then
+									endIcon.wasHoveringBeforeOverflow = true
+								end
 								endIcon:join(overflowIcon, "dropdown")
 								if #endIcon.menuIcons > 0 and endIcon.menuOpen then
 									endIcon:deselect()
@@ -576,6 +584,7 @@ function IconController.updateTopbar()
 							local yPos = overflowContainer.Position.Y
 							overflowContainer.Position = UDim2.new(0, myForesightBoundaryX, yPos.Scale, yPos.Offset)
 							winningOverlappedIcon:leave()
+							winningOverlappedIcon.wasHoveringBeforeOverflow = nil
 							--
 							if winningOverlappedIcon._overflowConvertedToMenu then
 								winningOverlappedIcon._overflowConvertedToMenu = nil
