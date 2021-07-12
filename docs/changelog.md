@@ -1,3 +1,10 @@
+## [2.7.2] - July 12 2021
+### Fixed
+- Flickering icon bug when an expanding hover effect triggered the overflow then immediately snapped back.
+
+
+
+--------
 ## [2.7.1] - May 29 2021
 ### Added
 - ``IconController.mimicCoreGui``, default is ``true``. Set to ``false`` to have the topbar persist even when ``game:GetService("StarterGui"):SetCore("TopbarEnabled", false)`` is called.
