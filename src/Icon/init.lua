@@ -1312,6 +1312,20 @@ function Icon:set(settingName, value, iconState, setAdditional)
 	return self
 end
 
+function Icon:setAdditionalValue(settingName, setAdditional, value, iconState)
+	local settingDetail = self._settingsDictionary[settingName]
+	assert(settingDetail ~= nil, ("setting '%s' does not exist"):format(settingName))
+	local stringMatch = setAdditional.."_"
+	if iconState then
+		stringMatch = stringMatch..iconState
+	end
+	for key, _ in pairs(settingDetail.additionalValues) do
+		if string.match(key, stringMatch) then
+			settingDetail.additionalValues[key] = value
+		end
+	end
+end
+
 function Icon:get(settingName, iconState, getAdditional)
 	local settingDetail = self._settingsDictionary[settingName]
 	assert(settingDetail ~= nil, ("setting '%s' does not exist"):format(settingName))
@@ -1818,6 +1832,21 @@ function Icon:_updateIconSize(_, iconState)
 			local widthScale = (cellSizeXScale > 0 and cellSizeXScale) or 0
 			local widthOffset = (cellSizeXScale > 0 and 0) or math.clamp(desiredCellWidth, minCellWidth, maxCellWidth)
 			self:set("iconSize", UDim2.new(widthScale, widthOffset, values.iconSize.Y.Scale, values.iconSize.Y.Offset), iconState, "_ignorePrevious")
+
+			-- This ensures that if an icon is within a dropdown or menu, its container adapts accordingly with this new iconSize value
+			local parentIcon = self._parentIcon
+			if parentIcon then
+				local originalIconSize = UDim2.new(0, desiredCellWidth, 0, values.iconSize.Y.Offset)
+				if #parentIcon.dropdownIcons > 0 then
+					self:setAdditionalValue("iconSize", "beforeDropdown", originalIconSize, iconState)
+					parentIcon:_updateDropdown()
+				end
+				if #parentIcon.menuIcons > 0 then
+					self:setAdditionalValue("iconSize", "beforeMenu", originalIconSize, iconState)
+					parentIcon:_updateMenu()
+				end
+			end
+
 			self._updatingIconSize = false
 		end
 	end
