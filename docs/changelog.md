@@ -1,3 +1,14 @@
+## [2.7.3] - August 6 2021
+### Added
+- A dynamic healthbar to replace the static core healthbar which appears to the right of the screen when the localPlayer is damaged.
+- ``IconController.disableHealthbar(bool)``
+
+### Fixed
+- The updating of menu and dropdown canvases when a icon is resized within them.
+
+
+
+--------
 ## [2.7.2] - July 12 2021
 ### Fixed
 - Flickering icon bug when an expanding hover effect triggered the overflow then immediately snapped back.
