@@ -78,6 +78,13 @@ local icon = IconController.getIcon(name)
 Returns the icon with the given name (or ``false`` if not found). If multiple icons have the same name, then one will be returned randomly.
 
 ----
+#### disableHealthbar
+```lua
+IconController.disableHealthbar(bool)
+```
+Hides the fake healthbar (if currently visible) and prevents it becoming visible again (which normally occurs when the player takes damage).
+
+----
 
 
 
