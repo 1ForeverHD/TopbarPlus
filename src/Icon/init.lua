@@ -1708,6 +1708,9 @@ function Icon:setMid(iconState)
 end
 
 function Icon:setRight(iconState)
+	if not self.internalIcon then
+		IconController.setupHealthbar()
+	end
 	return self:set("alignment", "right", iconState)
 end
 
@@ -1939,9 +1942,13 @@ function Icon:give(userdata)
 		local returnValue = userdata(self)
 		if typeof(userdata) ~= "function" then
 			valueToGive = returnValue
+		else
+			valueToGive = nil
 		end
 	end
-	self._maid:give(valueToGive)
+	if valueToGive ~= nil then
+		self._maid:give(valueToGive)
+	end
 	return self
 end
 
@@ -1956,6 +1963,7 @@ function Icon:setTip(text)
 	self.instances.tipLabel.Text = realText
 	self.instances.tipFrame.Size = (isVisible and UDim2.new(0, textSize.X+6, 0, 20)) or UDim2.new(0, 0, 0, 0)
 	self.instances.tipFrame.Parent = (isVisible and activeItems) or self.instances.iconContainer
+	self._maid.tipFrame = self.instances.tipFrame
 	self.tipText = text
 	
 	local tipMaid = Maid.new()
@@ -2055,6 +2063,7 @@ function Icon:setCaption(text)
 	self.captionText = text
 	self.instances.captionLabel.Text = realText
 	self.instances.captionContainer.Parent = (isVisible and activeItems) or self.instances.iconContainer
+	self._maid.captionContainer = self.instances.captionContainer
 	self:_updateIconSize(nil, self:getIconState())
 	local captionMaid = Maid.new()
 	self._maid.captionMaid = captionMaid
@@ -2185,7 +2194,9 @@ function Icon:join(parentIcon, featureName, dontUpdate)
 end
 
 function Icon:leave()
-	if self._destroyed then return end
+	if self._destroyed or self.instances.iconContainer.Parent == nil then
+		return
+	end
 	local settingsToReset = {"iconSize", "captionBlockerTransparency", "iconCornerRadius"}
 	local parentIcon = self._parentIcon
 	self.instances.iconContainer.Parent = topbarContainer
