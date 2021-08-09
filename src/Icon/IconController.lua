@@ -886,6 +886,143 @@ function IconController._enableControllerModeForIcon(icon, bool)
 	end
 end
 
+local createdFakeHealthbarIcon = false
+function IconController.setupHealthbar()
+
+	if createdFakeHealthbarIcon then
+		return
+	end
+	createdFakeHealthbarIcon = true
+
+	-- Create a fake healthbar icon to mimic the core health gui
+	task.defer(function()
+		runService.Heartbeat:Wait()
+		local Icon = require(script.Parent)
+
+		Icon.new()
+			:setProperty("internalIcon", true)
+			:setName("_FakeHealthbar")
+			:setRight()
+			:setOrder(-420)
+			:setSize(80, 32)
+			:lock()
+			:set("iconBackgroundTransparency", 1)
+			:give(function(icon)
+
+				local healthContainer = Instance.new("Frame")
+				healthContainer.Name = "HealthContainer"
+				healthContainer.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+				healthContainer.BorderSizePixel = 0
+				healthContainer.AnchorPoint = Vector2.new(0, 0.5)
+				healthContainer.Position = UDim2.new(0, 0, 0.5, 0)
+				healthContainer.Size = UDim2.new(1, 0, 0.2, 0)
+				healthContainer.Visible = true
+				healthContainer.ZIndex = 11
+				print("icon = ", icon)
+				print("icon.instances = ", icon.instances)
+				print("icon.instances.iconButton = ", icon.instances.iconButton)
+				healthContainer.Parent = icon.instances.iconButton
+
+				local corner = Instance.new("UICorner")
+				corner.CornerRadius = UDim.new(1, 0)
+				corner.Parent = healthContainer
+
+				local healthFrame = healthContainer:Clone()
+				healthFrame.Name = "HealthFrame"
+				healthFrame.BackgroundColor3 = Color3.fromRGB(167, 167, 167)
+				healthFrame.BorderSizePixel = 0
+				healthFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+				healthFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+				healthFrame.Size = UDim2.new(1, -2, 1, -2)
+				healthFrame.Visible = true
+				healthFrame.ZIndex = 12
+				healthFrame.Parent = healthContainer
+
+				local healthBar = healthFrame:Clone()
+				healthBar.Name = "HealthBar"
+				healthBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				healthBar.BorderSizePixel = 0
+				healthBar.AnchorPoint = Vector2.new(0, 0.5)
+				healthBar.Position = UDim2.new(0, 0, 0.5, 0)
+				healthBar.Size = UDim2.new(0.5, 0, 1, 0)
+				healthBar.Visible = true
+				healthBar.ZIndex = 13
+				healthBar.Parent = healthFrame
+
+				local START_HEALTHBAR_COLOR = Color3.fromRGB(27, 252, 107)
+				local MID_HEALTHBAR_COLOR = Color3.fromRGB(250, 235, 0)
+				local END_HEALTHBAR_COLOR = Color3.fromRGB(255, 28, 0)
+
+				local function powColor3(color, pow)
+					return Color3.new(
+						math.pow(color.R, pow),
+						math.pow(color.G, pow),
+						math.pow(color.B, pow)
+					)
+				end
+
+				local function lerpColor(colorA, colorB, frac, gamma)
+					gamma = gamma or 2.0
+					local CA = powColor3(colorA, gamma)
+					local CB = powColor3(colorB, gamma)
+					return powColor3(CA:Lerp(CB, frac), 1/gamma)
+				end
+
+				local firstTimeEnabling = true
+				local function listenToHealth(character)
+					if not character then
+						return
+					end
+					local humanoid = character:WaitForChild("Humanoid", 10)
+					if not humanoid then
+						return
+					end
+
+					local function updateHealthBar()
+						local realHealthbarEnabled = starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Health)
+						local healthInterval = humanoid.Health / humanoid.MaxHealth
+						if healthInterval == 1 or IconController.healthbarDisabled or (firstTimeEnabling and realHealthbarEnabled == false) then
+							if icon.enabled then
+								icon:setEnabled(false)
+							end
+							return
+						elseif healthInterval < 1 then
+							if not icon.enabled then
+								icon:setEnabled(true)
+							end
+							firstTimeEnabling = false
+							if realHealthbarEnabled then
+								starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false)
+							end
+						end
+						local startInterval = 0.9
+						local endInterval = 0.1
+						local m = 1/(startInterval - endInterval)
+						local c = -m*endInterval
+						local colorIntervalAbsolute = (m*healthInterval) + c
+						local colorInterval = (colorIntervalAbsolute > 1 and 1) or (colorIntervalAbsolute < 0 and 0) or colorIntervalAbsolute
+						local firstColor = (healthInterval > 0.5 and START_HEALTHBAR_COLOR) or MID_HEALTHBAR_COLOR
+						local lastColor = (healthInterval > 0.5 and MID_HEALTHBAR_COLOR) or END_HEALTHBAR_COLOR
+						local doubleSubtractor = (1-colorInterval)*2
+						local modifiedColorInterval = (healthInterval > 0.5 and (1-doubleSubtractor)) or (2-doubleSubtractor)
+						local newHealthFillColor = lerpColor(lastColor, firstColor, modifiedColorInterval)
+						local newHealthFillSize = UDim2.new(healthInterval, 0, 1, 0)
+						healthBar.BackgroundColor3 = newHealthFillColor
+						healthBar.Size = newHealthFillSize
+					end
+
+					humanoid.HealthChanged:Connect(updateHealthBar)
+					IconController.healthbarDisabledSignal:Connect(updateHealthBar)
+					updateHealthBar()
+				end
+				localPlayer.CharacterAdded:Connect(function(character)
+					listenToHealth(character)
+				end)
+				task.spawn(listenToHealth, localPlayer.Character)
+			end)
+	end)
+end
+
 
 
 -- BEHAVIOUR
@@ -896,6 +1033,7 @@ coroutine.wrap(function()
 	runService.Heartbeat:Wait() -- This is required to prevent an infinite recursion
 	local Icon = require(script.Parent)
 	local controllerOptionIcon = Icon.new()
+		:setProperty("internalIcon", true)
 		:setName("_TopbarControllerOption")
 		:setOrder(100)
 		:setImage("rbxassetid://5278150942")
@@ -903,121 +1041,6 @@ coroutine.wrap(function()
 		:setEnabled(false)
 		:setTip("Controller mode")
 		:setProperty("deselectWhenOtherIconSelected", false)
-
-	-- Create a fake healthbar icon to mimic the core health gui
-	Icon.new()
-		:setName("_FakeHealthbar")
-		:setRight()
-		:setOrder(-420)
-		:setSize(80, 32)
-		:lock()
-		:set("iconBackgroundTransparency", 1)
-		:give(function(icon)
-
-			local healthContainer = Instance.new("Frame")
-			healthContainer.Name = "HealthContainer"
-			healthContainer.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-			healthContainer.BorderSizePixel = 0
-			healthContainer.AnchorPoint = Vector2.new(0, 0.5)
-			healthContainer.Position = UDim2.new(0, 0, 0.5, 0)
-			healthContainer.Size = UDim2.new(1, 0, 0.2, 0)
-			healthContainer.Visible = true
-			healthContainer.ZIndex = 11
-			healthContainer.Parent = icon.instances.iconButton
-
-			local corner = Instance.new("UICorner")
-			corner.CornerRadius = UDim.new(1, 0)
-			corner.Parent = healthContainer
-
-			local healthFrame = healthContainer:Clone()
-			healthFrame.Name = "HealthFrame"
-			healthFrame.BackgroundColor3 = Color3.fromRGB(167, 167, 167)
-			healthFrame.BorderSizePixel = 0
-			healthFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-			healthFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-			healthFrame.Size = UDim2.new(1, -2, 1, -2)
-			healthFrame.Visible = true
-			healthFrame.ZIndex = 12
-			healthFrame.Parent = healthContainer
-
-			local healthBar = healthFrame:Clone()
-			healthBar.Name = "HealthBar"
-			healthBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			healthBar.BorderSizePixel = 0
-			healthBar.AnchorPoint = Vector2.new(0, 0.5)
-			healthBar.Position = UDim2.new(0, 0, 0.5, 0)
-			healthBar.Size = UDim2.new(0.5, 0, 1, 0)
-			healthBar.Visible = true
-			healthBar.ZIndex = 13
-			healthBar.Parent = healthFrame
-
-			local healthOriginallyEnabled = starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Health)
-			icon:setEnabled(healthOriginallyEnabled)
-			starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false)
-
-			local START_HEALTHBAR_COLOR = Color3.fromRGB(27, 252, 107)
-			local MID_HEALTHBAR_COLOR = Color3.fromRGB(250, 235, 0)
-			local END_HEALTHBAR_COLOR = Color3.fromRGB(255, 28, 0)
-
-			local function powColor3(color, pow)
-				return Color3.new(
-					math.pow(color.R, pow),
-					math.pow(color.G, pow),
-					math.pow(color.B, pow)
-				)
-			end
-
-			local function lerpColor(colorA, colorB, frac, gamma)
-				gamma = gamma or 2.0
-				local CA = powColor3(colorA, gamma)
-				local CB = powColor3(colorB, gamma)
-				return powColor3(CA:Lerp(CB, frac), 1/gamma)
-			end
-
-			local function listenToHealth(character)
-				if not character then
-					return
-				end
-				local humanoid = character:WaitForChild("Humanoid", 10)
-				if not humanoid then
-					return
-				end
-				local function updateHealthBar()
-					local healthInterval = humanoid.Health / humanoid.MaxHealth
-					if healthInterval == 1 or IconController.healthbarDisabled then
-						if icon.enabled then
-							icon:setEnabled(false)
-						end
-						return
-					elseif healthInterval < 1 then
-						if not icon.enabled then
-							icon:setEnabled(true)
-						end
-					end
-					local startInterval = 0.9
-					local endInterval = 0.1
-					local m = 1/(startInterval - endInterval)
-					local c = -m*endInterval
-					local colorIntervalAbsolute = (m*healthInterval) + c
-					local colorInterval = (colorIntervalAbsolute > 1 and 1) or (colorIntervalAbsolute < 0 and 0) or colorIntervalAbsolute
-					local firstColor = (healthInterval > 0.5 and START_HEALTHBAR_COLOR) or MID_HEALTHBAR_COLOR
-					local lastColor = (healthInterval > 0.5 and MID_HEALTHBAR_COLOR) or END_HEALTHBAR_COLOR
-					local doubleSubtractor = (1-colorInterval)*2
-					local modifiedColorInterval = (healthInterval > 0.5 and (1-doubleSubtractor)) or (2-doubleSubtractor)
-					local newHealthFillColor = lerpColor(lastColor, firstColor, modifiedColorInterval)
-					local newHealthFillSize = UDim2.new(healthInterval, 0, 1, 0)
-					healthBar.BackgroundColor3 = newHealthFillColor
-					healthBar.Size = newHealthFillSize
-				end
-				humanoid.HealthChanged:Connect(updateHealthBar)
-				IconController.healthbarDisabledSignal:Connect(updateHealthBar)
-				updateHealthBar()
-			end
-			localPlayer.CharacterAdded:Connect(function(character)
-				listenToHealth(character)
-			end)
-			task.spawn(listenToHealth, localPlayer.Character)
-		end)
 
 	-- This decides what controller widgets and displays to show based upon their connected inputs
 	-- For example, if on PC with a controller, give the player the option to enable controller mode with a toggle
@@ -1075,6 +1098,7 @@ coroutine.wrap(function()
 		if alignment ~= "mid" then
 			local overflowName = "_overflowIcon-"..alignment
 			local overflowIcon = Icon.new()
+				:setProperty("internalIcon", true)
 				:setImage(6069276526)
 				:setName(overflowName)
 				:setEnabled(false)

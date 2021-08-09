@@ -1,3 +1,15 @@
+## [2.7.4] - August 9 2021
+### Fixed
+- A bug with ResetOnRespawn where the :give() function would call right away *and* when destroyed for functions, which only triggered after two resets
+- Items like captions and tips not being destroyed when active with ResetOnSpawn.
+
+### Improved
+- The fake healthbar behaviour, so that it appears now *only* when an icon is set to the right.
+- Reduced the likelihood of two healthbars appearing simultaneously.
+
+
+
+--------
 ## [2.7.3] - August 6 2021
 ### Added
 - A dynamic healthbar to replace the static core healthbar which appears to the right of the screen when the localPlayer is damaged.
