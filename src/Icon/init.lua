@@ -976,10 +976,17 @@ function Icon.new()
 
 	-- Input handlers
 	-- Calls deselect/select when the icon is clicked
-	instances.iconButton.MouseButton1Click:Connect(function()
+	--[[instances.iconButton.MouseButton1Click:Connect(function()
 		if self._draggingFinger then
 			return false
 		elseif self.isSelected then
+			self:deselect()
+			return true
+		end
+		self:select()
+	end)--]]
+	instances.iconButton.MouseButton1Click:Connect(function()
+		if self.isSelected then
 			self:deselect()
 			return true
 		end
@@ -1390,7 +1397,7 @@ function Icon:_update(settingName, toggleState, customTweenInfo)
 		value = settingDetail.hoveringValue
 	end
 	if value == nil then return end
-	local tweenInfo = customTweenInfo or (settingDetail.tweenAction and self:get(settingDetail.tweenAction)) or self:get("toggleTransitionInfo") or TweenInfo.new(0.15)
+	local tweenInfo = customTweenInfo or (settingDetail.tweenAction and settingDetail.tweenAction ~= "" and self:get(settingDetail.tweenAction)) or self:get("toggleTransitionInfo") or TweenInfo.new(0.15)
 	local propertyName = settingDetail.propertyName
 	local invalidPropertiesTypes = {
 		["string"] = true,
@@ -1464,6 +1471,11 @@ function Icon:setTheme(theme, updateAfterSettingAll)
 		else
 			for settingName, settingValue in pairs(settingsDetails) do
 				if not self.lockedSettings[settingName] then
+					local settingDetail = self._settingsDictionary[settingName]
+					if settingsType == "action" and settingDetail == nil then
+						settingDetail = {}
+						self._settingsDictionary[settingName] = {}
+					end
 					self:set(settingName, settingValue)
 				end
 			end
