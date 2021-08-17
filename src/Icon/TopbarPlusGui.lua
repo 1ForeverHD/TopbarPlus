@@ -37,7 +37,7 @@ iconButton.ZIndex = 10--2
 iconButton.BorderSizePixel = 0
 iconButton.AutoButtonColor = false
 iconButton.Parent = iconContainer
-iconButton.Active = false
+iconButton.Active = true
 
 local iconImage = Instance.new("ImageLabel")
 iconImage.BackgroundTransparency = 1

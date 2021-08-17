@@ -1,3 +1,10 @@
+## [2.7.5] - August 17 2021
+### Improved
+- The roblox hover cursor now appears when hovering over Icon buttons.
+
+
+
+--------
 ## [2.7.4] - August 9 2021
 ### Fixed
 - A bug with ResetOnRespawn where the :give() function would call right away *and* when destroyed for functions, which only triggered after two resets
