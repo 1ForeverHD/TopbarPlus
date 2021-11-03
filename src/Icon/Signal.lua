@@ -121,7 +121,7 @@ function ScriptSignal:Connect(
 		"Must be function"
 	)
 
-	if self._active == false then
+	if self._active ~= true then
 		return setmetatable({
 			Connected = false
 		}, ScriptConnection)
@@ -181,12 +181,7 @@ function ScriptSignal:ConnectOnce(
 
 	local connection
 	connection = self:Connect(function(...: any)
-		if connection == nil then
-			return
-		end
-
 		connection:Disconnect()
-		connection = nil
 
 		handler(...)
 	end)
@@ -216,12 +211,7 @@ function ScriptSignal:Wait(): (...any)
 
 		local connection
 		connection = self:Connect(function(...: any)
-			if connection == nil then
-				return
-			end
-
 			connection:Disconnect()
-			connection = nil
 
 			task.spawn(thread, ...)
 		end)
@@ -302,7 +292,7 @@ end
 	@ignore
 ]=]
 function ScriptSignal:Destroy()
-	if self._active == false then
+	if self._active ~= true then
 		return
 	end
 
