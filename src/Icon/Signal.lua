@@ -1,109 +1,380 @@
-local HttpService = game:GetService("HttpService")
-local RunService = game:GetService("RunService")
-local heartbeat = RunService.Heartbeat
-local Signal = {}
-Signal.__index = Signal
-Signal.ClassName = "Signal"
-Signal.totalConnections = 0
+--[=[
+	A class which holds data and methods for ScriptSignals.
+
+	@class ScriptSignal
+]=]
+local ScriptSignal = {}
+ScriptSignal.__index = ScriptSignal
+
+--[=[
+	A class which holds data and methods for ScriptConnections.
+
+	@class ScriptConnection
+]=]
+local ScriptConnection = {}
+ScriptConnection.__index = ScriptConnection
+
+--[=[
+	A boolean which determines if a ScriptConnection is active or not.
+
+	@prop Connected boolean
+	@within ScriptConnection
+
+	@readonly
+	@ignore
+]=]
 
 
+export type Class = typeof( setmetatable({
+	_active = true,
+	_head = nil :: ScriptConnectionNode?
+}, ScriptSignal) )
 
--- CONSTRUCTOR
-function Signal.new(createConnectionsChangedSignal)
-	local self = setmetatable({}, Signal)
-	
-	if createConnectionsChangedSignal then
-		self.connectionsChanged = Signal.new()
-	end
+export type ScriptConnection = typeof( setmetatable({
+	Connected = true,
+	_node = nil :: ScriptConnectionNode?
+}, ScriptConnection) )
 
-	self.connections = {}
-	self.totalConnections = 0
-	self.waiting = {}
-	self.totalWaiting = 0
+type ScriptConnectionNode = {
+	_signal: Class,
+	_connection: ScriptConnection?,
+	_handler: (...any) -> (),
 
-	return self
+	_next: ScriptConnectionNode?,
+	_prev: ScriptConnectionNode?
+}
+
+
+local FreeThread: thread? = nil
+
+local function RunHandlerInFreeThread(handler, ...)
+	local thread = FreeThread :: thread
+	FreeThread = nil
+
+	handler(...)
+
+	FreeThread = thread
 end
 
+local function CreateFreeThread()
+	FreeThread = coroutine.running()
 
-
--- METHODS
-function Signal:Fire(...)
-	for _, connection in pairs(self.connections) do
-		connection.Handler(...)
+	while true do
+		RunHandlerInFreeThread( coroutine.yield() )
 	end
-	if self.totalWaiting > 0 then
-		local packedArgs = table.pack(...)
-		for waitingId, _ in pairs(self.waiting) do
-			self.waiting[waitingId] = packedArgs
+end
+
+--[=[
+	Creates a ScriptSignal object.
+
+	@return ScriptSignal
+	@ignore
+]=]
+function ScriptSignal.new(): Class
+	return setmetatable({
+		_active = true,
+		_head = nil
+	}, ScriptSignal)
+end
+
+--[=[
+	Returns a boolean determining if the object is a ScriptSignal.
+
+	```lua
+	local janitor = Janitor.new()
+	local signal = ScriptSignal.new()
+
+	ScriptSignal.Is(signal) -> true
+	ScriptSignal.Is(janitor) -> false
+	```
+
+	@param object any
+	@return boolean
+	@ignore
+]=]
+function ScriptSignal.Is(object): boolean
+	return typeof(object) == 'table'
+		and getmetatable(object) == ScriptSignal
+end
+
+--[=[
+	Returns a boolean determing if a ScriptSignal object is active.
+
+	```lua
+	ScriptSignal:IsActive() -> true
+	ScriptSignal:Destroy()
+	ScriptSignal:IsActive() -> false
+	```
+
+	@return boolean
+	@ignore
+]=]
+function ScriptSignal:IsActive(): boolean
+	return self._active == true
+end
+
+--[=[
+	Connects a handler to a ScriptSignal object.
+
+	```lua
+	ScriptSignal:Connect(function(text)
+		print(text)
+	end)
+
+	ScriptSignal:Fire("Something")
+	ScriptSignal:Fire("Something else")
+
+	-- "Something" and then "Something else" are printed
+	```
+
+	@param handler (...: any) -> ()
+	@return ScriptConnection
+	@ignore
+]=]
+function ScriptSignal:Connect(
+	handler: (...any) -> ()
+): ScriptConnection
+
+	assert(
+		typeof(handler) == 'function',
+		"Must be function"
+	)
+
+	if self._active ~= true then
+		return setmetatable({
+			Connected = false,
+			_node = nil
+		}, ScriptConnection)
+	end
+
+	local _head: ScriptConnectionNode? = self._head
+
+	local node: ScriptConnectionNode = {
+		_signal = self :: Class,
+		_connection = nil,
+		_handler = handler,
+
+		_next = _head,
+		_prev = nil
+	}
+
+	if _head ~= nil then
+		_head._prev = node
+	end
+
+	self._head = node
+
+	local connection = setmetatable({
+		Connected = true,
+		_node = node
+	}, ScriptConnection)
+
+	node._connection = connection
+
+	return connection :: ScriptConnection
+end
+
+--[=[
+	Connects a handler to a ScriptSignal object, but only allows that
+	connection to run once. Any `:Fire` calls called afterwards won't trigger anything.
+
+	```lua
+	ScriptSignal:ConnectOnce(function()
+		print("Connection fired")
+	end)
+
+	ScriptSignal:Fire()
+	ScriptSignal:Fire()
+
+	-- "Connection fired" is only fired once
+	```
+
+	@param handler (...: any) -> ()
+	@ignore
+]=]
+function ScriptSignal:ConnectOnce(
+	handler: (...any) -> ()
+)
+	assert(
+		typeof(handler) == 'function',
+		"Must be function"
+	)
+
+	local connection
+	connection = self:Connect(function(...)
+		connection:Disconnect()
+		handler(...)
+	end)
+end
+
+--[=[
+	Yields the thread until a `:Fire` call occurs, returns what the signal was fired with.
+
+	```lua
+	task.spawn(function()
+		print(
+			ScriptSignal:Wait()
+		)
+	end)
+
+	ScriptSignal:Fire("Arg", nil, 1, 2, 3, nil)
+	-- "Arg", nil, 1, 2, 3, nil are printed
+	```
+
+	@yields
+	@return ...any
+	@ignore
+]=]
+function ScriptSignal:Wait(): (...any)
+	local thread do
+		thread = coroutine.running()
+
+		local connection
+		connection = self:Connect(function(...)
+			connection:Disconnect()
+			task.spawn(thread, ...)
+		end)
+	end
+
+	return coroutine.yield()
+end
+
+--[=[
+	Fires a ScriptSignal object with the arguments passed.
+
+	```lua
+	ScriptSignal:Connect(function(text)
+		print(text)
+	end)
+
+	ScriptSignal:Fire("Some Text...")
+
+	-- "Some Text..." is printed twice
+	```
+
+	@param ... any
+	@ignore
+]=]
+function ScriptSignal:Fire(...: any)
+	local node: ScriptConnectionNode? = self._head
+	while node ~= nil do
+		if node._connection ~= nil then
+			if FreeThread == nil then
+				task.spawn(CreateFreeThread)
+			end
+
+			task.spawn(
+				FreeThread :: thread,
+				node._handler, ...
+			)
 		end
+
+		node = node._next
 	end
 end
-Signal.fire = Signal.Fire
 
-function Signal:Connect(handler)
-	if not (type(handler) == "function") then
-		error(("connect(%s)"):format(typeof(handler)), 2)
-	end
-	
-	local signal = self
-	local connectionId = HttpService:GenerateGUID(false)
-	local connection = {}
-	connection.Connected = true
-	connection.ConnectionId = connectionId
-	connection.Handler = handler
-	self.connections[connectionId] = connection
+--[=[
+	Disconnects all connections from a ScriptSignal object without making it unusable.
 
-	function connection:Disconnect()
-		signal.connections[connectionId] = nil
-		connection.Connected = false
-		signal.totalConnections -= 1
-		if signal.connectionsChanged then
-			signal.connectionsChanged:Fire(-1)
+	```lua
+	local connection = ScriptSignal:Connect(function() end)
+
+	connection.Connected -> true
+	ScriptSignal:DisconnectAll()
+	connection.Connected -> false
+	```
+
+	@ignore
+]=]
+function ScriptSignal:DisconnectAll()
+	local node: ScriptConnectionNode? = self._head
+	while node ~= nil do
+		local _connection = node._connection
+
+		if _connection ~= nil then
+			_connection.Connected = false
+			_connection._node = nil
+			node._connection = nil
 		end
-	end
-	connection.Destroy = connection.Disconnect
-	connection.destroy = connection.Disconnect
-	connection.disconnect = connection.Disconnect
-	self.totalConnections += 1
-	if self.connectionsChanged then
-		self.connectionsChanged:Fire(1)
+
+		node = node._next
 	end
 
-	return connection
+	self._head = nil
 end
-Signal.connect = Signal.Connect
 
-function Signal:Wait()
-	local waitingId = HttpService:GenerateGUID(false)
-	self.waiting[waitingId] = true
-	self.totalWaiting += 1
-	repeat heartbeat:Wait() until self.waiting[waitingId] ~= true
-	self.totalWaiting -= 1
-	local args = self.waiting[waitingId]
-	self.waiting[waitingId] = nil
-	return unpack(args)
+--[=[
+	Destroys a ScriptSignal object, disconnecting all connections and making it unusable.
+
+	```lua
+	ScriptSignal:Destroy()
+
+	local connection = ScriptSignal:Connect(function() end)
+	connection.Connected -> false
+	```
+
+	@ignore
+]=]
+function ScriptSignal:Destroy()
+	if self._active ~= true then
+		return
+	end
+
+	self:DisconnectAll()
+	self._active = false
 end
-Signal.wait = Signal.Wait
 
-function Signal:Destroy()
-	if self.bindableEvent then
-		self.bindableEvent:Destroy()
-		self.bindableEvent = nil
+--[=[
+	Disconnects a connection, any `:Fire` calls from now on will not
+	invoke this connection's handler.
+
+	```lua
+	local connection = ScriptSignal:Connect(function() end)
+
+	connection.Connected -> true
+	connection:Disconnect()
+	connection.Connected -> false
+	```
+
+	@ignore
+]=]
+function ScriptConnection:Disconnect()
+	if self.Connected ~= true then
+		return
 	end
-	if self.connectionsChanged then
-		self.connectionsChanged:Fire(-self.totalConnections)
-		self.connectionsChanged:Destroy()
-		self.connectionsChanged = nil
+
+	self.Connected = false
+
+	local _node: ScriptConnectionNode = self._node
+	local _prev = _node._prev
+	local _next = _node._next
+
+	if _next ~= nil then
+		_next._prev = _prev
 	end
-	self.totalConnections = 0
-	for connectionId, connection in pairs(self.connections) do
-		self.connections[connectionId] = nil
+
+	if _prev ~= nil then
+		_prev._next = _next
+	else
+		-- _node == _signal._head
+
+		_node._signal._head = _next
 	end
+
+	_node._connection = nil
+	self._node = nil
 end
-Signal.destroy = Signal.Destroy
-Signal.Disconnect = Signal.Destroy
-Signal.disconnect = Signal.Destroy
 
+-- Compatibility methods for TopbarPlus
+ScriptConnection.destroy = ScriptConnection.Disconnect
+ScriptConnection.Destroy = ScriptConnection.Disconnect
+ScriptConnection.disconnect = ScriptConnection.Disconnect
+ScriptSignal.destroy = ScriptSignal.Destroy
+ScriptSignal.Disconnect = ScriptSignal.Destroy
+ScriptSignal.disconnect = ScriptSignal.Destroy
 
+ScriptSignal.connect = ScriptSignal.Connect
+ScriptSignal.wait = ScriptSignal.Wait
+ScriptSignal.fire = ScriptSignal.Fire
 
-return Signal
+return ScriptSignal
