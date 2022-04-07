@@ -158,6 +158,8 @@ local fakeChatName = "_FakeChat"
 local forceTopbarDisabled = false
 local menuOpen
 local topbarUpdating = false
+local cameraConnection
+local controllerMenuOverride
 local STUPID_CONTROLLER_OFFSET = 32
 
 
@@ -178,7 +180,14 @@ local function checkTopbarEnabledAccountingForMimic()
 	return topbarEnabledAccountingForMimic
 end
 
-
+-- Add icons to an overflow if they overlap the screen bounds or other icons
+local function bindCamera()
+	if not workspace.CurrentCamera then return end
+	if cameraConnection and cameraConnection.Connected then
+		cameraConnection:Disconnect()
+	end
+	cameraConnection = workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(IconController.updateTopbar)
+end
 
 -- OFFSET HANDLERS
 local alignmentDetails = {}
@@ -289,6 +298,7 @@ IconController.iconRemoved:Connect(function(icon)
 	IconController:_updateSelectionGroup()
 end)
 
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera)
 
 
 -- METHODS
@@ -645,6 +655,11 @@ function IconController.setTopbarEnabled(bool, forceBool)
 			if forceBool then
 				indicator.Visible = topbarEnabledAccountingForMimic
 			else
+				indicator.Active = false
+				if controllerMenuOverride and controllerMenuOverride.Connected then
+					controllerMenuOverride:Disconnect()
+				end
+				
 				if hapticService:IsVibrationSupported(Enum.UserInputType.Gamepad1) and hapticService:IsMotorSupported(Enum.UserInputType.Gamepad1,Enum.VibrationMotor.Small) then
 					hapticService:SetMotor(Enum.UserInputType.Gamepad1,Enum.VibrationMotor.Small,1)
 					delay(0.2,function()
@@ -698,8 +713,16 @@ function IconController.setTopbarEnabled(bool, forceBool)
 		else
 			if forceBool then
 				indicator.Visible = false
+			elseif topbarEnabledAccountingForMimic then
+				indicator.Visible = true
+				indicator.Active = true
+				controllerMenuOverride = indicator.InputBegan:Connect(function(input)
+					if input.UserInputType == Enum.UserInputType.MouseButton1 then
+						IconController.setTopbarEnabled(true,false)
+					end
+				end)
 			else
-				indicator.Visible = topbarEnabledAccountingForMimic
+				indicator.Visible = false
 			end
 			if not TopbarPlusGui.TopbarContainer.Visible then return end
 			guiService.AutoSelectGuiEnabled = true
@@ -839,6 +862,12 @@ function IconController._enableControllerMode(bool)
 		indicator.Image = "rbxassetid://5278151556"
 		indicator.Visible = checkTopbarEnabledAccountingForMimic()
 		indicator.Position = UDim2.new(0.5,0,0,5)
+		indicator.Active = true
+		controllerMenuOverride = indicator.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				IconController.setTopbarEnabled(true,false)
+			end
+		end)
 	else
 		TopbarPlusGui.TopbarContainer.Position = UDim2.new(0,0,0,0)
 		TopbarPlusGui.TopbarContainer.Visible = checkTopbarEnabledAccountingForMimic()
@@ -1164,11 +1193,7 @@ guiService.MenuOpened:Connect(function()
 	IconController.setTopbarEnabled(false,false)
 end)
 
--- Add icons to an overflow if they overlap the screen bounds or other icons
-workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-	IconController.updateTopbar()
-end)
-
+bindCamera()
 
 
 return IconController
