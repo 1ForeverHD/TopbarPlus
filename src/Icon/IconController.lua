@@ -149,6 +149,8 @@ local runService = game:GetService("RunService")
 local userInputService = game:GetService("UserInputService")
 local tweenService = game:GetService("TweenService")
 local players = game:GetService("Players")
+local voiceChatService = game:GetService("VoiceChatService")
+local localPlayer = players.LocalPlayer
 local IconController = {}
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local Signal = require(script.Parent.Signal)
@@ -160,6 +162,8 @@ local menuOpen
 local topbarUpdating = false
 local cameraConnection
 local controllerMenuOverride
+local isStudio = runService:IsStudio()
+local isVoiceChatEnabled = false
 local STUPID_CONTROLLER_OFFSET = 32
 
 
@@ -195,8 +199,18 @@ alignmentDetails["left"] = {
 	startScale = 0,
 	getOffset = function()
 		local offset = 48 + IconController.leftOffset
-		if checkTopbarEnabled() and starterGui:GetCoreGuiEnabled("Chat") then
-			offset += 12 + 32
+		if checkTopbarEnabled() then
+			local chatEnabled = starterGui:GetCoreGuiEnabled("Chat")
+			if chatEnabled then
+				offset += 12 + 32
+			end
+			if isVoiceChatEnabled and not isStudio then
+				if chatEnabled then
+					offset += 67
+				else
+					offset += 43
+				end
+			end
 		end
 		return offset
 	end,
@@ -947,9 +961,6 @@ function IconController.setupHealthbar()
 				healthContainer.Size = UDim2.new(1, 0, 0.2, 0)
 				healthContainer.Visible = true
 				healthContainer.ZIndex = 11
-				print("icon = ", icon)
-				print("icon.instances = ", icon.instances)
-				print("icon.instances.iconButton = ", icon.instances.iconButton)
 				healthContainer.Parent = icon.instances.iconButton
 
 				local corner = Instance.new("UICorner")
@@ -1149,6 +1160,35 @@ coroutine.wrap(function()
 			}
 		end
 	end
+
+	-- This checks if voice chat is enabled
+	local success, enabled = pcall(function() return voiceChatService:IsVoiceEnabledForUserIdAsync(localPlayer.UserId) end)
+	if success and enabled then
+		isVoiceChatEnabled = true
+		IconController.updateTopbar()
+	end
+
+	-- Credit
+	if not isStudio then
+		local ownerId = game.CreatorId
+		local groupService = game:GetService("GroupService")
+		if game.CreatorType == Enum.CreatorType.Group then
+			local success, ownerInfo = pcall(function() return groupService:GetGroupInfoAsync(game.CreatorId).Owner end)
+			if success then
+				ownerId = ownerInfo.Id
+			end
+		end
+		local version = require(script.Parent.VERSION)
+		if localPlayer.UserId ~= ownerId then
+			local marketplaceService = game:GetService("MarketplaceService")
+			local success, placeInfo = pcall(function() return marketplaceService:GetProductInfo(game.PlaceId) end)
+			if success and placeInfo then
+				local gameName = placeInfo.Name
+				print(("\n\n\n⚽ %s uses TopbarPlus %s\n🍍 TopbarPlus was developed by ForeverHD and the Nanoblox Team\n🚀 You can learn more and take a free copy by searching for 'TopbarPlus' on the DevForum\n\n"):format(gameName, version))
+			end
+		end
+	end
+
 end)()
 
 -- Mimic the enabling of the topbar when StarterGui:SetCore("TopbarEnabled", state) is called
