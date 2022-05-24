@@ -2,7 +2,7 @@
 [themes]: https://1foreverhd.github.io/TopbarPlus/features/#themes
 [set method]: https://1foreverhd.github.io/TopbarPlus/api/icon/#set
 
-## Construtors
+## Constructors
 
 #### new
 ```lua

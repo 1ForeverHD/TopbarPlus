@@ -149,6 +149,8 @@ local runService = game:GetService("RunService")
 local userInputService = game:GetService("UserInputService")
 local tweenService = game:GetService("TweenService")
 local players = game:GetService("Players")
+local voiceChatService = game:GetService("VoiceChatService")
+local localPlayer = players.LocalPlayer
 local IconController = {}
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local Signal = require(script.Parent.Signal)
@@ -158,6 +160,10 @@ local fakeChatName = "_FakeChat"
 local forceTopbarDisabled = false
 local menuOpen
 local topbarUpdating = false
+local cameraConnection
+local controllerMenuOverride
+local isStudio = runService:IsStudio()
+local isVoiceChatEnabled = false
 local STUPID_CONTROLLER_OFFSET = 32
 
 
@@ -178,7 +184,14 @@ local function checkTopbarEnabledAccountingForMimic()
 	return topbarEnabledAccountingForMimic
 end
 
-
+-- Add icons to an overflow if they overlap the screen bounds or other icons
+local function bindCamera()
+	if not workspace.CurrentCamera then return end
+	if cameraConnection and cameraConnection.Connected then
+		cameraConnection:Disconnect()
+	end
+	cameraConnection = workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(IconController.updateTopbar)
+end
 
 -- OFFSET HANDLERS
 local alignmentDetails = {}
@@ -186,8 +199,18 @@ alignmentDetails["left"] = {
 	startScale = 0,
 	getOffset = function()
 		local offset = 48 + IconController.leftOffset
-		if checkTopbarEnabled() and starterGui:GetCoreGuiEnabled("Chat") then
-			offset += 12 + 32
+		if checkTopbarEnabled() then
+			local chatEnabled = starterGui:GetCoreGuiEnabled("Chat")
+			if chatEnabled then
+				offset += 12 + 32
+			end
+			if isVoiceChatEnabled and not isStudio then
+				if chatEnabled then
+					offset += 67
+				else
+					offset += 43
+				end
+			end
 		end
 		return offset
 	end,
@@ -289,6 +312,7 @@ IconController.iconRemoved:Connect(function(icon)
 	IconController:_updateSelectionGroup()
 end)
 
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera)
 
 
 -- METHODS
@@ -645,6 +669,11 @@ function IconController.setTopbarEnabled(bool, forceBool)
 			if forceBool then
 				indicator.Visible = topbarEnabledAccountingForMimic
 			else
+				indicator.Active = false
+				if controllerMenuOverride and controllerMenuOverride.Connected then
+					controllerMenuOverride:Disconnect()
+				end
+				
 				if hapticService:IsVibrationSupported(Enum.UserInputType.Gamepad1) and hapticService:IsMotorSupported(Enum.UserInputType.Gamepad1,Enum.VibrationMotor.Small) then
 					hapticService:SetMotor(Enum.UserInputType.Gamepad1,Enum.VibrationMotor.Small,1)
 					delay(0.2,function()
@@ -698,8 +727,16 @@ function IconController.setTopbarEnabled(bool, forceBool)
 		else
 			if forceBool then
 				indicator.Visible = false
+			elseif topbarEnabledAccountingForMimic then
+				indicator.Visible = true
+				indicator.Active = true
+				controllerMenuOverride = indicator.InputBegan:Connect(function(input)
+					if input.UserInputType == Enum.UserInputType.MouseButton1 then
+						IconController.setTopbarEnabled(true,false)
+					end
+				end)
 			else
-				indicator.Visible = topbarEnabledAccountingForMimic
+				indicator.Visible = false
 			end
 			if not TopbarPlusGui.TopbarContainer.Visible then return end
 			guiService.AutoSelectGuiEnabled = true
@@ -839,6 +876,12 @@ function IconController._enableControllerMode(bool)
 		indicator.Image = "rbxassetid://5278151556"
 		indicator.Visible = checkTopbarEnabledAccountingForMimic()
 		indicator.Position = UDim2.new(0.5,0,0,5)
+		indicator.Active = true
+		controllerMenuOverride = indicator.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				IconController.setTopbarEnabled(true,false)
+			end
+		end)
 	else
 		TopbarPlusGui.TopbarContainer.Position = UDim2.new(0,0,0,0)
 		TopbarPlusGui.TopbarContainer.Visible = checkTopbarEnabledAccountingForMimic()
@@ -918,9 +961,6 @@ function IconController.setupHealthbar()
 				healthContainer.Size = UDim2.new(1, 0, 0.2, 0)
 				healthContainer.Visible = true
 				healthContainer.ZIndex = 11
-				print("icon = ", icon)
-				print("icon.instances = ", icon.instances)
-				print("icon.instances.iconButton = ", icon.instances.iconButton)
 				healthContainer.Parent = icon.instances.iconButton
 
 				local corner = Instance.new("UICorner")
@@ -1120,6 +1160,35 @@ coroutine.wrap(function()
 			}
 		end
 	end
+
+	-- This checks if voice chat is enabled
+	local success, enabled = pcall(function() return voiceChatService:IsVoiceEnabledForUserIdAsync(localPlayer.UserId) end)
+	if success and enabled then
+		isVoiceChatEnabled = true
+		IconController.updateTopbar()
+	end
+
+	-- Credit
+	if not isStudio then
+		local ownerId = game.CreatorId
+		local groupService = game:GetService("GroupService")
+		if game.CreatorType == Enum.CreatorType.Group then
+			local success, ownerInfo = pcall(function() return groupService:GetGroupInfoAsync(game.CreatorId).Owner end)
+			if success then
+				ownerId = ownerInfo.Id
+			end
+		end
+		local version = require(script.Parent.VERSION)
+		if localPlayer.UserId ~= ownerId then
+			local marketplaceService = game:GetService("MarketplaceService")
+			local success, placeInfo = pcall(function() return marketplaceService:GetProductInfo(game.PlaceId) end)
+			if success and placeInfo then
+				local gameName = placeInfo.Name
+				print(("\n\n\n⚽ %s uses TopbarPlus %s\n🍍 TopbarPlus was developed by ForeverHD and the Nanoblox Team\n🚀 You can learn more and take a free copy by searching for 'TopbarPlus' on the DevForum\n\n"):format(gameName, version))
+			end
+		end
+	end
+
 end)()
 
 -- Mimic the enabling of the topbar when StarterGui:SetCore("TopbarEnabled", state) is called
@@ -1164,11 +1233,7 @@ guiService.MenuOpened:Connect(function()
 	IconController.setTopbarEnabled(false,false)
 end)
 
--- Add icons to an overflow if they overlap the screen bounds or other icons
-workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-	IconController.updateTopbar()
-end)
-
+bindCamera()
 
 
 return IconController

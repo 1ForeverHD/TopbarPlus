@@ -1,3 +1,14 @@
+## [2.7.6] - May 24 2022
+### Added
+- Checks to account for the new obtrusive 'Voice Chat Beta' icon.
+- Mouse-click detection for controller mode hide/show toggle. Credit to @Lucke0051 for this.
+  
+### Fixed
+- A bug with overflows caused by changing the Workspace.CurrentCamera. Credit to @Lucke0051 for this.
+
+
+
+--------
 ## [2.7.5] - August 17 2021
 ### Improved
 - The roblox hover cursor now appears when hovering over Icon buttons.
