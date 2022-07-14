@@ -66,7 +66,7 @@ Associates the given name to the icon which enables it to be retrieved with ``Ic
 ```lua
 icon:setProperty(propertyName, value)
 ```
-An alternative way of doing ``zone[propertyName] = value``. This enables the easy-configuration of icon properties within chained methods.
+An alternative way of doing ``icon.propertyName = value``. This enables the easy-configuration of icon properties within chained methods.
 
 ----
 #### select
@@ -91,6 +91,8 @@ Deselects the icon (as if it were clicked, then clicked again).
 icon:notify(clearNoticeEvent)
 ```
 Prompts a notice bubble which accumulates the further it is prompted. If the icon belongs to a dropdown or menu, then the notice will appear on the parent icon when the parent icon is deselected.
+
+`clearNoticeEvent` should be a [RBXScriptSignal](https://create.roblox.com/docs/reference/engine/datatypes/RBXScriptSignal)
 
 ----
 #### clearNotices
