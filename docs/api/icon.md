@@ -66,7 +66,7 @@ Associates the given name to the icon which enables it to be retrieved with ``Ic
 ```lua
 icon:setProperty(propertyName, value)
 ```
-An alternative way of doing ``icon.propertyName = value``. This enables the easy-configuration of icon properties within chained methods.
+An alternative way of doing ``icon[propertyName] = value``. This enables the easy-configuration of icon properties within chained methods.
 
 ----
 #### select
