@@ -92,7 +92,7 @@ icon:notify(clearNoticeEvent)
 ```
 Prompts a notice bubble which accumulates the further it is prompted. If the icon belongs to a dropdown or menu, then the notice will appear on the parent icon when the parent icon is deselected.
 
-`clearNoticeEvent` should be a [RBXScriptSignal](https://create.roblox.com/docs/reference/engine/datatypes/RBXScriptSignal)
+`clearNoticeEvent` should be a [RBXScriptSignal](https://create.roblox.com/docs/reference/engine/datatypes/RBXScriptSignal).
 
 ----
 #### clearNotices
