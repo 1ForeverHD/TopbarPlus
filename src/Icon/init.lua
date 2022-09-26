@@ -571,21 +571,27 @@ The position the icon is at or aims to move to.
 
 -- LOCAL
 local tweenService = game:GetService("TweenService")
-local replicatedStorage = game:GetService("ReplicatedStorage")
 local debris = game:GetService("Debris")
 local userInputService = game:GetService("UserInputService")
 local httpService = game:GetService("HttpService") -- This is to generate GUIDs
 local runService = game:GetService("RunService")
 local textService = game:GetService("TextService")
-local guiService = game:GetService("GuiService")
 local starterGui = game:GetService("StarterGui")
-local players = game:GetService("Players")
+local TopbarPlusReference = require(script.TopbarPlusReference)
+local referenceObject = TopbarPlusReference.getObject()
+local leadPackage = referenceObject and referenceObject.Value
+if leadPackage and leadPackage ~= script then
+	return require(leadPackage)
+end
+if not referenceObject then
+    TopbarPlusReference.addToReplicatedStorage()
+end
+local Icon = {}
+Icon.__index = Icon
 local IconController = require(script.IconController)
 local Signal = require(script.Signal)
 local Maid = require(script.Maid)
 local TopbarPlusGui = require(script.TopbarPlusGui)
-local TopbarPlusReference = require(script.TopbarPlusReference)
-local referenceObject = TopbarPlusReference.getObject()
 local Themes = require(script.Themes)
 local activeItems = TopbarPlusGui.ActiveItems
 local topbarContainer = TopbarPlusGui.TopbarContainer
@@ -593,11 +599,6 @@ local iconTemplate = topbarContainer["IconContainer"]
 local DEFAULT_THEME = Themes.Default
 local THUMB_OFFSET = 55
 local DEFAULT_FORCED_GROUP_VALUES = {}
-local Icon = (referenceObject and require(referenceObject.Value)) or {}
-Icon.__index = Icon
-if not referenceObject then
-	TopbarPlusReference.addToReplicatedStorage()
-end
 
 
 
@@ -1790,6 +1791,11 @@ function Icon:_updateIconSize(_, iconState)
 	local iconContainer = self.instances.iconContainer
 	if not iconContainer.Parent then return end
 
+	-- This converts richtext (e.g. "<b>Shop</b>") to normal text (e.g. "Shop")
+	-- This is important when calculating the size of the label/box for instance
+	self.instances.iconButton.Text = values.iconText
+	local iconTextContent = self.instances.iconButton.ContentText
+	
 	-- We calculate the cells dimensions as apposed to reading because there's a possibility the cells dimensions were changed at the exact time and have not yet updated
 	-- this essentially saves us from waiting a heartbeat which causes additonal complications
 	local cellSizeXOffset = values.iconSize.X.Offset
@@ -1801,7 +1807,7 @@ function Icon:_updateIconSize(_, iconState)
 	local cellSizeYScale = values.iconSize.Y.Scale
 	local cellHeight = cellSizeYOffset + (cellSizeYScale * iconContainer.Parent.AbsoluteSize.Y)
 	local labelHeight = cellHeight * values.iconLabelYScale
-	local labelWidth = textService:GetTextSize(values.iconText, labelHeight, values.iconFont, Vector2.new(10000, labelHeight)).X
+	local labelWidth = textService:GetTextSize(iconTextContent, labelHeight, values.iconFont, Vector2.new(10000, labelHeight)).X
 	local imageWidth = cellHeight * values.iconImageYScale * values.iconImageRatio
 	
 	local usingImage = values.iconImage ~= ""
@@ -2117,6 +2123,7 @@ function Icon:setCaption(text)
 		local cellSizeYScale = iconSize.Y.Scale
 		local iconContainer = self.instances.iconContainer
 		local captionContainer = self.instances.captionContainer
+		
 		if isVisible then
 			local cellHeight = cellSizeYOffset + (cellSizeYScale * iconContainer.Parent.AbsoluteSize.Y)
 			local captionLabel = self.instances.captionLabel

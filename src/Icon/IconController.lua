@@ -149,14 +149,21 @@ local runService = game:GetService("RunService")
 local userInputService = game:GetService("UserInputService")
 local tweenService = game:GetService("TweenService")
 local players = game:GetService("Players")
+local VRService = game:GetService("VRService")
 local voiceChatService = game:GetService("VoiceChatService")
-local localPlayer = players.LocalPlayer
+local TopbarPlusReference = require(script.Parent.TopbarPlusReference)
+local referenceObject = TopbarPlusReference.getObject()
+local leadPackage = referenceObject and referenceObject.Value
+if leadPackage and leadPackage.IconController ~= script then
+	return require(leadPackage.IconController)
+end
+if not referenceObject then
+    TopbarPlusReference.addToReplicatedStorage()
+end
 local IconController = {}
-local replicatedStorage = game:GetService("ReplicatedStorage")
 local Signal = require(script.Parent.Signal)
 local TopbarPlusGui = require(script.Parent.TopbarPlusGui)
 local topbarIcons = {}
-local fakeChatName = "_FakeChat"
 local forceTopbarDisabled = false
 local menuOpen
 local topbarUpdating = false
@@ -236,7 +243,7 @@ alignmentDetails["right"] = {
 	startScale = 1,
 	getOffset = function()
 		local offset = IconController.rightOffset
-		if checkTopbarEnabled() and (starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Backpack) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu)) then
+		if (checkTopbarEnabled() or VRService.VREnabled) and (starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Backpack) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu)) then
 			offset += 48
 		end
 		return offset
@@ -1223,12 +1230,18 @@ end)()
 
 -- Mimic roblox menu when opened and closed
 guiService.MenuClosed:Connect(function()
+	if VRService.VREnabled then
+		return
+	end
 	menuOpen = false
 	if not IconController.controllerModeEnabled then
 		IconController.setTopbarEnabled(IconController.topbarEnabled,false)
 	end
 end)
 guiService.MenuOpened:Connect(function()
+	if VRService.VREnabled then
+		return
+	end
 	menuOpen = true
 	IconController.setTopbarEnabled(false,false)
 end)

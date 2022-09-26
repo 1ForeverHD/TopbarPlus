@@ -1,24 +1,3 @@
-It's important only a single TopbarPlus applications initiates at runtime otherwise issues such as overlapping icons will occur.
+TopbarPlus supports the use of multiple Icon packages within a single experience. It achieves this by assigning the first-required package as the 'lead' package, then whenever a second package is required (such as via the Icon module), the lead package modules are used instead. Without this errors would occur such as overlapping icons.
 
-A developer may rename and/or place their Icon module anywhere within ReplicatedStorage therefore it's important for third party runtime applications (such as admin commands) to check and reference this correctly.
-
-To achieve this:
-
-1. When initiated, an ObjectValue called ``TopbarPlusReference`` is added directly under ``ReplicatedStorage``.
-2. Check for this. If present, require its value otherwise initiate your own TopbarPlus.
-
-```lua
-local replicatedStorage = game:GetService("ReplicatedStorage")
-
--- This checks for the reference module under ReplicatedStorage
-local topbarPlusReference = replicatedStorage:FindFirstChild("TopbarPlusReference")
-local iconModule = pathway.to.your.topbarplus
-if topbarPlusReference then
-	iconModule = topbarPlusReference.Value
-end
-
--- Now use TopbarPlus as normal
-local Icon = require(iconModule)
-local icon = Icon.new()
-```
-
+You don't have to do anything for your third-party applications. Simply use TopbarPlus as normal.

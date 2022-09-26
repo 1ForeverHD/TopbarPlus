@@ -38,6 +38,8 @@ iconButton.BorderSizePixel = 0
 iconButton.AutoButtonColor = false
 iconButton.Parent = iconContainer
 iconButton.Active = true
+iconButton.TextTransparency = 1
+iconButton.RichText = true
 
 local iconImage = Instance.new("ImageLabel")
 iconImage.BackgroundTransparency = 1

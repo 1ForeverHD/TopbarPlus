@@ -1,3 +1,18 @@
+## [2.7.7] - September 26 2022
+### Added
+- Added basic compatability for VR devices. This includes different behaviour for when the Roblox menu is toggled. Credit to @cl1ents for help with this.
+
+### Improved
+- Improved RichText compatability so that icons now account for the ContentText instead of Text when determining width.
+- Updated the third-party documents page which now explains that third-party applications no-longer need to do anything. TopbarPlus now handles multi-package logic internally.
+
+### Fixed
+- Fixed some third-party require logic within Icon and IconController. If more than one TopbarPlus package is required within an experience the first-required package will become the 'lead' package. No other package will run afterwards, only a reference to the lead package is returned. This prevents two-packages from running at once (such as when using HD Admin, SuperBiz Catalog, etc which also have their own TopbarPlus package).
+- Fixed additional third-party require logic that would occur when the IconController was required before the Icon.
+
+
+
+--------
 ## [2.7.6] - May 24 2022
 ### Added
 - Checks to account for the new obtrusive 'Voice Chat Beta' icon.
