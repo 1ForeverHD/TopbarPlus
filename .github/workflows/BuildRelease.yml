@@ -19,7 +19,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build asset
-        run: rojo build src/default.project.json --output TopbarPlus.rbxm
+        run: rojo build src/default.project.json --output Icon.rbxm
 
       - name: Git Release
         uses: anton-yurchenko/git-release@v3.4.3
@@ -32,4 +32,4 @@ jobs:
           ALLOW_TAG_PREFIX: "true"
         with:
           args: |
-              ./TopbarPlus.rbxm
+              ./Icon.rbxm
