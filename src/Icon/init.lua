@@ -230,6 +230,22 @@ icon:setSize(XOffset, YOffset, iconState)
 Determines the icons container size. By default ``XOffset`` and ``YOffset`` are ``32``.
 
 ----
+#### setXSize
+{chainable} {toggleable}
+```lua
+icon:setXSize(XOffset, iconState)
+```
+Same as ``icon:setSize`` except only for the X Offset (the Y offset is generated automatically).
+
+----
+#### setYSize
+{chainable} {toggleable}
+```lua
+icon:setYSize(XOffset, iconState)
+```
+Same as ``icon:setSize`` except only for the Y Offset (the X offset is generated automatically).
+
+----
 #### bindToggleItem
 {chainable}
 ```lua
@@ -291,7 +307,7 @@ Passes the given userdata to the Icons maid to be destroyed/disconnected on the 
 ```lua
 icon:lock()
 ```
-Prevents the icon from being pressed and toggled.
+Prevents the icon being toggled by user-input (such as clicking) however the icon can still be toggled via localscript using methods such as ``icon:select()``.
 
 ----
 #### unlock
@@ -299,7 +315,15 @@ Prevents the icon from being pressed and toggled.
 ```lua
 icon:unlock()
 ```
-Enables the icon to be pressed and toggled.
+Re-enables user-input to toggle the icon again.
+
+----
+#### autoDeselect
+{chainable}
+```lua
+icon:autoDeselect(true)
+```
+When set to ``true`` (the default) the icon is deselected when another icon (with autoDeselect enabled) is pressed. Set to ``false`` to prevent the icon being deselected when another icon is selected (a useful behaviour in dropdowns). This is a shorthand alternative to doing ``icon:setProperty("deselectWhenOtherIconSelected", true)``.
 
 ----
 #### setTopPadding
@@ -373,7 +397,7 @@ Clears all connections and destroys all instances associated with the icon.
 #### selected 
 ```lua
 icon.selected:Connect(function()
-    print("The icon was selected")
+    print("The icon was selected (either via localscript or the user)")
 end)
 ```
 
@@ -381,7 +405,7 @@ end)
 #### deselected 
 ```lua
 icon.deselected:Connect(function()
-    print("The icon was deselected")
+    print("The icon was deselected (either via localscript or the user)")
 end)
 ```
 
@@ -389,7 +413,30 @@ end)
 #### toggled 
 ```lua
 icon.toggled:Connect(function(isSelected)
-    print(("The icon was %s"):format(icon:getToggleState(isSelected)))
+    print(("The icon was %s (either via localscript or the user)"):format(icon:getToggleState(isSelected)))
+end)
+```
+
+#### userSelected 
+```lua
+icon.userSelected:Connect(function()
+    print("The icon was selected (solely by the user)")
+end)
+```
+
+----
+#### userDeselected 
+```lua
+icon.userDeselected:Connect(function()
+    print("The icon was deselected (solely by the user)")
+end)
+```
+
+----
+#### userToggled 
+```lua
+icon.userToggled:Connect(function(isSelected)
+    print(("The icon was %s (solely by the user)"):format(icon:getToggleState(isSelected)))
 end)
 ```
 
@@ -459,6 +506,7 @@ end)
 local bool = icon.deselectWhenOtherIconSelected --[default: 'true']
 ```
 A bool deciding whether the icon will be deselected when another icon is selected. Defaults to ``true``.
+This property can be updated either by doing ``icon:autoDeselect(bool)`` or ``icon:setProperty("deselectWhenOtherIconSelected", bool)``.
 
 ----
 #### accountForWhenDisabled
@@ -577,10 +625,11 @@ local httpService = game:GetService("HttpService") -- This is to generate GUIDs
 local runService = game:GetService("RunService")
 local textService = game:GetService("TextService")
 local starterGui = game:GetService("StarterGui")
-local TopbarPlusReference = require(script.TopbarPlusReference)
+local iconModule = script
+local TopbarPlusReference = require(iconModule.TopbarPlusReference)
 local referenceObject = TopbarPlusReference.getObject()
 local leadPackage = referenceObject and referenceObject.Value
-if leadPackage and leadPackage ~= script then
+if leadPackage and leadPackage ~= iconModule then
 	return require(leadPackage)
 end
 if not referenceObject then
@@ -588,11 +637,11 @@ if not referenceObject then
 end
 local Icon = {}
 Icon.__index = Icon
-local IconController = require(script.IconController)
-local Signal = require(script.Signal)
-local Maid = require(script.Maid)
-local TopbarPlusGui = require(script.TopbarPlusGui)
-local Themes = require(script.Themes)
+local IconController = require(iconModule.IconController)
+local Signal = require(iconModule.Signal)
+local Maid = require(iconModule.Maid)
+local TopbarPlusGui = require(iconModule.TopbarPlusGui)
+local Themes = require(iconModule.Themes)
 local activeItems = TopbarPlusGui.ActiveItems
 local topbarContainer = TopbarPlusGui.TopbarContainer
 local iconTemplate = topbarContainer["IconContainer"]
@@ -671,12 +720,13 @@ function Icon.new()
 			["iconImageColor"] = {instanceNames = {"iconImage"}, propertyName = "ImageColor3"},
 			["iconImageTransparency"] = {instanceNames = {"iconImage"}, propertyName = "ImageTransparency"},
 			["iconScale"] = {instanceNames = {"iconButton"}, propertyName = "Size"},
-			["forcedIconSize"] = {},
+			["forcedIconSizeX"] = {},
+			["forcedIconSizeY"] = {},
 			["iconSize"] = {callSignals = {self.updated}, callMethods = {self._updateIconSize}, instanceNames = {"iconContainer"}, propertyName = "Size", tweenAction = "resizeInfo"},
 			["iconOffset"] = {instanceNames = {"iconButton"}, propertyName = "Position"},
 			["iconText"] = {callMethods = {self._updateIconSize}, instanceNames = {"iconLabel"}, propertyName = "Text"},
 			["iconTextColor"] = {instanceNames = {"iconLabel"}, propertyName = "TextColor3"},
-			["iconFont"] = {instanceNames = {"iconLabel"}, propertyName = "Font"},
+			["iconFont"] = {callMethods = {self._updateIconSize}, instanceNames = {"iconLabel"}, propertyName = "Font"},
 			["iconImageYScale"] = {callMethods = {self._updateIconSize}},
 			["iconImageRatio"] = {callMethods = {self._updateIconSize}},
 			["iconLabelYScale"] = {callMethods = {self._updateIconSize}},
@@ -800,12 +850,13 @@ function Icon.new()
 				newValue = UDim2.new(0, XOffset, 0, 0)
 				isOpen = false
 			end
+			-- if #self.dropdownIcons > 0 and isOpen and hidePlayerlist and self._parentIcon == nil and self._bringBackPlayerlist == nil then
 			if #self.dropdownIcons > 0 and isOpen and hidePlayerlist then
 				if starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList) then
+					IconController._bringBackPlayerlist = (IconController._bringBackPlayerlist and IconController._bringBackPlayerlist + 1) or 1
+					self._bringBackPlayerlist = true
 					starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
 				end
-				IconController._bringBackPlayerlist = (IconController._bringBackPlayerlist and IconController._bringBackPlayerlist + 1) or 1
-				self._bringBackPlayerlist = true
 			elseif self._bringBackPlayerlist and not isOpen and IconController._bringBackPlayerlist then
 				IconController._bringBackPlayerlist -= 1
 				if IconController._bringBackPlayerlist <= 0 then
@@ -822,7 +873,7 @@ function Icon.new()
 			end)
 			tween:Play()
 			if isOpen then
-				dropdownFrame.CanvasPosition = self._dropdownCanvasPos
+				--dropdownFrame.CanvasPosition = self._dropdownCanvasPos
 			else
 				self._dropdownCanvasPos = dropdownFrame.CanvasPosition
 			end
@@ -901,6 +952,9 @@ function Icon.new()
 	self.selected = maid:give(Signal.new())
     self.deselected = maid:give(Signal.new())
     self.toggled = maid:give(Signal.new())
+	self.userSelected = maid:give(Signal.new())
+	self.userDeselected = maid:give(Signal.new())
+	self.userToggled = maid:give(Signal.new())
 	self.hoverStarted = maid:give(Signal.new())
 	self.hoverEnded = maid:give(Signal.new())
 	self.dropdownOpened = maid:give(Signal.new())
@@ -978,6 +1032,7 @@ function Icon.new()
 	-- Input handlers
 	-- Calls deselect/select when the icon is clicked
 	--[[instances.iconButton.MouseButton1Click:Connect(function()
+		if self.locked then return end
 		if self._draggingFinger then
 			return false
 		elseif self.isSelected then
@@ -987,11 +1042,16 @@ function Icon.new()
 		self:select()
 	end)--]]
 	instances.iconButton.MouseButton1Click:Connect(function()
+		if self.locked then return end
 		if self.isSelected then
 			self:deselect()
+			self.userDeselected:Fire()
+			self.userToggled:Fire(false)
 			return true
 		end
 		self:select()
+		self.userSelected:Fire()
+		self.userToggled:Fire(true)
 	end)
 	instances.iconButton.MouseButton2Click:Connect(function()
 		self._rightClicking = true
@@ -1010,7 +1070,7 @@ function Icon.new()
 		self:_updateStateOverlay(0.7, Color3.new(0, 0, 0))
 	end)
 	instances.iconButton.MouseButton1Up:Connect(function()
-		if self.locked then return end
+		if self.overlayLocked then return end
 		self:_updateStateOverlay(0.9, Color3.new(1, 1, 1))
 	end)
 
@@ -1033,11 +1093,15 @@ function Icon.new()
 			self._tappingAway = false
 		end
 		--
-		if self._bindedToggleKeys[input.KeyCode] and not touchingAnObject then
+		if self._bindedToggleKeys[input.KeyCode] and not touchingAnObject and not self.locked then
 			if self.isSelected then
 				self:deselect()
+				self.userDeselected:Fire()
+				self.userToggled:Fire(false)
 			else
 				self:select()
+				self.userSelected:Fire()
+				self.userToggled:Fire(true)
 			end
 		end
 		--
@@ -1581,7 +1645,7 @@ function Icon:_playClickSound()
 end
 
 function Icon:select(byIcon)
-	if self.locked then return self end
+	--if self.locked then return self end
 	self.isSelected = true
 	self:_setToggleItemsVisible(true, byIcon)
 	self:_updateNotice()
@@ -1596,7 +1660,7 @@ function Icon:select(byIcon)
 end
 
 function Icon:deselect(byIcon)
-	if self.locked then return self end
+	--if self.locked then return self end
 	self.isSelected = false
 	self:_setToggleItemsVisible(false, byIcon)
 	self:_updateNotice()
@@ -1753,17 +1817,51 @@ function Icon:_updateBaseZIndex(baseValue)
 	local difference = newBaseValue - container.ZIndex
 	if difference == 0 then return "The baseValue is the same" end
 	for _, object in pairs(self.instances) do
-		object.ZIndex = object.ZIndex + difference
+		if object:IsA("GuiObject") then
+			object.ZIndex = object.ZIndex + difference
+		end
 	end
 	return true
 end
 
 function Icon:setSize(XOffset, YOffset, iconState)
+	if tonumber(XOffset) then
+		self.forcefullyAppliedXSize = true
+		self:set("forcedIconSizeX", tonumber(XOffset), iconState)
+	else
+		self.forcefullyAppliedXSize = false
+		self:set("forcedIconSizeX", 32, iconState)
+	end
+	if tonumber(YOffset) then
+		self.forcefullyAppliedYSize = true
+		self:set("forcedIconSizeY", tonumber(YOffset), iconState)
+	else
+		self.forcefullyAppliedYSize = false
+		self:set("forcedIconSizeY", 32, iconState)
+	end
 	local newXOffset = tonumber(XOffset) or 32
-	local newYOffset = tonumber(YOffset) or newXOffset
-	self:set("forcedIconSize", UDim2.new(0, newXOffset, 0, newYOffset), iconState)
+	local newYOffset = tonumber(YOffset) or (YOffset ~= "_NIL" and newXOffset) or 32
 	self:set("iconSize", UDim2.new(0, newXOffset, 0, newYOffset), iconState)
 	return self
+end
+
+function Icon:setXSize(XOffset, iconState)
+	self:setSize(XOffset, "_NIL", iconState)
+	return self
+end
+
+function Icon:setYSize(YOffset, iconState)
+	self:setSize("_NIL", YOffset, iconState)
+	return self
+end
+
+function Icon:_getContentText(text)
+	-- This converts richtext (e.g. "<b>Shop</b>") to normal text (e.g. "Shop")
+	-- This also converts richtext/normaltext into its localized (translated) version
+	-- This is important when calculating the size of the label/box for instance
+	self.instances.iconButton.Text = text
+	self.instances.iconButton.Text = self.instances.iconButton.LocalizedText
+	return self.instances.iconButton.ContentText
 end
 
 function Icon:_updateIconSize(_, iconState)
@@ -1777,7 +1875,7 @@ function Icon:_updateIconSize(_, iconState)
 		iconText = self:get("iconText", iconState) or "_NIL",
 		iconFont = self:get("iconFont", iconState) or "_NIL",
 		iconSize = self:get("iconSize", iconState) or "_NIL",
-		forcedIconSize = self:get("forcedIconSize", iconState) or "_NIL",
+		forcedIconSizeX = self:get("forcedIconSizeX", iconState) or "_NIL",
 		iconImageYScale = self:get("iconImageYScale", iconState) or "_NIL",
 		iconImageRatio = self:get("iconImageRatio", iconState) or "_NIL",
 		iconLabelYScale = self:get("iconLabelYScale", iconState) or "_NIL",
@@ -1791,23 +1889,19 @@ function Icon:_updateIconSize(_, iconState)
 	local iconContainer = self.instances.iconContainer
 	if not iconContainer.Parent then return end
 
-	-- This converts richtext (e.g. "<b>Shop</b>") to normal text (e.g. "Shop")
-	-- This is important when calculating the size of the label/box for instance
-	self.instances.iconButton.Text = values.iconText
-	local iconTextContent = self.instances.iconButton.ContentText
-	
 	-- We calculate the cells dimensions as apposed to reading because there's a possibility the cells dimensions were changed at the exact time and have not yet updated
 	-- this essentially saves us from waiting a heartbeat which causes additonal complications
 	local cellSizeXOffset = values.iconSize.X.Offset
 	local cellSizeXScale = values.iconSize.X.Scale
 	local cellWidth = cellSizeXOffset + (cellSizeXScale * iconContainer.Parent.AbsoluteSize.X)
-	local minCellWidth = values.forcedIconSize.X.Offset--cellWidth
-	local maxCellWidth = (cellSizeXScale > 0 and cellWidth) or 9999
+	local minCellWidth = values.forcedIconSizeX--cellWidth
+	local maxCellWidth = (cellSizeXScale > 0 and cellWidth) or (self.forcefullyAppliedXSize and minCellWidth) or 9999
 	local cellSizeYOffset = values.iconSize.Y.Offset
 	local cellSizeYScale = values.iconSize.Y.Scale
 	local cellHeight = cellSizeYOffset + (cellSizeYScale * iconContainer.Parent.AbsoluteSize.Y)
 	local labelHeight = cellHeight * values.iconLabelYScale
-	local labelWidth = textService:GetTextSize(iconTextContent, labelHeight, values.iconFont, Vector2.new(10000, labelHeight)).X
+	local iconContentText = self:_getContentText(values.iconText)
+	local labelWidth = textService:GetTextSize(iconContentText, labelHeight, values.iconFont, Vector2.new(10000, labelHeight)).X
 	local imageWidth = cellHeight * values.iconImageYScale * values.iconImageRatio
 	
 	local usingImage = values.iconImage ~= ""
@@ -1912,12 +2006,29 @@ function Icon:unbindToggleKey(keyCodeEnum)
 end
 
 function Icon:lock()
+	self.instances.iconButton.Active = false
 	self.locked = true
+	task.defer(function()
+		-- We do this to prevent the overlay remaining enabled if :lock is called right after an icon is selected
+		if self.locked then
+			self.overlayLocked = true
+		end
+	end)
 	return self
 end
 
 function Icon:unlock()
+	self.instances.iconButton.Active = true
 	self.locked = false
+	self.overlayLocked = false
+	return self
+end
+
+function Icon:autoDeselect(bool)
+	if bool == nil then
+		bool = true
+	end
+	self.deselectWhenOtherIconSelected = bool
 	return self
 end
 
@@ -1977,7 +2088,8 @@ function Icon:setTip(text)
 	assert(typeof(text) == "string" or text == nil, "Expected string, got "..typeof(text))
 	local realText = text or ""
 	local isVisible = realText ~= ""
-	local textSize = textService:GetTextSize(realText, 12, Enum.Font.GothamSemibold, Vector2.new(1000, 20-6))
+	local iconContentText = self:_getContentText(realText)
+	local textSize = textService:GetTextSize(iconContentText, 12, Enum.Font.GothamSemibold, Vector2.new(1000, 20-6))
 	self.instances.tipLabel.Text = realText
 	self.instances.tipFrame.Size = (isVisible and UDim2.new(0, textSize.X+6, 0, 20)) or UDim2.new(0, 0, 0, 0)
 	self.instances.tipFrame.Parent = (isVisible and activeItems) or self.instances.iconContainer
@@ -2129,7 +2241,8 @@ function Icon:setCaption(text)
 			local captionLabel = self.instances.captionLabel
 			local captionContainerHeight = cellHeight * CAPTION_CONTAINER_Y_SIZE_SCALE
 			local captionLabelHeight = captionContainerHeight * CAPTION_LABEL_Y_SCALE
-			local textWidth = textService:GetTextSize(self.captionText, captionLabelHeight, labelFont, Vector2.new(10000, captionLabelHeight)).X
+			local iconContentText = self:_getContentText(self.captionText)
+			local textWidth = textService:GetTextSize(iconContentText, captionLabelHeight, labelFont, Vector2.new(10000, captionLabelHeight)).X
 			captionLabel.TextSize = captionLabelHeight
 			captionLabel.Size = UDim2.new(0, textWidth, CAPTION_LABEL_Y_SCALE, 0)
 			captionContainer.Size = UDim2.new(0, textWidth + CAPTION_X_MARGIN*2, 0, cellHeight*CAPTION_CONTAINER_Y_SIZE_SCALE)

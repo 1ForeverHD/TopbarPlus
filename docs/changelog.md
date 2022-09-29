@@ -1,3 +1,17 @@
+## [2.7.8] - September 28 2022
+### Added
+- Added RichText compatability to Captions and Tips
+
+### Improved
+- Updated Contributing docs page to mention that you don't need to open issues for smaller contributions like single-line fixes
+
+### Fixed
+- Fixed an offset bug that occurred when CoreGuis PlayerList and Backpack were disabled (but not EmotesMenu) while R6. More details here: https://devforum.roblox.com/t/topbarplus-v277/1017485/684?u=foreverhd
+- Fixed an error when setting the base ZIndex of an icon. More details here: https://devforum.roblox.com/t/topbarplus-v277/1017485/679?u=foreverhd
+
+
+
+--------
 ## [2.7.7] - September 26 2022
 ### Added
 - Added basic compatability for VR devices. This includes different behaviour for when the Roblox menu is toggled. Credit to @cl1ents for help with this.

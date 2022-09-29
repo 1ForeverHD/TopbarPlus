@@ -49,7 +49,8 @@ return {
             iconImageRatio = 1,
             iconLabelYScale = 0.45,
             iconScale = UDim2.new(1, 0, 1, 0),
-            forcedIconSize = UDim2.new(0, 32, 0, 32);
+            forcedIconSizeX = 32;
+            forcedIconSizeY = 32;
             iconSize = UDim2.new(0, 32, 0, 32),
             iconOffset = UDim2.new(0, 0, 0, 0),
             iconText = "",

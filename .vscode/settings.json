@@ -1,0 +1,5 @@
+{
+    "robloxLsp.diagnostics.disable": [
+        "undefined-global"
+    ]
+}

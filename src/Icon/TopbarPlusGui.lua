@@ -213,6 +213,7 @@ tipLabel.TextSize = 12
 tipLabel.Position = UDim2.new(0,3,0,3)
 tipLabel.Size = UDim2.new(1,-6,1,-6)
 tipLabel.ZIndex = 41
+tipLabel.RichText = true
 tipLabel.Parent = tipFrame
 tipLabel.Active = false
 

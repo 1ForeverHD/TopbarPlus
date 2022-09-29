@@ -90,6 +90,13 @@ Hides the fake healthbar (if currently visible) and prevents it becoming visible
 
 
 ## Properties
+#### voiceChatEnabled
+```lua
+local bool = IconController.voiceChatEnabled --[default: 'false']
+```
+It's important you set this to true ``IconController.voiceChatEnabled = true`` after enabling Voice Chat within your experience so that TopbarPlus can account for the BETA VoiceChat label. More information here: https://devforum.roblox.com/t/introduce-a-voicechatservice-property-or-method-to-see-if-voice-chat-is-enabled-in-that-experience/1999526
+
+----
 #### mimicCoreGui
 ```lua
 local bool = IconController.mimicCoreGui --[default: 'true']
@@ -151,7 +158,8 @@ local tweenService = game:GetService("TweenService")
 local players = game:GetService("Players")
 local VRService = game:GetService("VRService")
 local voiceChatService = game:GetService("VoiceChatService")
-local TopbarPlusReference = require(script.Parent.TopbarPlusReference)
+local iconModule = script.Parent
+local TopbarPlusReference = require(iconModule.TopbarPlusReference)
 local referenceObject = TopbarPlusReference.getObject()
 local leadPackage = referenceObject and referenceObject.Value
 if leadPackage and leadPackage.IconController ~= script then
@@ -161,8 +169,8 @@ if not referenceObject then
     TopbarPlusReference.addToReplicatedStorage()
 end
 local IconController = {}
-local Signal = require(script.Parent.Signal)
-local TopbarPlusGui = require(script.Parent.TopbarPlusGui)
+local Signal = require(iconModule.Signal)
+local TopbarPlusGui = require(iconModule.TopbarPlusGui)
 local topbarIcons = {}
 local forceTopbarDisabled = false
 local menuOpen
@@ -170,7 +178,8 @@ local topbarUpdating = false
 local cameraConnection
 local controllerMenuOverride
 local isStudio = runService:IsStudio()
-local isVoiceChatEnabled = false
+local localPlayer = players.LocalPlayer
+local voiceChatIsEnabledForUserAndWithinExperience = false
 local STUPID_CONTROLLER_OFFSET = 32
 
 
@@ -211,7 +220,7 @@ alignmentDetails["left"] = {
 			if chatEnabled then
 				offset += 12 + 32
 			end
-			if isVoiceChatEnabled and not isStudio then
+			if voiceChatIsEnabledForUserAndWithinExperience and not isStudio then
 				if chatEnabled then
 					offset += 67
 				else
@@ -243,7 +252,10 @@ alignmentDetails["right"] = {
 	startScale = 1,
 	getOffset = function()
 		local offset = IconController.rightOffset
-		if (checkTopbarEnabled() or VRService.VREnabled) and (starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Backpack) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu)) then
+		local localCharacter  = localPlayer.Character
+		local localHumanoid = localCharacter and localCharacter:FindFirstChild("Humanoid")
+		local isR6 = if localHumanoid and localHumanoid.RigType == Enum.HumanoidRigType.R6 then true else false -- Even though the EmotesMenu doesn't appear for R6 players, it will still register as enabled unless manually disabled
+		if (checkTopbarEnabled() or VRService.VREnabled) and (starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Backpack) or (not isR6 and starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu))) then
 			offset += 48
 		end
 		return offset
@@ -267,6 +279,7 @@ IconController.midGap = 12
 IconController.rightGap = 12
 IconController.leftOffset = 0
 IconController.rightOffset = 0
+IconController.voiceChatEnabled = false
 IconController.mimicCoreGui = true
 IconController.healthbarDisabled = false
 
@@ -947,7 +960,7 @@ function IconController.setupHealthbar()
 	-- Create a fake healthbar icon to mimic the core health gui
 	task.defer(function()
 		runService.Heartbeat:Wait()
-		local Icon = require(script.Parent)
+		local Icon = require(iconModule)
 
 		Icon.new()
 			:setProperty("internalIcon", true)
@@ -1078,7 +1091,7 @@ coroutine.wrap(function()
 	
 	-- Create PC 'Enter Controller Mode' Icon
 	runService.Heartbeat:Wait() -- This is required to prevent an infinite recursion
-	local Icon = require(script.Parent)
+	local Icon = require(iconModule)
 	local controllerOptionIcon = Icon.new()
 		:setProperty("internalIcon", true)
 		:setName("_TopbarControllerOption")
@@ -1169,13 +1182,26 @@ coroutine.wrap(function()
 	end
 
 	-- This checks if voice chat is enabled
-	local success, enabled = pcall(function() return voiceChatService:IsVoiceEnabledForUserIdAsync(localPlayer.UserId) end)
-	if success and enabled then
-		isVoiceChatEnabled = true
-		IconController.updateTopbar()
+	local success, enabledForUser = pcall(function() return voiceChatService:IsVoiceEnabledForUserIdAsync(localPlayer.UserId) end)
+	if IconController.voiceChatEnabled then
+		if success and enabledForUser then
+			voiceChatIsEnabledForUserAndWithinExperience = true
+			IconController.updateTopbar()
+		end
 	end
-
-	-- Credit
+	
+	
+	
+	--------------- FEEL FREE TO DELETE THIS IS YOU DO NOT USE VOICE CHAT WITHIN YOUR EXPERIENCE ---------------
+	task.delay(5, function()
+		if not IconController.voiceChatEnabled and success and enabledForUser and isStudio then
+			warn("⚠️TopbarPlus Action Required⚠️ If VoiceChat is enabled within your experience it's vital you set IconController.voiceChatEnabled to true ``require(game.ReplicatedStorage.Icon.IconController).voiceChatEnabled = true`` otherwise the BETA label will not be accounted for within your live servers. This warning will disappear after doing so. Feel free to delete this warning if you have not enabled VoiceChat within your experience.")
+		end
+	end)
+	------------------------------------------------------------------------------------------------------------
+	
+	
+	
 	if not isStudio then
 		local ownerId = game.CreatorId
 		local groupService = game:GetService("GroupService")
@@ -1185,11 +1211,13 @@ coroutine.wrap(function()
 				ownerId = ownerInfo.Id
 			end
 		end
-		local version = require(script.Parent.VERSION)
+		local version = require(iconModule.VERSION)
 		if localPlayer.UserId ~= ownerId then
 			local marketplaceService = game:GetService("MarketplaceService")
 			local success, placeInfo = pcall(function() return marketplaceService:GetProductInfo(game.PlaceId) end)
 			if success and placeInfo then
+				-- Required attrbute for using TopbarPlus
+				-- This is not printed within stuido and to the game owner to prevent mixing with debug prints
 				local gameName = placeInfo.Name
 				print(("\n\n\n⚽ %s uses TopbarPlus %s\n🍍 TopbarPlus was developed by ForeverHD and the Nanoblox Team\n🚀 You can learn more and take a free copy by searching for 'TopbarPlus' on the DevForum\n\n"):format(gameName, version))
 			end
@@ -1247,6 +1275,24 @@ guiService.MenuOpened:Connect(function()
 end)
 
 bindCamera()
+
+-- It's important we update all icons when a players language changes to account for changes in the width of text, etc
+task.spawn(function()
+	local LocalizationService = game:GetService("LocalizationService")
+	local success, translator = pcall(function() return LocalizationService:GetTranslatorForPlayerAsync(localPlayer) end)
+	local function updateAllIcons()
+		--print("LOCALIZE UPDATE!!!!")
+		local icons = IconController.getIcons()
+		for _, icon in pairs(icons) do
+			icon:_updateAll()
+		end
+	end
+	if success then
+		translator:GetPropertyChangedSignal("LocaleId"):Connect(updateAllIcons)
+		task.delay(1, updateAllIcons)
+		task.delay(30, updateAllIcons)
+	end
+end)
 
 
 return IconController

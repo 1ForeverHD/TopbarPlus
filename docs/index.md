@@ -1,6 +1,7 @@
 [icon:setOrder]: https://1foreverhd.github.io/TopbarPlus/api/icon/#setorder
 [Feature Guide]: https://1foreverhd.github.io/TopbarPlus/features
 [Icon API]: https://1foreverhd.github.io/TopbarPlus/api/icon/
+[IconController.voiceChatEnabled]: https://1foreverhd.github.io/TopbarPlus/api/icon_controller/#voicechatenabled
 
 TopbarPlus is a module enabling the construction of dynamic topbar icons. These icons can be enhanced with features and methods, like themes, dropdowns and menus, to expand upon their appearance and behaviour.
 
@@ -54,3 +55,6 @@ Icon.new()
 <a><img src="https://i.imgur.com/z1oCYMQ.gif" width="50%"/></a>
 
 You may wish to enhance icons further with features like themes, dropdowns and menus, or by binding GuiObjects and KeyCodes to their toggle. This and much more can be achieved by exploring the [Feature Guide] and [Icon API].
+
+!!! warning
+It's important you set [IconController.voiceChatEnabled] to ``true`` if VoiceChat is enabled within your experience so that the BETA label can be accounted for.
