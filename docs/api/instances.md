@@ -1,5 +1,6 @@
 ### instances.iconButton.MouseButton1Click:Connect(function()
 
+if self.locked then return end
 if self._draggingFinger then
 return false
 elseif self.isSelected then
@@ -9,11 +10,16 @@ end
 self:select()
 end)--]]
 instances.iconButton.MouseButton1Click:Connect(function()
+if self.locked then return end
 if self.isSelected then
 self:deselect()
+self.userDeselected:Fire()
+self.userToggled:Fire(false)
 return true
 end
 self:select()
+self.userSelected:Fire()
+self.userToggled:Fire(true)
 end)
 instances.iconButton.MouseButton2Click:Connect(function()
 self._rightClicking = true
@@ -32,7 +38,7 @@ if self.locked then return end
 self:_updateStateOverlay(0.7, Color3.new(0, 0, 0))
 end)
 instances.iconButton.MouseButton1Up:Connect(function()
-if self.locked then return end
+if self.overlayLocked then return end
 self:_updateStateOverlay(0.9, Color3.new(1, 1, 1))
 end)
 
@@ -55,11 +61,15 @@ end
 self._tappingAway = false
 end
 --
-if self._bindedToggleKeys[input.KeyCode] and not touchingAnObject then
+if self._bindedToggleKeys[input.KeyCode] and not touchingAnObject and not self.locked then
 if self.isSelected then
 self:deselect()
+self.userDeselected:Fire()
+self.userToggled:Fire(false)
 else
 self:select()
+self.userSelected:Fire()
+self.userToggled:Fire(true)
 end
 end
 --

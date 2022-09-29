@@ -229,6 +229,22 @@ icon:setSize(XOffset, YOffset, iconState)
 Determines the icons container size. By default ``XOffset`` and ``YOffset`` are ``32``.
 
 ----
+#### setXSize
+{chainable} {toggleable}
+```lua
+icon:setXSize(XOffset, iconState)
+```
+Same as ``icon:setSize`` except only for the X Offset (the Y offset is generated automatically).
+
+----
+#### setYSize
+{chainable} {toggleable}
+```lua
+icon:setYSize(XOffset, iconState)
+```
+Same as ``icon:setSize`` except only for the Y Offset (the X offset is generated automatically).
+
+----
 #### bindToggleItem
 {chainable}
 ```lua
@@ -290,7 +306,7 @@ Passes the given userdata to the Icons maid to be destroyed/disconnected on the 
 ```lua
 icon:lock()
 ```
-Prevents the icon from being pressed and toggled.
+Prevents the icon being toggled by user-input (such as clicking) however the icon can still be toggled via localscript using methods such as ``icon:select()``.
 
 ----
 #### unlock
@@ -298,7 +314,15 @@ Prevents the icon from being pressed and toggled.
 ```lua
 icon:unlock()
 ```
-Enables the icon to be pressed and toggled.
+Re-enables user-input to toggle the icon again.
+
+----
+#### autoDeselect
+{chainable}
+```lua
+icon:autoDeselect(true)
+```
+When set to ``true`` (the default) the icon is deselected when another icon (with autoDeselect enabled) is pressed. Set to ``false`` to prevent the icon being deselected when another icon is selected (a useful behaviour in dropdowns). This is a shorthand alternative to doing ``icon:setProperty("deselectWhenOtherIconSelected", true)``.
 
 ----
 #### setTopPadding
@@ -372,7 +396,7 @@ Clears all connections and destroys all instances associated with the icon.
 #### selected 
 ```lua
 icon.selected:Connect(function()
-    print("The icon was selected")
+    print("The icon was selected (either via localscript or the user)")
 end)
 ```
 
@@ -380,7 +404,7 @@ end)
 #### deselected 
 ```lua
 icon.deselected:Connect(function()
-    print("The icon was deselected")
+    print("The icon was deselected (either via localscript or the user)")
 end)
 ```
 
@@ -388,7 +412,30 @@ end)
 #### toggled 
 ```lua
 icon.toggled:Connect(function(isSelected)
-    print(("The icon was %s"):format(icon:getToggleState(isSelected)))
+    print(("The icon was %s (either via localscript or the user)"):format(icon:getToggleState(isSelected)))
+end)
+```
+
+#### userSelected 
+```lua
+icon.userSelected:Connect(function()
+    print("The icon was selected (solely by the user)")
+end)
+```
+
+----
+#### userDeselected 
+```lua
+icon.userDeselected:Connect(function()
+    print("The icon was deselected (solely by the user)")
+end)
+```
+
+----
+#### userToggled 
+```lua
+icon.userToggled:Connect(function(isSelected)
+    print(("The icon was %s (solely by the user)"):format(icon:getToggleState(isSelected)))
 end)
 ```
 
@@ -458,6 +505,7 @@ end)
 local bool = icon.deselectWhenOtherIconSelected --[default: 'true']
 ```
 A bool deciding whether the icon will be deselected when another icon is selected. Defaults to ``true``.
+This property can be updated either by doing ``icon:autoDeselect(bool)`` or ``icon:setProperty("deselectWhenOtherIconSelected", bool)``.
 
 ----
 #### accountForWhenDisabled

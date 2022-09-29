@@ -89,6 +89,13 @@ Hides the fake healthbar (if currently visible) and prevents it becoming visible
 
 
 ## Properties
+#### voiceChatEnabled
+```lua
+local bool = IconController.voiceChatEnabled --[default: 'false']
+```
+It's important you set this to true ``IconController.voiceChatEnabled = true`` after enabling Voice Chat within your experience so that TopbarPlus can account for the BETA VoiceChat label. More information here: https://devforum.roblox.com/t/introduce-a-voicechatservice-property-or-method-to-see-if-voice-chat-is-enabled-in-that-experience/1999526
+
+----
 #### mimicCoreGui
 ```lua
 local bool = IconController.mimicCoreGui --[default: 'true']
