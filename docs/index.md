@@ -57,4 +57,4 @@ Icon.new()
 You may wish to enhance icons further with features like themes, dropdowns and menus, or by binding GuiObjects and KeyCodes to their toggle. This and much more can be achieved by exploring the [Feature Guide] and [Icon API].
 
 !!! warning
-It's important you set [IconController.voiceChatEnabled] to ``true`` if VoiceChat is enabled within your experience so that the BETA label can be accounted for.
+    It's important you set [IconController.voiceChatEnabled] to ``true`` if VoiceChat is enabled within your experience so that the BETA label can be accounted for.

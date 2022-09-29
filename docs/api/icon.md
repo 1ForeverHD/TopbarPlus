@@ -293,6 +293,14 @@ icon:unbindToggleKey(keyCodeEnum)
 Unbinds the given keycode.
 
 ----
+#### call
+{chainable}
+```lua
+icon:call(func)
+```
+Calls the function as a separate coroutine with the first argument being the icon itself. This is useful when needing to extend the behaviour of an icon while remaining in the chain.
+
+----
 #### give
 {chainable}
 ```lua

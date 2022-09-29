@@ -1,13 +1,35 @@
-## [2.7.8] - September 28 2022
+--------
+## [2.8.0] - September 29 2022
 ### Added
+- Added Localization compatability. Icons will now update their properties (such as width) when new localized text is found or detected. This also accounts for switching languages live in-game. This resolves #38
 - Added RichText compatability to Captions and Tips
+- Added ``IconController.voiceChatEnabled`` (default ``false``) which now must be set to true by game developers if their experience uses VoiceChat This is also accompanied by a warning to inform developers of this. This resolves the issue outlined here: https://devforum.roblox.com/t/topbarplus-v277/1017485/681?u=foreverhd
+- Added ``icon:autoDeselect(bool)`` as a shorthand alternative to ``:setProperty("deselectWhenOtherIconSelected", bool)``
+- Added ``icon:call(func)`` as a more appropriate alternative to ``icon:give(object)``
+- Added ``icon:setXSize(XOffset, iconState)``
+- Added ``icon:setYSize(YOffset, iconState)``
+- Added ``forcedIconSizeX`` and ``forcedIconSizeY`` theme settings
+- Added ``icon.userSelected`` event
+- Added ``icon.userDeselected`` event
+- Added ``icon.userToggled`` event
+- Added a variable for script and script.Parent to Icon and IconController. This resolves #47
+
 
 ### Improved
 - Updated Contributing docs page to mention that you don't need to open issues for smaller contributions like single-line fixes
+- Improved the internal behaviour of ``:setSize``
+- Improved the behaviour of ``:lock`` so that the overlaps now disappear and so that ``:select`` and ``:deselect`` can still work (now only the user-input is disabled). This resolves #42
 
 ### Fixed
 - Fixed an offset bug that occurred when CoreGuis PlayerList and Backpack were disabled (but not EmotesMenu) while R6. More details here: https://devforum.roblox.com/t/topbarplus-v277/1017485/684?u=foreverhd
 - Fixed an error when setting the base ZIndex of an icon. More details here: https://devforum.roblox.com/t/topbarplus-v277/1017485/679?u=foreverhd
+- Fixed a bug preventing dropdown icons from updating: This resolves #32 and https://devforum.roblox.com/t/topbarplus-v277/1017485/348?u=foreverhd
+- Fixed a font-clipping issue by using ContentText instead and updating the icon whenever its font is changed. This resolves #60 and resolves #54
+- Fixed a bug which caused the Playerlist to re-appear when toggling right-set dropdowns even if the Playerlist CoreGui was previously disabled. This resolves #57
+
+## Removed
+- Removed the documentation within Icon and IconController, and removed the module-docs.yml action. This was not as beneficial as first assumed.
+- Removed ``forcedIconSize`` theme setting
 
 
 

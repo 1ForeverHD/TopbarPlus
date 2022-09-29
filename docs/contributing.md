@@ -32,7 +32,6 @@
 
 ## Documentation
 - If you find any problems in the documentation, including typos, bad grammar, misleading phrasing, or missing content, feel free to file issues and pull requests to fix them.
-- API documentation should be written at the top of the corresponding module under ``--[[ module:header``. These comment blocks are automatically converted into markdown files and deployed to the site when pulled into the ``main`` branch.
 - To test documentation:
     1. Install [Material for MKDocs].
     2. Visit the [TopbarPlus repository].
