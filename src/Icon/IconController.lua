@@ -30,6 +30,7 @@ local controllerMenuOverride
 local isStudio = runService:IsStudio()
 local localPlayer = players.LocalPlayer
 local voiceChatIsEnabledForUserAndWithinExperience = false
+local disableControllerOption = false
 local STUPID_CONTROLLER_OFFSET = 32
 
 
@@ -225,6 +226,14 @@ function IconController.disableHealthbar(bool)
 	IconController.healthbarDisabledSignal:Fire(finalBool)
 end
 
+function IconController.disableControllerOption(bool)
+	local finalBool = (bool == nil or bool)
+	disableControllerOption = finalBool
+	if IconController.getIcon("_TopbarControllerOption") then
+		IconController._determineControllerDisplay()
+	end
+end
+
 function IconController.canShowIconOnTopbar(icon)
 	if (icon.enabled == true or icon.accountForWhenDisabled) and icon.presentOnTopbar then
 		return true
@@ -235,9 +244,6 @@ end
 function IconController.getMenuOffset(icon)
 	local alignment = icon:get("alignment")
 	local alignmentGap = IconController[alignment.."Gap"]
-	local iconSize = icon:get("iconSize") or UDim2.new(0, 32, 0, 32)
-	local sizeX = iconSize.X.Offset
-	local iconWidthAndGap = (sizeX + alignmentGap)
 	local extendLeft = 0
 	local extendRight = 0
 	local additionalRight = 0
@@ -279,7 +285,7 @@ function IconController.updateTopbar()
 		requestedTopbarUpdate = true
 		return false
 	end
-	coroutine.wrap(function()
+	task.defer(function()
 		topbarUpdating = true
 		runService.Heartbeat:Wait()
 		topbarUpdating = false
@@ -521,7 +527,7 @@ function IconController.updateTopbar()
 			IconController.updateTopbar()
 		end
 		return true
-	end)()
+	end)
 end
 
 function IconController.setTopbarEnabled(bool, forceBool)
@@ -935,6 +941,29 @@ function IconController.setupHealthbar()
 	end)
 end
 
+function IconController._determineControllerDisplay()
+	local mouseEnabled = userInputService.MouseEnabled
+	local controllerEnabled = userInputService.GamepadEnabled
+	local controllerOptionIcon = IconController.getIcon("_TopbarControllerOption")
+	if mouseEnabled and controllerEnabled then
+		-- Show icon (if option not disabled else hide)
+		if not disableControllerOption then
+			controllerOptionIcon:setEnabled(true)
+		else
+			controllerOptionIcon:setEnabled(false)
+		end
+	elseif mouseEnabled and not controllerEnabled then
+		-- Hide icon, disableControllerMode
+		controllerOptionIcon:setEnabled(false)
+		IconController._enableControllerMode(false)
+		controllerOptionIcon:deselect()
+	elseif not mouseEnabled and controllerEnabled then
+		-- Hide icon, _enableControllerMode
+		controllerOptionIcon:setEnabled(false)
+		IconController._enableControllerMode(true)
+	end
+end
+
 
 
 -- BEHAVIOUR
@@ -957,28 +986,10 @@ coroutine.wrap(function()
 	-- This decides what controller widgets and displays to show based upon their connected inputs
 	-- For example, if on PC with a controller, give the player the option to enable controller mode with a toggle
 	-- While if using a console (no mouse, but controller) then bypass the toggle and automatically enable controller mode
-	local function determineDisplay()
-		local mouseEnabled = userInputService.MouseEnabled
-		local controllerEnabled = userInputService.GamepadEnabled
-		local iconIsSelected = controllerOptionIcon.isSelected
-		if mouseEnabled and controllerEnabled then
-			-- Show icon
-			controllerOptionIcon:setEnabled(true)
-		elseif mouseEnabled and not controllerEnabled then
-			-- Hide icon, disableControllerMode
-			controllerOptionIcon:setEnabled(false)
-			IconController._enableControllerMode(false)
-			controllerOptionIcon:deselect()
-		elseif not mouseEnabled and controllerEnabled then
-			-- Hide icon, _enableControllerMode
-			controllerOptionIcon:setEnabled(false)
-			IconController._enableControllerMode(true)
-		end
-	end
-	userInputService:GetPropertyChangedSignal("MouseEnabled"):Connect(determineDisplay)
-	userInputService.GamepadConnected:Connect(determineDisplay)
-	userInputService.GamepadDisconnected:Connect(determineDisplay)
-	determineDisplay()
+	userInputService:GetPropertyChangedSignal("MouseEnabled"):Connect(IconController._determineControllerDisplay)
+	userInputService.GamepadConnected:Connect(IconController._determineControllerDisplay)
+	userInputService.GamepadDisconnected:Connect(IconController._determineControllerDisplay)
+	IconController._determineControllerDisplay()
 
 	-- Enable/Disable Controller Mode when icon clicked
 	local function iconClicked()

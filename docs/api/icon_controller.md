@@ -85,6 +85,13 @@ IconController.disableHealthbar(bool)
 Hides the fake healthbar (if currently visible) and prevents it becoming visible again (which normally occurs when the player takes damage).
 
 ----
+#### disableControllerOption
+```lua
+IconController.disableControllerOption(bool)
+```
+Hides the 'enter controller mode' icon which otherwise appears when a mouse and controller are enabled.
+
+----
 
 
 

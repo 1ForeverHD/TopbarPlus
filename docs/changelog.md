@@ -2,6 +2,7 @@
 ## [2.9.0] - October 6th 2022
 ### Added
 - Added ``icon:debounce(seconds)``. This is shorthand for ``icon:lock() task.wait(seconds) icon:unlock()``
+- Added `` IconController.disableControllerOption(bool)``
 - Added controller selection support
 
 ### Improved
