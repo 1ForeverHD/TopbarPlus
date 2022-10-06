@@ -132,6 +132,8 @@ IconController.rightOffset = 0
 IconController.voiceChatEnabled = false
 IconController.mimicCoreGui = true
 IconController.healthbarDisabled = false
+IconController.activeButtonBCallbacks = 0
+IconController.disableButtonB = false
 
 
 
@@ -568,7 +570,7 @@ function IconController.setTopbarEnabled(bool, forceBool)
 				runService.Heartbeat:Wait()
 				local indicatorSizeTrip = 50 --indicator.AbsoluteSize.Y * 2
 				for otherIcon, _ in pairs(topbarIcons) do
-					if IconController.canShowIconOnTopbar(otherIcon) and (selectIcon == nil or otherIcon:get("order") > selectIcon:get("order")) then
+					if IconController.canShowIconOnTopbar(otherIcon) and (selectIcon == nil or otherIcon:get("order") < selectIcon:get("order")) and otherIcon.enabled then
 						selectIcon = otherIcon
 					end
 					local container = otherIcon.instances.iconContainer
@@ -722,8 +724,8 @@ function IconController._setControllerSelectedObject(object)
 	local startId = (IconController._controllerSetCount and IconController._controllerSetCount + 1) or 0
 	IconController._controllerSetCount = startId
 	guiService.SelectedObject = object
-	delay(0.1, function() -- blame the roblox guiservice its a piece of doo doo
-		local finalId = IconController._controllerSetCount
+	task.delay(0.1, function()
+		local finalId = IconController._controllerSetCountS
 		if startId == finalId then
 			guiService.SelectedObject = object
 		end
@@ -946,7 +948,7 @@ coroutine.wrap(function()
 		:setProperty("internalIcon", true)
 		:setName("_TopbarControllerOption")
 		:setOrder(100)
-		:setImage("rbxassetid://5278150942")
+		:setImage(11162828670)
 		:setRight()
 		:setEnabled(false)
 		:setTip("Controller mode")
@@ -995,10 +997,16 @@ coroutine.wrap(function()
 			if not guiService.SelectedObject and checkTopbarEnabledAccountingForMimic() then
 				IconController.setTopbarEnabled(true,false)
 			end
-		elseif input.KeyCode == Enum.KeyCode.ButtonB then
-			IconController._previousSelectedObject = guiService.SelectedObject
-			IconController._setControllerSelectedObject(nil)
-			IconController.setTopbarEnabled(false,false)
+		elseif input.KeyCode == Enum.KeyCode.ButtonB and not IconController.disableButtonB then
+			if IconController.activeButtonBCallbacks == 1 and TopbarPlusGui.Indicator.Image == "rbxassetid://5278151556" then
+				IconController.activeButtonBCallbacks = 0
+				guiService.SelectedObject = nil
+			end
+			if IconController.activeButtonBCallbacks == 0 then
+				IconController._previousSelectedObject = guiService.SelectedObject
+				IconController._setControllerSelectedObject(nil)
+				IconController.setTopbarEnabled(false,false)
+			end
 		end
 		input:Destroy()
 	end)

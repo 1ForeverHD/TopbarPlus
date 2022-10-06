@@ -35,6 +35,9 @@ const style = `.tag {
 .deprecated {
     background-color: rgb(227, 87, 75);
 }
+.yields {
+    background-color: rgb(163, 149, 79);
+}
 .critical {
     background-color: rgb(255, 0, 0);
 }
@@ -48,6 +51,7 @@ var replaceStuff = [
     ["{server-only}", '<p class="tag server-only">server-only</p>'],
     ["{client-only}", '<p class="tag client-only">client-only</p>'],
     ["{deprecated}", '<p class="tag deprecated">deprecated</p>'],
+    ["{yields}", '<p class="tag yields">yields</p>'],
     ["{critical}", '<p class="tag critical">critical</p>'],
     ["{chainable}", '<p class="tag chainable">chainable</p>'],
     ["{unstable}", '<p class="tag unstable">unstable</p>'],

@@ -6,6 +6,7 @@ local httpService = game:GetService("HttpService") -- This is to generate GUIDs
 local runService = game:GetService("RunService")
 local textService = game:GetService("TextService")
 local starterGui = game:GetService("StarterGui")
+local guiService = game:GetService("GuiService")
 local iconModule = script
 local TopbarPlusReference = require(iconModule.TopbarPlusReference)
 local referenceObject = TopbarPlusReference.getObject()
@@ -258,6 +259,7 @@ function Icon.new()
 			else
 				self._dropdownCanvasPos = dropdownFrame.CanvasPosition
 			end
+			dropdownFrame.ScrollingEnabled = isOpen -- It's important scrolling is only enabled when the dropdown is visible otherwise it could block the scrolling behaviour of other icons
 			self.dropdownOpen = isOpen
 			self:_decideToCallSignal("dropdown")
 		end,
@@ -299,6 +301,7 @@ function Icon.new()
 			else
 				self._menuCanvasPos = menuFrame.CanvasPosition
 			end
+			menuFrame.ScrollingEnabled = isOpen -- It's important scrolling is only enabled when the menu is visible otherwise it could block the scrolling behaviour of other icons
 			self.menuOpen = isOpen
 			self:_decideToCallSignal("menu")
 		end,
@@ -397,6 +400,8 @@ function Icon.new()
 	self.targetPosition = nil
 	self.toggleItems = {}
 	self.lockedSettings = {}
+	self.UID = httpService:GenerateGUID(true)
+	self.blockBackBehaviourChecks = {}
 	
 	-- Private Properties
 	self._draggingFinger = false
@@ -1035,7 +1040,43 @@ function Icon:select(byIcon)
 	if #self.dropdownIcons > 0 or #self.menuIcons > 0 then
 		IconController:_updateSelectionGroup()
 	end
-    self.selected:Fire()
+	if userInputService.GamepadEnabled then
+		-- If a corresponding guiObject is found (set via :setToggleItem()) then this automatically
+		-- moves the controller selection to a selectable and active instance within that guiObject.
+		-- It also support back (Controller B) being pressed by navigating to previous pages or
+		-- closing the icon and focusing selection back on the controller navigation topbar.
+		for toggleItem, buttonInstancesArray in pairs(self.toggleItems) do
+			if #buttonInstancesArray > 0 then
+				local focusMaid = Maid.new()
+				guiService:AddSelectionTuple(self.UID, unpack(buttonInstancesArray))
+				guiService.SelectedObject = buttonInstancesArray[1]
+				IconController.activeButtonBCallbacks += 1
+				focusMaid:give(userInputService.InputEnded:Connect(function(input, processed)
+					local blockBackBehaviour = false
+					for _, func in pairs(self.blockBackBehaviourChecks) do
+						if func() == true then
+							blockBackBehaviour = true
+							break
+						end
+					end
+					if input.KeyCode == Enum.KeyCode.ButtonB and not blockBackBehaviour then
+						guiService.SelectedObject = self.instances.iconButton
+						self:deselect()
+					end
+				end))
+				focusMaid:give(self.deselected:Connect(function()
+					focusMaid:clean()
+				end))
+				focusMaid:give(function()
+					IconController.activeButtonBCallbacks -= 1
+					if IconController.activeButtonBCallbacks < 0 then
+						IconController.activeButtonBCallbacks = 0
+					end
+				end)
+			end
+		end
+	end
+	self.selected:Fire()
     self.toggled:Fire(self.isSelected)
 	return self
 end
@@ -1052,6 +1093,9 @@ function Icon:deselect(byIcon)
 	end
     self.deselected:Fire()
     self.toggled:Fire(self.isSelected)
+	if userInputService.GamepadEnabled then
+		guiService:RemoveSelectionGroup(self.UID)
+	end
 	return self
 end
 
@@ -1405,6 +1449,13 @@ function Icon:unlock()
 	return self
 end
 
+function Icon:debounce(seconds)
+	self:lock()
+	task.wait(seconds)
+	self:unlock()
+	return self
+end
+
 function Icon:autoDeselect(bool)
 	if bool == nil then
 		bool = true
@@ -1426,6 +1477,29 @@ function Icon:bindToggleItem(guiObjectOrLayerCollector)
 		error("Toggle item must be a GuiObject or LayerCollector!")
 	end
 	self.toggleItems[guiObjectOrLayerCollector] = true
+	self:updateSelectionInstances()
+	return self
+end
+
+function Icon:updateSelectionInstances()
+	-- This is to assist with controller navigation and selection
+	for guiObjectOrLayerCollector, _ in pairs(self.toggleItems) do
+		local buttonInstancesArray = {}
+		for _, instance in pairs(guiObjectOrLayerCollector:GetDescendants()) do
+			if (instance:IsA("TextButton") or instance:IsA("ImageButton")) and instance.Active then
+				table.insert(buttonInstancesArray, instance)
+			end
+		end
+		self.toggleItems[guiObjectOrLayerCollector] = buttonInstancesArray
+	end
+end
+
+function Icon:addBackBlocker(func)
+	-- This is custom behaviour that can block the default behaviour of going back or closing a page when Controller B is pressed
+	-- If the function returns ``true`` then the B Back behaviour is blocked
+	-- This is useful for instance when a user is purchasing an item and you don't want them to return to the previous page
+	-- if they pressed B during this pending period
+	table.insert(self.blockBackBehaviourChecks, func)
 	return self
 end
 
@@ -1700,7 +1774,11 @@ function Icon:join(parentIcon, featureName, dontUpdate)
 	local array = parentIcon[newFeatureName.."Icons"]
 	table.insert(array, self)
 	if not dontUpdate then
-		parentIcon:_updateDropdown()
+		if featureName == "dropdown" then
+			parentIcon:_updateDropdown()
+		elseif featureName == "menu" then
+			parentIcon:_updateMenu()
+		end
 	end
 	parentIcon.deselectWhenOtherIconSelected = false
 	--
@@ -1875,6 +1953,11 @@ function Icon:_updateDropdown()
 		if otherIconWidth > newMinWidth then
 			newMinWidth = otherIconWidth
 		end
+		-- This ensures the dropdown is navigated fully and correctly with a controller
+		local prevIcon = (i == 1 and self) or self.dropdownIcons[i-1]
+		local nextIcon = self.dropdownIcons[i+1]
+		otherIcon.instances.iconButton.NextSelectionUp = prevIcon and prevIcon.instances.iconButton
+		otherIcon.instances.iconButton.NextSelectionDown = nextIcon and nextIcon.instances.iconButton
 	end
 
 	local finalCanvasSizeY = (lastVisibleIconIndex == totalIcons and 0) or newCanvasSizeY
@@ -1984,6 +2067,11 @@ function Icon:_updateMenu()
 		if otherIconHeight > newMinHeight then
 			newMinHeight = otherIconHeight
 		end
+		-- This ensures the menu is navigated fully and correctly with a controller
+		local prevIcon = self.menuIcons[i-1]
+		local nextIcon = self.menuIcons[i+1]
+		otherIcon.instances.iconButton.NextSelectionRight = prevIcon and prevIcon.instances.iconButton
+		otherIcon.instances.iconButton.NextSelectionLeft = nextIcon and nextIcon.instances.iconButton
 	end
 
 	local canvasSize = (lastVisibleIconIndex == totalIcons and 0) or newCanvasSizeX + XPadding
@@ -2031,7 +2119,7 @@ function Icon:destroy()
 	self._destroyed = true
 	self._maid:clean()
 end
-Icon.Destroy = Icon.destroy -- an alias for you maid-using Pascal lovers
+Icon.Destroy = Icon.destroy
 
 
 

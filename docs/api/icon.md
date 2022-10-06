@@ -325,6 +325,14 @@ icon:unlock()
 Re-enables user-input to toggle the icon again.
 
 ----
+#### debounce
+{chainable} {yields}
+```lua
+icon:debounce(seconds)
+```
+Locks the icon, yields for the given time, then unlocks the icon, effectively shorthand for ``icon:lock() task.wait(seconds) icon:unlock()``. This is useful for applying cooldowns (to prevent an icon from being pressed again) after an icon has been selected or deselected. 
+
+----
 #### autoDeselect
 {chainable}
 ```lua

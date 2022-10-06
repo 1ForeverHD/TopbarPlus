@@ -1,5 +1,6 @@
 [discussion thread]: https://devforum.roblox.com/t/topbarplus-v2-construct-dynamic-and-intuitive-topbar-icons/1017485
 [resources]: https://1foreverhd.github.io/TopbarPlus/resources/
+[Python]: https://www.python.org/
 [Material for MKDocs]: https://squidfunk.github.io/mkdocs-material/
 [ForeverHD on the devforum]: https://devforum.roblox.com/u/ForeverHD/summary
 [TopbarPlus repository]: https://github.com/1ForeverHD/TopbarPlus
@@ -33,15 +34,16 @@
 ## Documentation
 - If you find any problems in the documentation, including typos, bad grammar, misleading phrasing, or missing content, feel free to file issues and pull requests to fix them.
 - To test documentation:
-    1. Install [Material for MKDocs].
-    2. Visit the [TopbarPlus repository].
-    3. Click *Fork* in the top right corner.
-    4. Clone this fork into your local repository.
-    5. Change directory to this clone ``cd TopbarPlus``.
-    6. Swap to the development branch ``git checkout development``.
-    7. Call ``mkdocs serve`` within your terminal.
-    8. Open your local website (it will look something like ``http://0.0.0.0:8000``)
-    9. Any changes to ``mkdocs.yml`` or the files within ``docs`` will now update live to this local site.
+    1. Install [Python] (which comes with pip).
+    2. Install [Material for MKDocs].
+    3. Visit the [TopbarPlus repository].
+    4. Click *Fork* in the top right corner.
+    5. Clone this fork into your local repository.
+    6. Change directory to this clone ``cd TopbarPlus``.
+    7. Swap to the development branch ``git checkout development``.
+    8. Call ``mkdocs serve`` within your terminal.
+    9. Open your local website (it will look something like ``http://0.0.0.0:8000``)
+    10. Any changes to ``mkdocs.yml`` or the files within ``docs`` will now update live to this local site.
    
 !!! important
     All pull requests must be made to the ***development*** branch.

@@ -228,6 +228,7 @@ dropdownContainer.ZIndex = -2
 dropdownContainer.ClipsDescendants = true
 dropdownContainer.Visible = true
 dropdownContainer.Parent = iconContainer
+dropdownContainer.Selectable = false
 dropdownContainer.Active = false
 
 local dropdownFrame = Instance.new("ScrollingFrame")
@@ -246,6 +247,8 @@ dropdownFrame.VerticalScrollBarInset = Enum.ScrollBarInset.Always
 dropdownFrame.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
 dropdownFrame.Parent = dropdownContainer
 dropdownFrame.Active = false
+dropdownFrame.Selectable = false
+dropdownFrame.ScrollingEnabled = false
 
 local dropdownList = Instance.new("UIListLayout")
 dropdownList.Name = "DropdownList"
@@ -261,8 +264,6 @@ dropdownPadding.Parent = dropdownFrame
 
 -- Menus
 local menuContainer = Instance.new("Frame")
-menuContainer.Active = true
-menuContainer.Selectable = false
 menuContainer.Name = "MenuContainer"
 menuContainer.BackgroundTransparency = 1
 menuContainer.BorderSizePixel = 0
@@ -273,10 +274,9 @@ menuContainer.ClipsDescendants = true
 menuContainer.Visible = true
 menuContainer.Parent = iconContainer
 menuContainer.Active = false
+menuContainer.Selectable = false
 
 local menuFrame = Instance.new("ScrollingFrame")
-menuFrame.Active = true
-menuFrame.Selectable = true
 menuFrame.Name = "MenuFrame"
 menuFrame.BackgroundTransparency = 1
 menuFrame.BorderSizePixel = 0
@@ -292,6 +292,8 @@ menuFrame.HorizontalScrollBarInset = Enum.ScrollBarInset.Always
 menuFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 menuFrame.Parent = menuContainer
 menuFrame.Active = false
+menuFrame.Selectable = false
+menuFrame.ScrollingEnabled = false
 
 local menuList = Instance.new("UIListLayout")
 menuList.Name = "MenuList"

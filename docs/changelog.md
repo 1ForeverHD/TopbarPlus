@@ -1,4 +1,16 @@
 --------
+## [2.9.0] - October 6th 2022
+### Added
+- Added ``icon:debounce(seconds)``. This is shorthand for ``icon:lock() task.wait(seconds) icon:unlock()``
+- Added controller selection support
+
+### Improved
+- Improved the scrolling behaviour of menus and dropdowns (scrolling is no longer blocked by other scrolling items)
+- Improved menu and dropdown selection when using a controller so that menu/dropdown icons are no longer skipped when the maxIconsBeforeScroll is less than the total icons within the feature
+
+
+
+--------
 ## [2.8.0] - September 29 2022
 ### Added
 - Added Localization compatability. Icons will now update their properties (such as width) when new localized text is found or detected. This also accounts for switching languages live in-game. This resolves #38
