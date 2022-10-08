@@ -61,8 +61,18 @@ iconLabel.RichText = true
 iconLabel.TextScaled = false
 iconLabel.ClipsDescendants = true
 iconLabel.ZIndex = 11--3
-iconLabel.Parent = iconButton
 iconLabel.Active = false
+iconLabel.AutoLocalize = true
+iconLabel.Parent = iconButton
+
+local fakeIconLabel = iconLabel:Clone()
+fakeIconLabel.Name = "FakeIconLabel"
+fakeIconLabel.AnchorPoint = Vector2.new(0, 0)
+fakeIconLabel.Position = UDim2.new(0, 0, 0, 0)
+fakeIconLabel.Size = UDim2.new(1, 0, 1, 0)
+fakeIconLabel.TextTransparency = 1
+fakeIconLabel.AutoLocalize = false
+fakeIconLabel.Parent = iconLabel.Parent
 
 local iconGradient = Instance.new("UIGradient")
 iconGradient.Name = "IconGradient"

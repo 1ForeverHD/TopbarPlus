@@ -8,6 +8,7 @@
 ### Improved
 - Improved the scrolling behaviour of menus and dropdowns (scrolling is no longer blocked by other scrolling items)
 - Improved menu and dropdown selection when using a controller so that menu/dropdown icons are no longer skipped when the maxIconsBeforeScroll is less than the total icons within the feature
+- Updated internals of localization support so that only the source language is scraped
 
 
 

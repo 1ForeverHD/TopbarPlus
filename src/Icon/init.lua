@@ -1,4 +1,5 @@
 -- LOCAL
+local LocalizationService = game:GetService("LocalizationService")
 local tweenService = game:GetService("TweenService")
 local debris = game:GetService("Debris")
 local userInputService = game:GetService("UserInputService")
@@ -7,6 +8,9 @@ local runService = game:GetService("RunService")
 local textService = game:GetService("TextService")
 local starterGui = game:GetService("StarterGui")
 local guiService = game:GetService("GuiService")
+local localizationService = game:GetService("LocalizationService")
+local playersService = game:GetService("Players")
+local localPlayer = playersService.LocalPlayer
 local iconModule = script
 local TopbarPlusReference = require(iconModule.TopbarPlusReference)
 local referenceObject = TopbarPlusReference.getObject()
@@ -55,6 +59,7 @@ function Icon.new()
 	instances["iconButton"] = iconContainer.IconButton
 	instances["iconImage"] = instances.iconButton.IconImage
 	instances["iconLabel"] = instances.iconButton.IconLabel
+	instances["fakeIconLabel"] = instances.iconButton.FakeIconLabel
 	instances["iconGradient"] = instances.iconButton.IconGradient
 	instances["iconCorner"] = instances.iconButton.IconCorner
 	instances["iconOverlay"] = iconContainer.IconOverlay
@@ -605,7 +610,7 @@ function Icon.mimic(coreIconToMimic)
 			starterGui:SetCoreGuiEnabled("Chat", icon.enabled)
 		end
 		-- Tap into chat module
-		local chatMainModule = players.LocalPlayer.PlayerScripts:WaitForChild("ChatScript").ChatMain
+		local chatMainModule = localPlayer.PlayerScripts:WaitForChild("ChatScript").ChatMain
 		local ChatMain = require(chatMainModule)
 		local function displayChatBar(visibility)
 			icon.ignoreVisibilityStateChange = true
@@ -1284,9 +1289,15 @@ function Icon:_getContentText(text)
 	-- This converts richtext (e.g. "<b>Shop</b>") to normal text (e.g. "Shop")
 	-- This also converts richtext/normaltext into its localized (translated) version
 	-- This is important when calculating the size of the label/box for instance
-	self.instances.iconButton.Text = text
-	self.instances.iconButton.Text = self.instances.iconButton.LocalizedText
-	return self.instances.iconButton.ContentText
+	self.instances.fakeIconLabel.Text = text
+	local translator = localizationService:GetTranslatorForPlayerAsync(localPlayer)
+	local textToTranslate = self.instances.fakeIconLabel.ContentText
+	local translatedContentText = typeof(self.instances.iconLabel) == "Instance" and translator:Translate(self.instances.iconLabel, textToTranslate)
+	if typeof(translatedContentText) ~= "string" or translatedContentText == "" then
+		translatedContentText = textToTranslate
+	end
+	self.instances.fakeIconLabel.Text = ""
+	return translatedContentText
 end
 
 function Icon:_updateIconSize(_, iconState)

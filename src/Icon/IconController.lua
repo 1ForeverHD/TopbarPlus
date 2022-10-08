@@ -1050,27 +1050,46 @@ coroutine.wrap(function()
 		end
 	end
 
+
+
+
+
 	-- This checks if voice chat is enabled
-	local success, enabledForUser = pcall(function() return voiceChatService:IsVoiceEnabledForUserIdAsync(localPlayer.UserId) end)
-	if IconController.voiceChatEnabled then
-		if success and enabledForUser then
-			voiceChatIsEnabledForUserAndWithinExperience = true
-			IconController.updateTopbar()
+	task.defer(function()
+		local success, enabledForUser
+		while true do
+			success, enabledForUser = pcall(function() return voiceChatService:IsVoiceEnabledForUserIdAsync(localPlayer.UserId) end)
+			if success then
+				break
+			end
+			task.wait(1)
 		end
-	end
-	
-	
-	
-	--------------- FEEL FREE TO DELETE THIS IS YOU DO NOT USE VOICE CHAT WITHIN YOUR EXPERIENCE ---------------
-	task.delay(5, function()
-		if not IconController.voiceChatEnabled and success and enabledForUser and isStudio then
-			warn("⚠️TopbarPlus Action Required⚠️ If VoiceChat is enabled within your experience it's vital you set IconController.voiceChatEnabled to true ``require(game.ReplicatedStorage.Icon.IconController).voiceChatEnabled = true`` otherwise the BETA label will not be accounted for within your live servers. This warning will disappear after doing so. Feel free to delete this warning if you have not enabled VoiceChat within your experience.")
+		local function checkVoiceChatManuallyEnabled()
+			if IconController.voiceChatEnabled then
+				if success and enabledForUser then
+					voiceChatIsEnabledForUserAndWithinExperience = true
+					IconController.updateTopbar()
+				end
+			end
 		end
+		checkVoiceChatManuallyEnabled()
+		
+		--------------- FEEL FREE TO DELETE THIS IS YOU DO NOT USE VOICE CHAT WITHIN YOUR EXPERIENCE ---------------
+		localPlayer.PlayerGui:WaitForChild("TopbarPlus", 999)
+		task.delay(10, function()
+			checkVoiceChatManuallyEnabled()
+			if not IconController.voiceChatEnabled and success and enabledForUser and isStudio then
+				warn("⚠️TopbarPlus Action Required⚠️ If VoiceChat is enabled within your experience it's vital you set IconController.voiceChatEnabled to true ``require(game.ReplicatedStorage.Icon.IconController).voiceChatEnabled = true`` otherwise the BETA label will not be accounted for within your live servers. This warning will disappear after doing so. Feel free to delete this warning if you have not enabled VoiceChat within your experience.")
+			end
+		end)
+		------------------------------------------------------------------------------------------------------------
+
 	end)
-	------------------------------------------------------------------------------------------------------------
 	
 	
 	
+
+
 	if not isStudio then
 		local ownerId = game.CreatorId
 		local groupService = game:GetService("GroupService")
