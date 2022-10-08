@@ -1290,9 +1290,8 @@ function Icon:_getContentText(text)
 	-- This also converts richtext/normaltext into its localized (translated) version
 	-- This is important when calculating the size of the label/box for instance
 	self.instances.fakeIconLabel.Text = text
-	local translator = localizationService:GetTranslatorForPlayerAsync(localPlayer)
 	local textToTranslate = self.instances.fakeIconLabel.ContentText
-	local translatedContentText = typeof(self.instances.iconLabel) == "Instance" and translator:Translate(self.instances.iconLabel, textToTranslate)
+	local translatedContentText = typeof(self.instances.iconLabel) == "Instance" and IconController.translator:Translate(self.instances.iconLabel, textToTranslate)
 	if typeof(translatedContentText) ~= "string" or translatedContentText == "" then
 		translatedContentText = textToTranslate
 	end

@@ -8,6 +8,7 @@ local tweenService = game:GetService("TweenService")
 local players = game:GetService("Players")
 local VRService = game:GetService("VRService")
 local voiceChatService = game:GetService("VoiceChatService")
+local localizationService = game:GetService("LocalizationService")
 local iconModule = script.Parent
 local TopbarPlusReference = require(iconModule.TopbarPlusReference)
 local referenceObject = TopbarPlusReference.getObject()
@@ -135,6 +136,7 @@ IconController.mimicCoreGui = true
 IconController.healthbarDisabled = false
 IconController.activeButtonBCallbacks = 0
 IconController.disableButtonB = false
+IconController.translator = localizationService:GetTranslatorForPlayer(localPlayer)
 
 
 
@@ -1166,16 +1168,18 @@ bindCamera()
 
 -- It's important we update all icons when a players language changes to account for changes in the width of text, etc
 task.spawn(function()
-	local LocalizationService = game:GetService("LocalizationService")
-	local success, translator = pcall(function() return LocalizationService:GetTranslatorForPlayerAsync(localPlayer) end)
+	local success, translator = pcall(function() return localizationService:GetTranslatorForPlayerAsync(localPlayer) end)
 	local function updateAllIcons()
 		local icons = IconController.getIcons()
 		for _, icon in pairs(icons) do
 			icon:_updateAll()
+			icon:_updateIconSize()
 		end
 	end
 	if success then
+		IconController.translator = translator
 		translator:GetPropertyChangedSignal("LocaleId"):Connect(updateAllIcons)
+		task.spawn(updateAllIcons)
 		task.delay(1, updateAllIcons)
 		task.delay(10, updateAllIcons)
 	end
