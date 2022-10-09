@@ -1080,7 +1080,7 @@ coroutine.wrap(function()
 		localPlayer.PlayerGui:WaitForChild("TopbarPlus", 999)
 		task.delay(10, function()
 			checkVoiceChatManuallyEnabled()
-			if not IconController.voiceChatEnabled and success and enabledForUser and isStudio then
+			if IconController.voiceChatEnabled == nil and success and enabledForUser and isStudio then
 				warn("⚠️TopbarPlus Action Required⚠️ If VoiceChat is enabled within your experience it's vital you set IconController.voiceChatEnabled to true ``require(game.ReplicatedStorage.Icon.IconController).voiceChatEnabled = true`` otherwise the BETA label will not be accounted for within your live servers. This warning will disappear after doing so. Feel free to delete this warning if you have not enabled VoiceChat within your experience.")
 			end
 		end)
