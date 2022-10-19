@@ -1173,7 +1173,6 @@ task.spawn(function()
 		local icons = IconController.getIcons()
 		for _, icon in pairs(icons) do
 			icon:_updateAll()
-			icon:_updateIconSize()
 		end
 	end
 	if success then

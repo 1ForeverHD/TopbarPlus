@@ -894,6 +894,11 @@ function Icon:_updateAll(iconState, customTweenInfo)
 			self:_update(settingName, iconState, customTweenInfo)
 		end
 	end
+	-- It's important we adapt the size of anything that could be changed through Localization
+	-- In this case, the icon label, caption and tip
+	self:_updateIconSize()
+	self:_updateCaptionSize()
+	self:_updateTipSize()
 end
 
 function Icon:_updateHovering(customTweenInfo)
@@ -1346,6 +1351,7 @@ function Icon:_updateIconSize(_, iconState)
 	local preventClippingOffset = labelHeight/2
 	
 	if usingImage and not usingText then
+		desiredCellWidth = 0
 		notifPosYScale = 0.45
 		self:set("iconImageVisible", true, iconState)
 		self:set("iconImageAnchorPoint", Vector2.new(0.5, 0.5), iconState)
@@ -1558,13 +1564,11 @@ function Icon:setTip(text)
 	assert(typeof(text) == "string" or text == nil, "Expected string, got "..typeof(text))
 	local realText = text or ""
 	local isVisible = realText ~= ""
-	local iconContentText = self:_getContentText(realText)
-	local textSize = textService:GetTextSize(iconContentText, 12, Enum.Font.GothamSemibold, Vector2.new(1000, 20-6))
+	self.tipText = text
 	self.instances.tipLabel.Text = realText
-	self.instances.tipFrame.Size = (isVisible and UDim2.new(0, textSize.X+6, 0, 20)) or UDim2.new(0, 0, 0, 0)
 	self.instances.tipFrame.Parent = (isVisible and activeItems) or self.instances.iconContainer
 	self._maid.tipFrame = self.instances.tipFrame
-	self.tipText = text
+	self:_updateTipSize()
 	
 	local tipMaid = Maid.new()
 	self._maid.tipMaid = tipMaid
@@ -1585,6 +1589,14 @@ function Icon:setTip(text)
 	end
 	self:displayTip(self.hovering and isVisible)
 	return self
+end
+
+function Icon:_updateTipSize()
+	local realText = self.tipText or ""
+	local isVisible = realText ~= ""
+	local iconContentText = self:_getContentText(realText)
+	local textSize = textService:GetTextSize(iconContentText, 12, Enum.Font.GothamSemibold, Vector2.new(1000, 20-6))
+	self.instances.tipFrame.Size = (isVisible and UDim2.new(0, textSize.X+6, 0, 20)) or UDim2.new(0, 0, 0, 0)
 end
 
 function Icon:displayTip(bool)
@@ -1693,7 +1705,12 @@ function Icon:setCaption(text)
 			end
 		end))
 	end
+	self:_updateCaptionSize()
+	self:displayCaption(self.hovering and isVisible)
+	return self
+end
 
+function Icon:_updateCaptionSize()
 	-- This adapts the caption size
 	local CAPTION_X_MARGIN = 6
 	local CAPTION_CONTAINER_Y_SIZE_SCALE = 0.8
@@ -1705,7 +1722,8 @@ function Icon:setCaption(text)
 		local cellSizeYScale = iconSize.Y.Scale
 		local iconContainer = self.instances.iconContainer
 		local captionContainer = self.instances.captionContainer
-		
+		local realText = self.captionText or ""
+		local isVisible = realText ~= ""
 		if isVisible then
 			local cellHeight = cellSizeYOffset + (cellSizeYScale * iconContainer.Parent.AbsoluteSize.Y)
 			local captionLabel = self.instances.captionLabel
@@ -1720,9 +1738,6 @@ function Icon:setCaption(text)
 			captionContainer.Size = UDim2.new(0, 0, 0, 0)
 		end
 	end
-
-	self:displayCaption(self.hovering and isVisible)
-	return self
 end
 
 function Icon:displayCaption(bool)
