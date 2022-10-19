@@ -131,7 +131,7 @@ IconController.midGap = 12
 IconController.rightGap = 12
 IconController.leftOffset = 0
 IconController.rightOffset = 0
-IconController.voiceChatEnabled = false
+IconController.voiceChatEnabled = nil
 IconController.mimicCoreGui = true
 IconController.healthbarDisabled = false
 IconController.activeButtonBCallbacks = 0
@@ -1081,7 +1081,7 @@ coroutine.wrap(function()
 		task.delay(10, function()
 			checkVoiceChatManuallyEnabled()
 			if IconController.voiceChatEnabled == nil and success and enabledForUser and isStudio then
-				warn("⚠️TopbarPlus Action Required⚠️ If VoiceChat is enabled within your experience it's vital you set IconController.voiceChatEnabled to true ``require(game.ReplicatedStorage.Icon.IconController).voiceChatEnabled = true`` otherwise the BETA label will not be accounted for within your live servers. This warning will disappear after doing so. Feel free to delete this warning if you have not enabled VoiceChat within your experience.")
+				warn("⚠️TopbarPlus Action Required⚠️ If VoiceChat is enabled within your experience it's vital you set IconController.voiceChatEnabled to true ``require(game.ReplicatedStorage.Icon.IconController).voiceChatEnabled = true`` otherwise the BETA label will not be accounted for within your live servers. This warning will disappear after doing so. Feel free to delete this warning or to set to false if you don't have VoiceChat enabled within your experience.")
 			end
 		end)
 		------------------------------------------------------------------------------------------------------------
