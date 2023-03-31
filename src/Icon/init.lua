@@ -1750,7 +1750,12 @@ function Icon:displayCaption(bool)
 	end
 	local iconContainer = self.instances.iconContainer
 	local captionContainer = self.instances.captionContainer
-	local newPos = UDim2.new(0, iconContainer.AbsolutePosition.X+iconContainer.AbsoluteSize.X/2-captionContainer.AbsoluteSize.X/2, 0, iconContainer.AbsolutePosition.Y+(iconContainer.AbsoluteSize.Y*2)+yOffset)
+	local newPos = UDim2.new(
+		0, math.clamp(
+			iconContainer.AbsolutePosition.X + iconContainer.AbsoluteSize.X/2 - captionContainer.AbsoluteSize.X/2, 
+			0, 
+			workspace.CurrentCamera.ViewportSize.X - captionContainer.AbsoluteSize.X),
+		0, iconContainer.AbsolutePosition.Y + (iconContainer.AbsoluteSize.Y*2) + yOffset)
 	captionContainer.Position = newPos
 
 	-- Determine caption visibility
