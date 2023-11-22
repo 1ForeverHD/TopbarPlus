@@ -31,11 +31,26 @@ local Themes = require(iconModule.Themes)
 local activeItems = TopbarPlusGui.ActiveItems
 local topbarContainer = TopbarPlusGui.TopbarContainer
 local iconTemplate = topbarContainer["IconContainer"]
-local DEFAULT_THEME = Themes.Default
+local DEFAULT_THEME = Themes["New_RobloxTopbar"]
 local THUMB_OFFSET = 55
 local DEFAULT_FORCED_GROUP_VALUES = {}
 
-
+local defaultThemeChanged = Signal.new()
+local function topbarInsetChanged()
+	local topbarInset = guiService.TopbarInset
+	local newDefaultTheme = nil
+	if topbarInset.Height > 36 then
+		newDefaultTheme = Themes["New_RobloxTopbar"]
+	else
+		newDefaultTheme = Themes["Old_RobloxTopbar"]
+	end
+	if newDefaultTheme ~= nil and DEFAULT_THEME ~= newDefaultTheme then
+		DEFAULT_THEME = newDefaultTheme
+		defaultThemeChanged:Fire()
+	end
+end
+pcall(topbarInsetChanged)
+guiService:GetPropertyChangedSignal("TopbarInset"):Connect(topbarInsetChanged)
 
 -- CONSTRUCTORS
 function Icon.new()
@@ -401,6 +416,7 @@ function Icon.new()
 	self.dropdownOpen = false
 	self.menuOpen = false
 	self.locked = false
+	self.topPaddingChanged = false
 	self.topPadding = UDim.new(0, 4)
 	self.targetPosition = nil
 	self.toggleItems = {}
@@ -415,10 +431,27 @@ function Icon.new()
 	self._previousMenuOpen = false
 	self._bindedToggleKeys = {}
 	self._bindedEvents = {}
+	self._usingDefaultTheme = true
 	
 	-- Apply start values
 	self:setName("UnnamedIcon")
-	self:setTheme(DEFAULT_THEME, true)
+	self:setTheme(DEFAULT_THEME, true, true)
+	maid:give(defaultThemeChanged:Connect(function()
+		self:setTheme(DEFAULT_THEME, true, true)
+	end))
+	
+	local function iconTopbarInsetChanged()
+		local topbarInset = guiService.TopbarInset
+		if self.topPaddingChanged == false then
+			self.topPadding = UDim.new(
+				self.topPadding.Scale,
+				(topbarInset.Height == 36 and 4 or 10)
+			)
+		end
+	end
+	
+	pcall(iconTopbarInsetChanged)
+	maid:give(guiService:GetPropertyChangedSignal("TopbarInset"):Connect(iconTopbarInsetChanged))
 
 	-- Input handlers
 	-- Calls deselect/select when the icon is clicked
@@ -915,7 +948,7 @@ function Icon:_updateStateOverlay(transparency, color)
 	stateOverlay.BackgroundColor3 = color or Color3.new(1, 1, 1)
 end
 
-function Icon:setTheme(theme, updateAfterSettingAll)
+function Icon:setTheme(theme, updateAfterSettingAll, isDefault)
 	self._updateAfterSettingAll = updateAfterSettingAll
 	for settingsType, settingsDetails in pairs(theme) do
 		if settingsType == "toggleable" then
@@ -943,6 +976,9 @@ function Icon:setTheme(theme, updateAfterSettingAll)
 		end
 	end
 	self._updateAfterSettingAll = nil
+	if isDefault ~= true then
+		self._usingDefaultTheme = false
+	end
 	if updateAfterSettingAll then
 		self:_updateAll()
 	end
@@ -1481,10 +1517,17 @@ function Icon:autoDeselect(bool)
 end
 
 function Icon:setTopPadding(offset, scale)
-	local newOffset = offset or 4
+	local topbarInset = guiService.TopbarInset
+	
+	local newOffset = offset or (topbarInset.Height == 36 and 4 or 10)
 	local newScale = scale or 0
 	self.topPadding = UDim.new(newScale, newOffset)
 	self.updated:Fire()
+	if not offset then
+		self.topPaddingChanged = false
+	else
+		self.topPaddingChanged = true
+	end
 	return self
 end
 
@@ -2145,7 +2188,5 @@ function Icon:destroy()
 	self._maid:clean()
 end
 Icon.Destroy = Icon.destroy
-
-
 
 return Icon

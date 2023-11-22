@@ -66,20 +66,8 @@ local alignmentDetails = {}
 alignmentDetails["left"] = {
 	startScale = 0,
 	getOffset = function()
-		local offset = 48 + IconController.leftOffset
-		if checkTopbarEnabled() then
-			local chatEnabled = starterGui:GetCoreGuiEnabled("Chat")
-			if chatEnabled then
-				offset += 12 + 32
-			end
-			if voiceChatIsEnabledForUserAndWithinExperience and not isStudio then
-				if chatEnabled then
-					offset += 67
-				else
-					offset += 43
-				end
-			end
-		end
+		local inset = guiService.TopbarInset
+		local offset = inset.Min.X + IconController.leftOffset
 		return offset
 	end,
 	getStartOffset = function()
@@ -103,13 +91,10 @@ alignmentDetails["mid"] = {
 alignmentDetails["right"] = {
 	startScale = 1,
 	getOffset = function()
-		local offset = IconController.rightOffset
-		local localCharacter  = localPlayer.Character
-		local localHumanoid = localCharacter and localCharacter:FindFirstChild("Humanoid")
-		local isR6 = if localHumanoid and localHumanoid.RigType == Enum.HumanoidRigType.R6 then true else false -- Even though the EmotesMenu doesn't appear for R6 players, it will still register as enabled unless manually disabled
-		if (checkTopbarEnabled() or VRService.VREnabled) and (starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList) or starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Backpack) or (not isR6 and starterGui:GetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu))) then
-			offset += 48
-		end
+		local inset = guiService.TopbarInset
+		local viewportSize = workspace.CurrentCamera.ViewportSize
+		local viewportWidth = viewportSize.X
+		local offset = (viewportWidth - inset.Width - inset.Min.X) + IconController.rightOffset
 		return offset
 	end,
 	getStartOffset = function(totalIconX)
@@ -1184,5 +1169,11 @@ task.spawn(function()
 	end
 end)
 
+local function topbarInsetChanged()
+	local topbarInset = guiService.TopbarInset
+	IconController.updateTopbar()
+end
+pcall(topbarInsetChanged)
+guiService:GetPropertyChangedSignal("TopbarInset"):Connect(topbarInsetChanged)
 
 return IconController
