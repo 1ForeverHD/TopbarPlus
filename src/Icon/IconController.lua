@@ -42,7 +42,7 @@ local function checkTopbarEnabled()
 		return starterGui:GetCore("TopbarEnabled")
 	end,function(err)
 		--has not been registered yet, but default is that is enabled
-		return true	
+		return true
 	end)
 	return (success and bool)
 end
@@ -1094,7 +1094,7 @@ coroutine.wrap(function()
 				-- Required attrbute for using TopbarPlus
 				-- This is not printed within stuido and to the game owner to prevent mixing with debug prints
 				local gameName = placeInfo.Name
-				print(("\n\n\n⚽ %s uses TopbarPlus %s\n🍍 TopbarPlus was developed by ForeverHD and the Nanoblox Team\n🚀 You can learn more and take a free copy by searching for 'TopbarPlus' on the DevForum\n\n"):format(gameName, version))
+				print(("\n\n\n⚽ %s uses TopbarPlus-Forked %s\n🍍 TopbarPlus-Forked was originally developed by ForeverHD and the Nanoblox Team, forked by iamEvanRBLX.\n🚀 You can learn more and take a free copy by searching for 'TopbarPlus' on the DevForum\n\n"):format(gameName, version))
 			end
 		end
 	end

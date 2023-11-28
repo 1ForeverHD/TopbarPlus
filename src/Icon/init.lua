@@ -38,15 +38,19 @@ local DEFAULT_FORCED_GROUP_VALUES = {}
 local defaultThemeChanged = Signal.new()
 local function topbarInsetChanged()
 	local topbarInset = guiService.TopbarInset
+	if topbarInset.Height == 0 then
+		return
+	end
 	local newDefaultTheme = nil
-	if topbarInset.Height > 36 then
+	if (topbarInset.Height > 36) then
 		newDefaultTheme = Themes["New_RobloxTopbar"]
 	else
 		newDefaultTheme = Themes["Old_RobloxTopbar"]
 	end
 	if newDefaultTheme ~= nil and DEFAULT_THEME ~= newDefaultTheme then
+		local oldDefaultTheme = DEFAULT_THEME
 		DEFAULT_THEME = newDefaultTheme
-		defaultThemeChanged:Fire()
+		defaultThemeChanged:Fire(oldDefaultTheme,newDefaultTheme)
 	end
 end
 pcall(topbarInsetChanged)
@@ -436,8 +440,11 @@ function Icon.new()
 	-- Apply start values
 	self:setName("UnnamedIcon")
 	self:setTheme(DEFAULT_THEME, true, true)
-	maid:give(defaultThemeChanged:Connect(function()
-		self:setTheme(DEFAULT_THEME, true, true)
+	maid:give(defaultThemeChanged:Connect(function(oldDefaultTheme,newDefaultTheme)
+		if oldDefaultTheme == newDefaultTheme then
+			return
+		end
+		self:setTheme(newDefaultTheme, true, true, oldDefaultTheme)
 	end))
 	
 	local function iconTopbarInsetChanged()
@@ -930,6 +937,7 @@ function Icon:_updateAll(iconState, customTweenInfo)
 	-- It's important we adapt the size of anything that could be changed through Localization
 	-- In this case, the icon label, caption and tip
 	self:_updateIconSize()
+
 	self:_updateCaptionSize()
 	self:_updateTipSize()
 end
@@ -948,23 +956,63 @@ function Icon:_updateStateOverlay(transparency, color)
 	stateOverlay.BackgroundColor3 = color or Color3.new(1, 1, 1)
 end
 
-function Icon:setTheme(theme, updateAfterSettingAll, isDefault)
+local oldThemeBlacklistedSetings = {
+	"iconSize",
+}
+
+function Icon:setTheme(theme, updateAfterSettingAll, isDefault, oldTheme)
 	self._updateAfterSettingAll = updateAfterSettingAll
 	for settingsType, settingsDetails in pairs(theme) do
 		if settingsType == "toggleable" then
 			for settingName, settingValue in pairs(settingsDetails.deselected) do
-				if not self.lockedSettings[settingName] then
-					self:set(settingName, settingValue, "both")
+				local changedFromOldTheme = false
+				if oldTheme and table.find(oldThemeBlacklistedSetings,settingName) == nil then
+					-- Might not be found & will error
+					pcall(function()
+						local oldVal = self:get(settingName,"deselected")
+						if oldVal ~= oldTheme[settingsType]["deselected"][settingName] then
+							changedFromOldTheme = true
+						end
+					end)
+				end
+				if not self.lockedSettings[settingName] and changedFromOldTheme == false then
+					local iconStateToSet = "both"
+					pcall(function()
+						if settingsDetails["selected"][settingName] then
+							iconStateToSet = "deselected"
+						end
+					end)
+					self:set(settingName, settingValue, iconStateToSet)
 				end
 			end
 			for settingName, settingValue in pairs(settingsDetails.selected) do
-				if not self.lockedSettings[settingName] then
+				local changedFromOldTheme = false
+				if oldTheme and table.find(oldThemeBlacklistedSetings,settingName) == nil then
+					-- Might not be found & will error
+					pcall(function()
+						local oldVal = self:get(settingName,"selected")
+						if oldVal ~= oldTheme[settingsType]["selected"][settingName] then
+							changedFromOldTheme = true
+						end
+					end)
+				end
+				if not self.lockedSettings[settingName] and changedFromOldTheme == false then
 					self:set(settingName, settingValue, "selected")
 				end
 			end
 		else
 			for settingName, settingValue in pairs(settingsDetails) do
-				if not self.lockedSettings[settingName] then
+				local changedFromOldTheme = false
+				if oldTheme and table.find(oldThemeBlacklistedSetings,settingName) == nil then
+					-- Might not be found & will error
+					pcall(function()
+						local oldVal = self:get(settingName)
+						if oldVal ~= oldTheme[settingsType][settingName] then
+							changedFromOldTheme = true
+						end
+					end)
+				end
+				if not self.lockedSettings[settingName] and changedFromOldTheme == false then
 					local settingDetail = self._settingsDictionary[settingName]
 					if settingsType == "action" and settingDetail == nil then
 						settingDetail = {}
@@ -981,6 +1029,7 @@ function Icon:setTheme(theme, updateAfterSettingAll, isDefault)
 	end
 	if updateAfterSettingAll then
 		self:_updateAll()
+		self:_updateIconSize(nil,"hovering")
 	end
 	return self
 end
@@ -1356,6 +1405,18 @@ function Icon:_updateIconSize(_, iconState)
 		iconImageRatio = self:get("iconImageRatio", iconState) or "_NIL",
 		iconLabelYScale = self:get("iconLabelYScale", iconState) or "_NIL",
 	}
+	if iconState == "hovering" and self._usingDefaultTheme then
+		values = {
+			iconImage = self:get("iconImage", iconState) or "_NIL",
+			iconText = self:get("iconText", iconState) or "_NIL",
+			iconFont = self:get("iconFont", iconState) or "_NIL",
+			iconSize = self:get("iconSize", nil) or "_NIL",
+			forcedIconSizeX = self:get("forcedIconSizeX", nil) or "_NIL",
+			iconImageYScale = self:get("iconImageYScale", nil) or "_NIL",
+			iconImageRatio = self:get("iconImageRatio", nil) or "_NIL",
+			iconLabelYScale = self:get("iconLabelYScale", nil) or "_NIL",
+		}
+	end
 	for k,v in pairs(values) do
 		if v == "_NIL" then
 			return
