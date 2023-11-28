@@ -445,7 +445,7 @@ function Icon.new()
 		if self.topPaddingChanged == false then
 			self.topPadding = UDim.new(
 				self.topPadding.Scale,
-				(topbarInset.Height == 36 and 4 or 10)
+				(topbarInset.Height == 36 and 4 or 12)
 			)
 		end
 	end
@@ -1519,7 +1519,7 @@ end
 function Icon:setTopPadding(offset, scale)
 	local topbarInset = guiService.TopbarInset
 	
-	local newOffset = offset or (topbarInset.Height == 36 and 4 or 10)
+	local newOffset = offset or (topbarInset.Height == 36 and 4 or 12)
 	local newScale = scale or 0
 	self.topPadding = UDim.new(newScale, newOffset)
 	self.updated:Fire()
