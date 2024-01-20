@@ -1,4 +1,15 @@
 --------
+## [2.9.1] - October 19th 2022
+### Improved
+- Improved the size adapting of captions and tips when their texts are changed via localization
+- Improved the size adapting of icon labels, in particular for the selected state
+
+### Fixed
+- Fixed a bug preventing the icon cell resizing when deselected for icons with an image but only selected text
+
+
+
+--------
 ## [2.9.0] - October 6th 2022
 ### Added
 - Added ``icon:debounce(seconds)``. This is shorthand for ``icon:lock() task.wait(seconds) icon:unlock()``

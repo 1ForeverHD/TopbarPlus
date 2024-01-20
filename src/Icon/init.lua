@@ -31,11 +31,30 @@ local Themes = require(iconModule.Themes)
 local activeItems = TopbarPlusGui.ActiveItems
 local topbarContainer = TopbarPlusGui.TopbarContainer
 local iconTemplate = topbarContainer["IconContainer"]
-local DEFAULT_THEME = Themes.Default
+local DEFAULT_THEME = Themes["New_RobloxTopbar"]
 local THUMB_OFFSET = 55
 local DEFAULT_FORCED_GROUP_VALUES = {}
 
-
+local defaultThemeChanged = Signal.new()
+local function topbarInsetChanged()
+	local topbarInset = guiService.TopbarInset
+	if topbarInset.Height == 0 then
+		return
+	end
+	local newDefaultTheme = nil
+	if (topbarInset.Height > 36) then
+		newDefaultTheme = Themes["New_RobloxTopbar"]
+	else
+		newDefaultTheme = Themes["Old_RobloxTopbar"]
+	end
+	if newDefaultTheme ~= nil and DEFAULT_THEME ~= newDefaultTheme then
+		local oldDefaultTheme = DEFAULT_THEME
+		DEFAULT_THEME = newDefaultTheme
+		defaultThemeChanged:Fire(oldDefaultTheme,newDefaultTheme)
+	end
+end
+pcall(topbarInsetChanged)
+guiService:GetPropertyChangedSignal("TopbarInset"):Connect(topbarInsetChanged)
 
 -- CONSTRUCTORS
 function Icon.new()
@@ -401,6 +420,7 @@ function Icon.new()
 	self.dropdownOpen = false
 	self.menuOpen = false
 	self.locked = false
+	self.topPaddingChanged = false
 	self.topPadding = UDim.new(0, 4)
 	self.targetPosition = nil
 	self.toggleItems = {}
@@ -415,10 +435,30 @@ function Icon.new()
 	self._previousMenuOpen = false
 	self._bindedToggleKeys = {}
 	self._bindedEvents = {}
+	self._usingDefaultTheme = true
 	
 	-- Apply start values
 	self:setName("UnnamedIcon")
-	self:setTheme(DEFAULT_THEME, true)
+	self:setTheme(DEFAULT_THEME, true, true)
+	maid:give(defaultThemeChanged:Connect(function(oldDefaultTheme,newDefaultTheme)
+		if oldDefaultTheme == newDefaultTheme then
+			return
+		end
+		self:setTheme(newDefaultTheme, true, true, oldDefaultTheme)
+	end))
+	
+	local function iconTopbarInsetChanged()
+		local topbarInset = guiService.TopbarInset
+		if self.topPaddingChanged == false then
+			self.topPadding = UDim.new(
+				self.topPadding.Scale,
+				(topbarInset.Height == 36 and 4 or 12)
+			)
+		end
+	end
+	
+	pcall(iconTopbarInsetChanged)
+	maid:give(guiService:GetPropertyChangedSignal("TopbarInset"):Connect(iconTopbarInsetChanged))
 
 	-- Input handlers
 	-- Calls deselect/select when the icon is clicked
@@ -894,6 +934,12 @@ function Icon:_updateAll(iconState, customTweenInfo)
 			self:_update(settingName, iconState, customTweenInfo)
 		end
 	end
+	-- It's important we adapt the size of anything that could be changed through Localization
+	-- In this case, the icon label, caption and tip
+	self:_updateIconSize()
+
+	self:_updateCaptionSize()
+	self:_updateTipSize()
 end
 
 function Icon:_updateHovering(customTweenInfo)
@@ -910,23 +956,63 @@ function Icon:_updateStateOverlay(transparency, color)
 	stateOverlay.BackgroundColor3 = color or Color3.new(1, 1, 1)
 end
 
-function Icon:setTheme(theme, updateAfterSettingAll)
+local oldThemeBlacklistedSetings = {
+	"iconSize",
+}
+
+function Icon:setTheme(theme, updateAfterSettingAll, isDefault, oldTheme)
 	self._updateAfterSettingAll = updateAfterSettingAll
 	for settingsType, settingsDetails in pairs(theme) do
 		if settingsType == "toggleable" then
 			for settingName, settingValue in pairs(settingsDetails.deselected) do
-				if not self.lockedSettings[settingName] then
-					self:set(settingName, settingValue, "both")
+				local changedFromOldTheme = false
+				if oldTheme and table.find(oldThemeBlacklistedSetings,settingName) == nil then
+					-- Might not be found & will error
+					pcall(function()
+						local oldVal = self:get(settingName,"deselected")
+						if oldVal ~= oldTheme[settingsType]["deselected"][settingName] then
+							changedFromOldTheme = true
+						end
+					end)
+				end
+				if not self.lockedSettings[settingName] and changedFromOldTheme == false then
+					local iconStateToSet = "both"
+					pcall(function()
+						if settingsDetails["selected"][settingName] then
+							iconStateToSet = "deselected"
+						end
+					end)
+					self:set(settingName, settingValue, iconStateToSet)
 				end
 			end
 			for settingName, settingValue in pairs(settingsDetails.selected) do
-				if not self.lockedSettings[settingName] then
+				local changedFromOldTheme = false
+				if oldTheme and table.find(oldThemeBlacklistedSetings,settingName) == nil then
+					-- Might not be found & will error
+					pcall(function()
+						local oldVal = self:get(settingName,"selected")
+						if oldVal ~= oldTheme[settingsType]["selected"][settingName] then
+							changedFromOldTheme = true
+						end
+					end)
+				end
+				if not self.lockedSettings[settingName] and changedFromOldTheme == false then
 					self:set(settingName, settingValue, "selected")
 				end
 			end
 		else
 			for settingName, settingValue in pairs(settingsDetails) do
-				if not self.lockedSettings[settingName] then
+				local changedFromOldTheme = false
+				if oldTheme and table.find(oldThemeBlacklistedSetings,settingName) == nil then
+					-- Might not be found & will error
+					pcall(function()
+						local oldVal = self:get(settingName)
+						if oldVal ~= oldTheme[settingsType][settingName] then
+							changedFromOldTheme = true
+						end
+					end)
+				end
+				if not self.lockedSettings[settingName] and changedFromOldTheme == false then
 					local settingDetail = self._settingsDictionary[settingName]
 					if settingsType == "action" and settingDetail == nil then
 						settingDetail = {}
@@ -938,8 +1024,12 @@ function Icon:setTheme(theme, updateAfterSettingAll)
 		end
 	end
 	self._updateAfterSettingAll = nil
+	if isDefault ~= true then
+		self._usingDefaultTheme = false
+	end
 	if updateAfterSettingAll then
 		self:_updateAll()
+		self:_updateIconSize(nil,"hovering")
 	end
 	return self
 end
@@ -1315,6 +1405,18 @@ function Icon:_updateIconSize(_, iconState)
 		iconImageRatio = self:get("iconImageRatio", iconState) or "_NIL",
 		iconLabelYScale = self:get("iconLabelYScale", iconState) or "_NIL",
 	}
+	if iconState == "hovering" and self._usingDefaultTheme then
+		values = {
+			iconImage = self:get("iconImage", iconState) or "_NIL",
+			iconText = self:get("iconText", iconState) or "_NIL",
+			iconFont = self:get("iconFont", iconState) or "_NIL",
+			iconSize = self:get("iconSize", nil) or "_NIL",
+			forcedIconSizeX = self:get("forcedIconSizeX", nil) or "_NIL",
+			iconImageYScale = self:get("iconImageYScale", nil) or "_NIL",
+			iconImageRatio = self:get("iconImageRatio", nil) or "_NIL",
+			iconLabelYScale = self:get("iconLabelYScale", nil) or "_NIL",
+		}
+	end
 	for k,v in pairs(values) do
 		if v == "_NIL" then
 			return
@@ -1346,6 +1448,7 @@ function Icon:_updateIconSize(_, iconState)
 	local preventClippingOffset = labelHeight/2
 	
 	if usingImage and not usingText then
+		desiredCellWidth = 0
 		notifPosYScale = 0.45
 		self:set("iconImageVisible", true, iconState)
 		self:set("iconImageAnchorPoint", Vector2.new(0.5, 0.5), iconState)
@@ -1475,10 +1578,17 @@ function Icon:autoDeselect(bool)
 end
 
 function Icon:setTopPadding(offset, scale)
-	local newOffset = offset or 4
+	local topbarInset = guiService.TopbarInset
+	
+	local newOffset = offset or (topbarInset.Height == 36 and 4 or 12)
 	local newScale = scale or 0
 	self.topPadding = UDim.new(newScale, newOffset)
 	self.updated:Fire()
+	if not offset then
+		self.topPaddingChanged = false
+	else
+		self.topPaddingChanged = true
+	end
 	return self
 end
 
@@ -1558,13 +1668,11 @@ function Icon:setTip(text)
 	assert(typeof(text) == "string" or text == nil, "Expected string, got "..typeof(text))
 	local realText = text or ""
 	local isVisible = realText ~= ""
-	local iconContentText = self:_getContentText(realText)
-	local textSize = textService:GetTextSize(iconContentText, 12, Enum.Font.GothamSemibold, Vector2.new(1000, 20-6))
+	self.tipText = text
 	self.instances.tipLabel.Text = realText
-	self.instances.tipFrame.Size = (isVisible and UDim2.new(0, textSize.X+6, 0, 20)) or UDim2.new(0, 0, 0, 0)
 	self.instances.tipFrame.Parent = (isVisible and activeItems) or self.instances.iconContainer
 	self._maid.tipFrame = self.instances.tipFrame
-	self.tipText = text
+	self:_updateTipSize()
 	
 	local tipMaid = Maid.new()
 	self._maid.tipMaid = tipMaid
@@ -1585,6 +1693,14 @@ function Icon:setTip(text)
 	end
 	self:displayTip(self.hovering and isVisible)
 	return self
+end
+
+function Icon:_updateTipSize()
+	local realText = self.tipText or ""
+	local isVisible = realText ~= ""
+	local iconContentText = self:_getContentText(realText)
+	local textSize = textService:GetTextSize(iconContentText, 12, Enum.Font.GothamSemibold, Vector2.new(1000, 20-6))
+	self.instances.tipFrame.Size = (isVisible and UDim2.new(0, textSize.X+6, 0, 20)) or UDim2.new(0, 0, 0, 0)
 end
 
 function Icon:displayTip(bool)
@@ -1693,7 +1809,12 @@ function Icon:setCaption(text)
 			end
 		end))
 	end
+	self:_updateCaptionSize()
+	self:displayCaption(self.hovering and isVisible)
+	return self
+end
 
+function Icon:_updateCaptionSize()
 	-- This adapts the caption size
 	local CAPTION_X_MARGIN = 6
 	local CAPTION_CONTAINER_Y_SIZE_SCALE = 0.8
@@ -1705,7 +1826,8 @@ function Icon:setCaption(text)
 		local cellSizeYScale = iconSize.Y.Scale
 		local iconContainer = self.instances.iconContainer
 		local captionContainer = self.instances.captionContainer
-		
+		local realText = self.captionText or ""
+		local isVisible = realText ~= ""
 		if isVisible then
 			local cellHeight = cellSizeYOffset + (cellSizeYScale * iconContainer.Parent.AbsoluteSize.Y)
 			local captionLabel = self.instances.captionLabel
@@ -1720,9 +1842,6 @@ function Icon:setCaption(text)
 			captionContainer.Size = UDim2.new(0, 0, 0, 0)
 		end
 	end
-
-	self:displayCaption(self.hovering and isVisible)
-	return self
 end
 
 function Icon:displayCaption(bool)
@@ -2130,7 +2249,5 @@ function Icon:destroy()
 	self._maid:clean()
 end
 Icon.Destroy = Icon.destroy
-
-
 
 return Icon
