@@ -1,7 +1,6 @@
 [icon:setOrder]: https://1foreverhd.github.io/TopbarPlus/api/icon/#setorder
 [Feature Guide]: https://1foreverhd.github.io/TopbarPlus/features
 [Icon API]: https://1foreverhd.github.io/TopbarPlus/api/icon/
-[IconController.voiceChatEnabled]: https://1foreverhd.github.io/TopbarPlus/api/icon_controller/#voicechatenabled
 
 TopbarPlus is a module enabling the construction of dynamic topbar icons. These icons can be enhanced with features and methods, like themes, dropdowns and menus, to expand upon their appearance and behaviour.
 
@@ -37,9 +36,10 @@ local icon = Icon.new()
 Sometimes you'll want an item to appear only when *deselected*, and similarily only when *selected*. You can achieve this by specifying a string value within the ``iconState`` parameter of methods containing the ``toggleable`` tag. These are:
 
 ```lua
-"deselected" -- Applies the value when the icon is deselected (i.e. not pressed)
-"selected" -- Applies the value when the icon is selected (i.e. pressed)
-"hovering" -- Applies the value when a cursor, finger or controller is hovering over the icon
+"Deselected" -- Applies the value when the icon is deselected (i.e. not pressed)
+"Selected" -- Applies the value when the icon is selected (i.e. pressed)
+"Hovering" -- Applies the value when a cursor, finger or controller is hovering over the icon
+"Pressing" -- Applies the value when a cursor, finger or controller is pressing down on the icon
 ```
 
 If no argument is specified, the value will be applied to both ``deselected`` and ``selected`` states. For example:
@@ -47,14 +47,11 @@ If no argument is specified, the value will be applied to both ``deselected`` an
 ```lua
 Icon.new()
 	:setImage(4882429582)
-	:setLabel("Closed", "deselected")
-	:setLabel("Open", "selected")
-	:setLabel("Hovering", "hovering")
+	:setLabel("Closed", "Deselected")
+	:setLabel("Open", "Selected")
+	:setLabel("Hovering", "Hovering")
 ```
 
 <a><img src="https://i.imgur.com/z1oCYMQ.gif" width="50%"/></a>
 
 You may wish to enhance icons further with features like themes, dropdowns and menus, or by binding GuiObjects and KeyCodes to their toggle. This and much more can be achieved by exploring the [Feature Guide] and [Icon API].
-
-!!! warning
-    It's important you set [IconController.voiceChatEnabled] to ``true`` if VoiceChat is enabled within your experience so that the BETA label can be accounted for.
