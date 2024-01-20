@@ -65,6 +65,5 @@ nav:
     - API:
       - Icon: api/icon.md
       - IconController: api/icon_controller.md
-    - Resources: resources.md
   - Contributing: contributing.md
   - Changelog: changelog.md
