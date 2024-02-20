@@ -6,8 +6,13 @@
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
 
-      "Icon": {
-        "$path": "src/Icon"
+      "TopbarPlus": {
+        "$className": "Folder",
+
+        "Icon": {
+          "$path": "src/Icon"
+        }
+
       }
     }
   }

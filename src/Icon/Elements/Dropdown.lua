@@ -1,42 +1,49 @@
 return function(icon)
-
+	
 	local dropdown = Instance.new("Frame")
 	dropdown.Name = "Dropdown"
 	dropdown.AutomaticSize = Enum.AutomaticSize.XY
 	dropdown.BackgroundTransparency = 1
 	dropdown.BorderSizePixel = 0
 	dropdown.AnchorPoint = Vector2.new(0.5, 0)
-	dropdown.Position = UDim2.new(0.5, 0, 1, 8)
+	dropdown.Position = UDim2.new(0.5, 0, 1, 10)
 	dropdown.ZIndex = -2
 	dropdown.ClipsDescendants = true
-	dropdown.Visible = true
-	dropdown.Selectable = false
-	dropdown.Active = false
+	dropdown.Parent = icon.widget
 
 	local UICorner = Instance.new("UICorner")
 	UICorner.Name = "DropdownCorner"
 	UICorner.CornerRadius = UDim.new(0, 10)
 	UICorner.Parent = dropdown
 
-	local dropdownHolder = Instance.new("ScrollingFrame")
-	dropdownHolder.Name = "DropdownHolder"
-	dropdownHolder.AutomaticSize = Enum.AutomaticSize.XY
-	dropdownHolder.BackgroundTransparency = 1
-	dropdownHolder.BorderSizePixel = 0
-	dropdownHolder.AnchorPoint = Vector2.new(0, 0)
-	dropdownHolder.Position = UDim2.new(0, 0, 0, 0)
-	dropdownHolder.Size = UDim2.new(1, 0, 1, 0)
-	dropdownHolder.ZIndex = -1
-	dropdownHolder.ClipsDescendants = false
-	dropdownHolder.Visible = true
-	dropdownHolder.TopImage = dropdownHolder.MidImage
-	dropdownHolder.BottomImage = dropdownHolder.MidImage
-	dropdownHolder.VerticalScrollBarInset = Enum.ScrollBarInset.Always
-	dropdownHolder.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
-	dropdownHolder.Parent = dropdown
-	dropdownHolder.Active = false
-	dropdownHolder.Selectable = false
-	dropdownHolder.ScrollingEnabled = false
+	local dropdownScroller = Instance.new("ScrollingFrame")
+	dropdownScroller.Name = "DropdownScroller"
+	dropdownScroller.AutomaticSize = Enum.AutomaticSize.X
+	dropdownScroller.BackgroundTransparency = 1
+	dropdownScroller.BorderSizePixel = 0
+	dropdownScroller.AnchorPoint = Vector2.new(0, 0)
+	dropdownScroller.Position = UDim2.new(0, 0, 0, 0)
+	dropdownScroller.ZIndex = -1
+	dropdownScroller.ClipsDescendants = true
+	dropdownScroller.Visible = true
+	dropdownScroller.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+	dropdownScroller.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
+	dropdownScroller.Active = false
+	dropdownScroller.ScrollingEnabled = true
+	dropdownScroller.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	dropdownScroller.ScrollBarThickness = 5
+	dropdownScroller.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
+	dropdownScroller.ScrollBarImageTransparency = 0.8
+	dropdownScroller.CanvasSize = UDim2.new(0, 0, 0, 0)
+	dropdownScroller.Selectable = false
+	dropdownScroller.Active = true
+	dropdownScroller.Parent = dropdown
+	
+	local dropdownPadding = Instance.new("UIPadding")
+	dropdownPadding.Name = "DropdownPadding"
+	dropdownPadding.PaddingTop = UDim.new(0, 8)
+	dropdownPadding.PaddingBottom = UDim.new(0, 8)
+	dropdownPadding.Parent = dropdownScroller
 
 	local dropdownList = Instance.new("UIListLayout")
 	dropdownList.Name = "DropdownList"
@@ -44,20 +51,116 @@ return function(icon)
 	dropdownList.SortOrder = Enum.SortOrder.LayoutOrder
 	dropdownList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	dropdownList.HorizontalFlex = Enum.UIFlexAlignment.SpaceEvenly
-	dropdownList.Parent = dropdownHolder
-
-	local dropdownPadding = Instance.new("UIPadding")
-	dropdownPadding.Name = "DropdownPadding"
-	dropdownPadding.PaddingTop = UDim.new(0, 8)
-	dropdownPadding.PaddingBottom = UDim.new(0, 8)
-	dropdownPadding.Parent = dropdownHolder
-
+	dropdownList.Parent = dropdownScroller
+	
 	local dropdownJanitor = icon.dropdownJanitor
-	local function updatePosition()
-		-- To complete: this currently does not account for
-		-- exceeding the minimum or maximum boundaries of the screen
-	end
-	dropdownJanitor:add(icon.widget:GetPropertyChangedSignal("AbsolutePosition"):Connect(updatePosition))
+	local Icon = require(icon.iconModule)
+	icon.dropdownChildAdded:Connect(function(childIcon)
+		-- Modify appearance of child when joined
+		local _, modificationUID = childIcon:modifyTheme({
+			{"Widget", "BorderSize", 0},
+			{"IconCorners", "CornerRadius", UDim.new(0, 4)},
+			{"Widget", "MinimumWidth", 190},
+			{"Widget", "MinimumHeight", 56},
+			{"IconLabel", "TextSize", 19},
+			{"PaddingLeft", "Size", UDim2.fromOffset(20, 0)},
+			{"Notice", "Position", UDim2.new(1, -24, 0, 5)},
+			{"ContentsList", "HorizontalAlignment", Enum.HorizontalAlignment.Left},
+			{"Selection", "Size", UDim2.new(1, -8, 1, -8)},
+			{"Selection", "Position", UDim2.new(0, 4, 0, 4)},
+		})
+		task.defer(function()
+			childIcon.joinJanitor:add(function()
+				childIcon:removeModification(modificationUID)
+			end)
+		end)
+	end)
+	icon.dropdownSet:Connect(function(arrayOfIcons)
+		-- Destroy any previous icons
+		for i, otherIconUID in pairs(icon.dropdownIcons) do
+			local otherIcon = Icon.getIconByUID(otherIconUID)
+			otherIcon:destroy()
+		end
+		-- Add new icons
+		local totalNewIcons = #arrayOfIcons
+		if type(arrayOfIcons) == "table" then
+			for i, otherIcon in pairs(arrayOfIcons) do
+				otherIcon:joinDropdown(icon)
+			end
+		end
+	end)
 
+	-- Update visibiliy of dropdown
+	local function updateVisibility()
+		icon:modifyTheme({"Dropdown", "Visible", icon.isSelected})
+	end
+	dropdownJanitor:add(icon.toggled:Connect(updateVisibility))
+	updateVisibility()
+	
+	-- This updates the scrolling frame to only display a scroll
+	-- length equal to the distance produced by its MaxIcons
+	local updateCount = 0
+	local isUpdating = false
+	local function updateMaxIcons()
+		
+		-- This prevents more than 1 update occurring every frame
+		updateCount += 1
+		if isUpdating then
+			return
+		end
+		local myUpdateCount = updateCount
+		isUpdating = true
+		task.defer(function()
+			isUpdating = false
+			if updateCount ~= myUpdateCount then
+				updateMaxIcons()
+			end
+		end)
+			
+		local maxIcons = dropdown:GetAttribute("MaxIcons")
+		if not maxIcons then
+			return
+		end
+		local orderedInstances = {}
+		for _, child in pairs(dropdownScroller:GetChildren()) do
+			if child:IsA("GuiObject") then
+				table.insert(orderedInstances, {child, child.AbsolutePosition.Y})
+			end
+		end
+		table.sort(orderedInstances, function(groupA, groupB)
+			return groupA[2] < groupB[2]
+		end)
+		local totalHeight = 0
+		local hasSetNextSelection = false
+		for i = 1, maxIcons do
+			local group = orderedInstances[i]
+			if not group then
+				break
+			end
+			local child = group[1]
+			local height = child.AbsoluteSize.Y
+			totalHeight += height
+			local iconUID = child:GetAttribute("WidgetUID")
+			local childIcon = iconUID and Icon.getIconByUID(iconUID)
+			if childIcon then
+				local nextSelection = nil
+				if not hasSetNextSelection then
+					hasSetNextSelection = true
+					nextSelection = icon:getInstance("ClickRegion")
+				end
+				childIcon:getInstance("ClickRegion").NextSelectionUp = nextSelection
+			end
+		end
+		totalHeight += dropdownPadding.PaddingTop.Offset
+		totalHeight += dropdownPadding.PaddingBottom.Offset
+		dropdownScroller.Size = UDim2.fromOffset(0, totalHeight)
+	end
+	dropdownJanitor:add(dropdownScroller:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(updateMaxIcons))
+	dropdownJanitor:add(dropdownScroller.ChildAdded:Connect(updateMaxIcons))
+	dropdownJanitor:add(dropdownScroller.ChildRemoved:Connect(updateMaxIcons))
+	dropdownJanitor:add(dropdown:GetAttributeChangedSignal("MaxIcons"):Connect(updateMaxIcons))
+	dropdownJanitor:add(icon.childThemeModified:Connect(updateMaxIcons))
+	updateMaxIcons()
+	
 	return dropdown
 end
