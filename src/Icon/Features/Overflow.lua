@@ -27,8 +27,8 @@ local Icon
 function Overflow.start(incomingIcon)
 	Icon = incomingIcon
 	iconsDict = Icon.iconsDictionary
-	for _, screenGui in pairs(Icon.container) do
-		for _, holder in pairs(screenGui.Holders:GetChildren()) do
+	for _, screenGui in Icon.container do
+		for _, holder in screenGui.Holders:GetChildren() do
 			if holder:GetAttribute("IsAHolder") then
 				holders[holder.Name] = holder
 			end
@@ -59,7 +59,7 @@ function Overflow.updateAvailableIcons(alignment)
 	local holder = holders[alignment]
 	local holderUIList = holder.UIListLayout
 	local ourOrderedIcons = {}
-	for _, icon in pairs(iconsDict) do
+	for _, icon in iconsDict do
 		local parentUID = icon.parentIconUID
 		local isDirectlyOnTopbar = not parentUID or overflowIconUIDs[parentUID]
 		local isOverflow = false --overflowIconUIDs[icon.UID]
@@ -132,7 +132,7 @@ function Overflow.updateBoundary(alignment)
 	local ourOrderedIcons = Overflow.updateAvailableIcons(alignment)
 	local boundWidth = 0
 	local ourTotal = 0
-	for _, icon in pairs(ourOrderedIcons) do
+	for _, icon in ourOrderedIcons do
 		boundWidth += icon.widget.AbsoluteSize.X + topbarPadding
 		ourTotal += 1
 	end

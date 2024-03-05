@@ -240,7 +240,7 @@ return function(icon: Typing.Icon): Frame
 			local initialWidgetWidth = contentsPadding --0
 			local textWidth = iconLabel.TextBounds.X
 			iconLabelContainer.Size = UDim2.new(0, textWidth, iconLabel.Size.Y.Scale, 0)
-			for _, child in pairs(contents:GetChildren()) do
+			for _, child in contents:GetChildren() do
 				if child:IsA("GuiObject") and child.Visible == true then
 					local itemWidth = getItemWidth(child)
 					initialWidgetWidth += itemWidth + contentsPadding
@@ -255,7 +255,7 @@ return function(icon: Typing.Icon): Frame
 			local hasMenu = #menuIcons > 0
 			local showMenu = hasMenu and icon.isSelected
 			if showMenu then
-				for _, frame in pairs(menu:GetChildren()) do
+				for _, frame in menu:GetChildren() do
 					if frame ~= iconSpot and frame:IsA("GuiObject") and frame.Visible then
 						additionalWidth += getItemWidth(frame) + menuUIListLayout.Padding.Offset
 					end

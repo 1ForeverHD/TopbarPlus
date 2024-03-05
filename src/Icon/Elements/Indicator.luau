@@ -22,7 +22,7 @@ return function(icon: Typing.Icon): Frame
 	indicatorButton.BorderSizePixel = 0
 	indicatorButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	indicatorButton.Parent = indicator
-	
+
 	local GuiService = game:GetService("GuiService")
 	local GamepadService = game:GetService("GamepadService")
 	local ourClickRegion = icon:getInstance("ClickRegion")
@@ -64,11 +64,11 @@ return function(icon: Typing.Icon): Frame
 			visibility = false
 		end
 		if visibility then
-			icon:modifyTheme({"PaddingRight", "Size", UDim2.new(0, 0, 1, 0)}, "IndicatorPadding")
+			icon:modifyTheme({ "PaddingRight", "Size", UDim2.new(0, 0, 1, 0) }, "IndicatorPadding")
 		elseif indicator.Visible then
 			icon:removeModification("IndicatorPadding")
 		end
-		icon:modifyTheme({"Indicator", "Visible", visibility})
+		icon:modifyTheme({ "Indicator", "Visible", visibility })
 		icon.updateSize:Fire()
 	end
 	icon.janitor:add(GamepadService:GetPropertyChangedSignal("GamepadCursorEnabled"):Connect(setIndicatorVisible))
@@ -82,7 +82,7 @@ return function(icon: Typing.Icon): Frame
 	end)
 
 	local function updateSize()
-		local ySize = widget.AbsoluteSize.Y*0.96
+		local ySize = widget.AbsoluteSize.Y * 0.96
 		indicator.Size = UDim2.new(0, ySize, 0, ySize)
 	end
 	widget:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateSize)

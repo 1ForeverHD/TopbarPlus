@@ -121,7 +121,7 @@ return function(icon: Typing.Icon): Frame
 			return
 		end
 		local orderedInstances = {}
-		for _, child in pairs(dropdownScroller:GetChildren()) do
+		for _, child in dropdownScroller:GetChildren() do
 			if child:IsA("GuiObject") then
 				table.insert(orderedInstances, { child, child.AbsolutePosition.Y })
 			end

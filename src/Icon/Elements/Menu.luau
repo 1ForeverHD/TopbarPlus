@@ -113,7 +113,7 @@ return function(icon: Typing.Icon): ScrollingFrame
 				return
 			end
 			local orderedInstances = {}
-			for _, child in pairs(menu:GetChildren()) do
+			for _, child in menu:GetChildren() do
 				local widgetUID = child:GetAttribute("WidgetUID")
 				if widgetUID and child.Visible then
 					table.insert(orderedInstances, { child, child.AbsolutePosition.X })
@@ -154,14 +154,14 @@ return function(icon: Typing.Icon): ScrollingFrame
 	icon.menuChildAdded:Connect(totalChildrenChanged)
 	icon.menuSet:Connect(function(arrayOfIcons)
 		-- Reset any previous icons
-		for i, otherIconUID in pairs(icon.menuIcons) do
+		for i, otherIconUID in icon.menuIcons do
 			local otherIcon = Icon.getIconByUID(otherIconUID)
 			otherIcon:destroy()
 		end
 		-- Apply new icons
 		local totalNewIcons = #arrayOfIcons
 		if type(arrayOfIcons) == "table" then
-			for i, otherIcon in pairs(arrayOfIcons) do
+			for i, otherIcon in arrayOfIcons do
 				otherIcon:joinMenu(icon)
 			end
 		end

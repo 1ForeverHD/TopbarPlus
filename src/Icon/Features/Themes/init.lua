@@ -11,7 +11,7 @@ local baseTheme = require(script.Default)
 -- FUNCTIONS
 function Themes.getThemeValue(stateGroup, instanceName, property, iconState)
 	if stateGroup then
-		for _, detail in pairs(stateGroup) do
+		for _, detail in stateGroup do
 			local checkingInstanceName, checkingPropertyName, checkingValue = unpack(detail)
 			if instanceName == checkingInstanceName and property == checkingPropertyName then
 				return checkingValue
@@ -69,14 +69,14 @@ function Themes.refresh(icon, instance, specificProperty)
 		return
 	end
 	local validInstances = { [instance.Name] = instance }
-	for _, child in pairs(instance:GetDescendants()) do
+	for _, child in instance:GetDescendants() do
 		local collective = child:GetAttribute("Collective")
 		if collective then
 			validInstances[collective] = child
 		end
 		validInstances[child.Name] = child
 	end
-	for _, detail in pairs(stateGroup) do
+	for _, detail in stateGroup do
 		local checkingInstanceName, checkingPropertyName, checkingValue = unpack(detail)
 		local instanceToUpdate = validInstances[checkingInstanceName]
 		if instanceToUpdate then
@@ -104,7 +104,7 @@ function Themes.apply(icon, collectiveOrInstanceNameOrInstance, property, value,
 	end
 	local key = collectiveOrInstanceName .. "-" .. property
 	local customBehaviour = icon.customBehaviours[key]
-	for _, instance in pairs(instances) do
+	for _, instance in instances do
 		local clippedClone = Themes.getClippedClone(instance)
 		if clippedClone then
 			-- This means theme effects are applied to both the original
@@ -114,7 +114,7 @@ function Themes.apply(icon, collectiveOrInstanceNameOrInstance, property, value,
 			table.insert(instances, clippedClone)
 		end
 	end
-	for _, instance in pairs(instances) do
+	for _, instance in instances do
 		if property == "Position" and Themes.getClippedClone(instance) then
 			-- The clone manages the position of the real instance so ignore
 			continue
@@ -183,7 +183,7 @@ function Themes.modify(icon, modifications, modificationsUID)
 	task.spawn(function()
 		modificationsUID = modificationsUID or Utility.generateUID()
 		modifications = Themes.getModifications(modifications)
-		for _, modification in pairs(modifications) do
+		for _, modification in modifications do
 			local instanceName, property, value, iconState = table.unpack(modification)
 			if iconState == nil then
 				-- If no state specified, apply to all states
@@ -198,7 +198,7 @@ function Themes.modify(icon, modifications, modificationsUID)
 				end
 			end
 			local function updateRecord()
-				for stateName, detail in pairs(stateGroup) do
+				for stateName, detail in stateGroup do
 					local didMerge = Themes.merge(detail, modification, function(detail)
 						detail[5] = modificationsUID
 						nowSetIt()
@@ -218,7 +218,7 @@ function Themes.modify(icon, modifications, modificationsUID)
 end
 
 function Themes.remove(icon, modificationsUID)
-	for iconState, stateGroup in pairs(icon.appearance) do
+	for iconState, stateGroup in icon.appearance do
 		for i = #stateGroup, 1, -1 do
 			local detail = stateGroup[i]
 			local checkingUID = detail[5]
@@ -231,7 +231,7 @@ function Themes.remove(icon, modificationsUID)
 end
 
 function Themes.removeWith(icon, instanceName, property, state)
-	for iconState, stateGroup in pairs(icon.appearance) do
+	for iconState, stateGroup in icon.appearance do
 		if state == iconState or not state then
 			for i = #stateGroup, 1, -1 do
 				local detail = stateGroup[i]
@@ -250,7 +250,7 @@ function Themes.change(icon)
 	-- This changes the theme to the appearance of whatever
 	-- state is currently active
 	local stateGroup = icon:getStateGroup()
-	for _, detail in pairs(stateGroup) do
+	for _, detail in stateGroup do
 		local instanceName, property, value = unpack(detail)
 		Themes.apply(icon, instanceName, property, value)
 	end
@@ -287,7 +287,7 @@ function Themes.rebuild(icon)
 	local appliedTheme = icon.appliedTheme
 	local statesArray = { "Deselected", "Selected", "Viewing" }
 	local function generateTheme()
-		for _, stateName in pairs(statesArray) do
+		for _, stateName in statesArray do
 			-- This applies themes in layers
 			-- The last layers take higher priority as they overwrite
 			-- any duplicate earlier applied effects
@@ -297,7 +297,7 @@ function Themes.rebuild(icon)
 				if not theme then
 					return
 				end
-				for _, detail in pairs(theme) do
+				for _, detail in theme do
 					local modificationsUID = detail[5]
 					local detailStateName = detail[4]
 					if Themes.statesMatch(incomingStateName, detailStateName) then
@@ -327,7 +327,7 @@ function Themes.rebuild(icon)
 			local alreadyAppliedTheme = {}
 			local alreadyAppliedGroup = icon.appearance[stateName]
 			if alreadyAppliedGroup then
-				for _, modifier in pairs(alreadyAppliedGroup) do
+				for _, modifier in alreadyAppliedGroup do
 					local modificationsUID = modifier[5]
 					if modificationsUID ~= nil then
 						local modification = { modifier[1], modifier[2], modifier[3], stateName, modificationsUID }
@@ -338,7 +338,7 @@ function Themes.rebuild(icon)
 			updateDetails(alreadyAppliedTheme, stateName)
 			-- This now converts it into our final appearance
 			local finalStateAppearance = {}
-			for _, detail in pairs(stateAppearance) do
+			for _, detail in stateAppearance do
 				table.insert(finalStateAppearance, detail)
 			end
 			icon.appearance[stateName] = finalStateAppearance

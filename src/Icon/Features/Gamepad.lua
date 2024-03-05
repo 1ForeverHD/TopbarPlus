@@ -135,7 +135,7 @@ function Gamepad.getIconToHighlight()
 	local iconToHighlight = Icon.highlightIcon or Icon.lastHighlightedIcon
 	if not iconToHighlight then
 		local currentX
-		for _, icon in pairs(iconsDict) do
+		for _, icon in iconsDict do
 			if icon.parentIconUID then
 				continue
 			end
