@@ -1,4 +1,6 @@
-return function(icon)
+local Typing = require(script.Parent.Parent.Typing)
+
+return function(icon: Typing.Icon): Frame
 
 	-- Credit to lolmansReturn and Canary Software for
 	-- retrieving these values
@@ -250,7 +252,7 @@ return function(icon)
 	updatePosition(false)
 	
 	captionJanitor:add(icon.toggleKeyAdded:Connect(updateHotkey))
-	for keyCodeEnum, _ in pairs(icon.bindedToggleKeys) do
+	for keyCodeEnum, _ in icon.bindedToggleKeys do
 		updateHotkey(keyCodeEnum)
 		break
 	end

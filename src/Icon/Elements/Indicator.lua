@@ -1,5 +1,6 @@
-return function(icon, Icon)
+local Typing = require(script.Parent.Parent.Typing)
 
+return function(icon: Typing.Icon): Frame
 	local widget = icon.widget
 	local contents = icon:getInstance("Contents")
 	local indicator = Instance.new("Frame")

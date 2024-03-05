@@ -1,5 +1,6 @@
-return function(Icon)
-	
+local Typing = require(script.Parent.Parent.Typing)
+
+return function(Icon: Typing.Icon): Typing.Container
 	local GuiService = game:GetService("GuiService")
 	local isOldTopbar = Icon.isOldTopbar
 	local container = {}

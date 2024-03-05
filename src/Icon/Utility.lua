@@ -1,21 +1,17 @@
 -- Just generic utility functions which I use and repeat across all my projects
 
-
-
 -- LOCAL
 local Utility = {}
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
-
-
 
 -- FUNCTIONS
 function Utility.copyTable(t)
 	-- Credit to Stephen Leitnick (September 13, 2017) for this function from TableUtil
 	assert(type(t) == "table", "First argument must be a table")
 	local tCopy = table.create(#t)
-	for k,v in pairs(t) do
-		if (type(v) == "table") then
+	for k, v in pairs(t) do
+		if type(v) == "table" then
 			tCopy[k] = Utility.copyTable(v)
 		else
 			tCopy[k] = v
@@ -24,7 +20,85 @@ function Utility.copyTable(t)
 	return tCopy
 end
 
-local validCharacters = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","1","2","3","4","5","6","7","8","9","0","<",">","?","@","{","}","[","]","!","(",")","=","+","~","#"}
+local validCharacters = {
+	"a",
+	"b",
+	"c",
+	"d",
+	"e",
+	"f",
+	"g",
+	"h",
+	"i",
+	"j",
+	"k",
+	"l",
+	"m",
+	"n",
+	"o",
+	"p",
+	"q",
+	"r",
+	"s",
+	"t",
+	"u",
+	"v",
+	"w",
+	"x",
+	"y",
+	"z",
+	"A",
+	"B",
+	"C",
+	"D",
+	"E",
+	"F",
+	"G",
+	"H",
+	"I",
+	"J",
+	"K",
+	"L",
+	"M",
+	"N",
+	"O",
+	"P",
+	"Q",
+	"R",
+	"S",
+	"T",
+	"U",
+	"V",
+	"W",
+	"X",
+	"Y",
+	"Z",
+	"1",
+	"2",
+	"3",
+	"4",
+	"5",
+	"6",
+	"7",
+	"8",
+	"9",
+	"0",
+	"<",
+	">",
+	"?",
+	"@",
+	"{",
+	"}",
+	"[",
+	"]",
+	"!",
+	"(",
+	")",
+	"=",
+	"+",
+	"~",
+	"#",
+}
 function Utility.generateUID(length)
 	length = length or 8
 	local UID = ""
@@ -32,7 +106,7 @@ function Utility.generateUID(length)
 	local total = #list
 	for i = 1, length do
 		local randomCharacter = list[math.random(1, total)]
-		UID = UID..randomCharacter
+		UID = UID .. randomCharacter
 	end
 	return UID
 end
@@ -41,7 +115,7 @@ local instanceTrackers = {}
 function Utility.setVisible(instance, bool, sourceUID)
 	-- This effectively works like a buff object but
 	-- incredibly simplified. It stacks false values
-	-- so that if there is more than more than, the 
+	-- so that if there is more than more than, the
 	-- instance remains hidden even if set visible true
 	local tracker = instanceTrackers[instance]
 	if not tracker then
@@ -67,7 +141,7 @@ function Utility.setVisible(instance, bool, sourceUID)
 end
 
 function Utility.formatStateName(incomingStateName)
-	return string.upper(string.sub(incomingStateName, 1, 1))..string.lower(string.sub(incomingStateName, 2))
+	return string.upper(string.sub(incomingStateName, 1, 1)) .. string.lower(string.sub(incomingStateName, 2))
 end
 
 function Utility.localPlayerRespawned(callback)
@@ -86,10 +160,9 @@ function Utility.localPlayerRespawned(callback)
 		end
 		if humanoid then
 			humanoid.Died:Once(function()
-				task.delay(Players.RespawnTime-0.1, function()
+				task.delay(Players.RespawnTime - 0.1, function()
 					callback()
 				end)
-
 			end)
 		end
 	end)
@@ -131,17 +204,19 @@ function Utility.clipOutside(icon, instance)
 	valueInstance.Name = "OriginalInstance"
 	valueInstance.Value = instance
 	valueInstance.Parent = clone
-	
+
 	local valueInstanceCopy = valueInstance:Clone()
 	instance:SetAttribute("HasAClippedClone", true)
 	valueInstanceCopy.Name = "ClippedClone"
 	valueInstanceCopy.Value = clone
 	valueInstanceCopy.Parent = instance
-	
+
 	local screenGui
 	local function updateScreenGui()
 		local originalScreenGui = originalParent:FindFirstAncestorWhichIsA("ScreenGui")
-		screenGui = if string.match(originalScreenGui.Name, "Clipped") then originalScreenGui else originalScreenGui.Parent[originalScreenGui.Name.."Clipped"]
+		screenGui = if string.match(originalScreenGui.Name, "Clipped")
+			then originalScreenGui
+			else originalScreenGui.Parent[originalScreenGui.Name .. "Clipped"]
 		instance.AnchorPoint = Vector2.new(0, 0)
 		instance.Parent = Utility.getClippedContainer(screenGui)
 	end
@@ -154,7 +229,7 @@ function Utility.clipOutside(icon, instance)
 			child:Clone().Parent = clone
 		end
 	end
-	
+
 	-- If the icon is hidden, its important we are too (as
 	-- setting a parent to visible = false no longer makes
 	-- this hidden)
@@ -184,7 +259,7 @@ function Utility.clipOutside(icon, instance)
 				return
 			end
 			local pos = instance.AbsolutePosition
-			local halfSize = instance.AbsoluteSize/2
+			local halfSize = instance.AbsoluteSize / 2
 			local parentPos = parentInstance.AbsolutePosition
 			local parentSize = parentInstance.AbsoluteSize
 			local posHalf = (pos + halfSize)
@@ -203,44 +278,46 @@ function Utility.clipOutside(icon, instance)
 	local camera = workspace.CurrentCamera
 	local additionalOffsetX = instance:GetAttribute("AdditionalOffsetX") or 0
 	local function trackProperty(property)
-		local absoluteProperty = "Absolute"..property
+		local absoluteProperty = "Absolute" .. property
 		cloneJanitor:add(clone:GetPropertyChangedSignal(absoluteProperty):Connect(function()
-			task.defer(function() -- This defer is essential as the listener may be in a different screenGui to the actor
-				local cloneValue = clone[absoluteProperty]
-				local absoluteValue = UDim2.fromOffset(cloneValue.X, cloneValue.Y)
-				if property == "Position" then
+			task.defer(
+				function() -- This defer is essential as the listener may be in a different screenGui to the actor
+					local cloneValue = clone[absoluteProperty]
+					local absoluteValue = UDim2.fromOffset(cloneValue.X, cloneValue.Y)
+					if property == "Position" then
+						-- This binds the instances within the bounds of the screen
+						local SIDE_PADDING = 4
+						local limitX = camera.ViewportSize.X - instance.AbsoluteSize.X - SIDE_PADDING
+						local inputX = absoluteValue.X.Offset
+						if inputX < SIDE_PADDING then
+							inputX = SIDE_PADDING
+						elseif inputX > limitX then
+							inputX = limitX
+						end
+						absoluteValue = UDim2.fromOffset(inputX, absoluteValue.Y.Offset)
 
-					-- This binds the instances within the bounds of the screen
-					local SIDE_PADDING = 4
-					local limitX = camera.ViewportSize.X - instance.AbsoluteSize.X - SIDE_PADDING
-					local inputX = absoluteValue.X.Offset
-					if inputX < SIDE_PADDING then
-						inputX = SIDE_PADDING
-					elseif inputX > limitX then
-						inputX = limitX
+						-- AbsolutePosition does not perfectly match with TopbarInsets enabled
+						-- This corrects this
+						local topbarInset = GuiService.TopbarInset
+						local viewportWidth = workspace.CurrentCamera.ViewportSize.X
+						local guiWidth = screenGui.AbsoluteSize.X
+						local guiOffset = screenGui.AbsolutePosition.X
+						local widthDifference = guiOffset - topbarInset.Min.X
+						local oldTopbarCenterOffset = 0 --widthDifference/30 -- I have no idea why this works, it just does
+						local offsetX = if icon.isOldTopbar
+							then guiOffset
+							else viewportWidth - guiWidth - oldTopbarCenterOffset
+
+						-- Also add additionalOffset
+						offsetX -= additionalOffsetX
+						absoluteValue += UDim2.fromOffset(-offsetX, topbarInset.Height)
+
+						-- Finally check if within its direct parents bounds
+						checkIfOutsideParentXBounds()
 					end
-					absoluteValue = UDim2.fromOffset(inputX, absoluteValue.Y.Offset)
-					
-					-- AbsolutePosition does not perfectly match with TopbarInsets enabled
-					-- This corrects this
-					local topbarInset = GuiService.TopbarInset
-					local viewportWidth = workspace.CurrentCamera.ViewportSize.X
-					local guiWidth = screenGui.AbsoluteSize.X
-					local guiOffset = screenGui.AbsolutePosition.X
-					local widthDifference = guiOffset - topbarInset.Min.X
-					local oldTopbarCenterOffset = 0--widthDifference/30 -- I have no idea why this works, it just does
-					local offsetX = if icon.isOldTopbar then guiOffset else viewportWidth - guiWidth - oldTopbarCenterOffset
-					
-					-- Also add additionalOffset
-					offsetX -= additionalOffsetX
-					absoluteValue += UDim2.fromOffset(-offsetX, topbarInset.Height)
-					
-					-- Finally check if within its direct parents bounds
-					checkIfOutsideParentXBounds()
-					
+					instance[property] = absoluteValue
 				end
-				instance[property] = absoluteValue
-			end)
+			)
 		end))
 	end
 	checkIfOutsideParentXBounds()
@@ -262,7 +339,6 @@ function Utility.clipOutside(icon, instance)
 end
 
 function Utility.joinFeature(originalIcon, parentIcon, iconsArray, scrollingFrameOrFrame)
-
 	-- This is resonsible for moving the icon under a feature like a dropdown
 	local joinJanitor = originalIcon.joinJanitor
 	joinJanitor:clean()
@@ -281,8 +357,8 @@ function Utility.joinFeature(originalIcon, parentIcon, iconsArray, scrollingFram
 	end
 	joinJanitor:add(parentIcon.alignmentChanged:Connect(updateAlignent))
 	updateAlignent()
-	originalIcon:modifyTheme({"IconButton", "BackgroundTransparency", 1}, "JoinModification")
-	originalIcon:modifyTheme({"ClickRegion", "Active", false}, "JoinModification")
+	originalIcon:modifyTheme({ "IconButton", "BackgroundTransparency", 1 }, "JoinModification")
+	originalIcon:modifyTheme({ "ClickRegion", "Active", false }, "JoinModification")
 	if parentIcon.childModifications then
 		originalIcon:modifyTheme(parentIcon.childModifications, parentIcon.childModificationsUID)
 	end
@@ -297,7 +373,7 @@ function Utility.joinFeature(originalIcon, parentIcon, iconsArray, scrollingFram
 		clickRegion.Selectable = true
 	end)
 	--
-	
+
 	-- We track icons in arrays and dictionaries using their UID instead of the icon
 	-- itself to prevent heavy cyclical tables when printing the icons
 	local originalIconUID = originalIcon.UID
@@ -340,11 +416,7 @@ function Utility.joinFeature(originalIcon, parentIcon, iconsArray, scrollingFram
 			parentIcon:setEnabled(false)
 		end
 		updateAlignent()
-		
 	end)
-
 end
-
-
 
 return Utility

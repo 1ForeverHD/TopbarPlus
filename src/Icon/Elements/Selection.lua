@@ -1,11 +1,10 @@
-return function(Icon)
-
+return function(): Frame
 	-- Credit to lolmansReturn and Canary Software for
 	-- retrieving these values
 	local selectionContainer = Instance.new("Frame")
 	selectionContainer.Name = "SelectionContainer"
 	selectionContainer.Visible = false
-	
+
 	local selection = Instance.new("Frame")
 	selection.Name = "Selection"
 	selection.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -30,7 +29,7 @@ return function(Icon)
 	UICorner.Name = "UICorner"
 	UICorner.CornerRadius = UDim.new(1, 0)
 	UICorner.Parent = selection
-	
+
 	local RunService = game:GetService("RunService")
 	local GuiService = game:GetService("GuiService")
 	local rotationSpeed = 1
@@ -45,5 +44,4 @@ return function(Icon)
 	end)
 
 	return selectionContainer
-	
 end

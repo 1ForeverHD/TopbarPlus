@@ -6,14 +6,12 @@
 --!!! TO DO STILL:
 -- 1. Replace test loop with events that are listened for
 -- 2. The boundaries (or the holder sizing) aren't 100% accurate. Double check values and make sure there is comfortable spacing
--- 3. Hang on Ben, maybe reconsider this appraoach entirely because 
+-- 3. Hang on Ben, maybe reconsider this appraoach entirely because
 -- 3. Update the description above as might not reflect new behaviour (frames not overflow icons)
 -- 4. Ensure :clipOutside items acccount for this such as notices and captions
 
-
-
 -- LOCAL
-local SUBMISSIVE_ALIGNMENT = "Right" -- This boundary shrinks if the other alignments boundary gets too close 
+local SUBMISSIVE_ALIGNMENT = "Right" -- This boundary shrinks if the other alignments boundary gets too close
 local Overflow = {}
 local holders = {}
 local orderedAvailableIcons = {}
@@ -23,8 +21,6 @@ local currentCamera = workspace.CurrentCamera
 local overflowIcons = {}
 local overflowIconUIDs = {}
 local Icon
-
-
 
 -- FUNCTIONS
 -- This is called upon the Icon initializing
@@ -58,7 +54,6 @@ function Overflow.getAvailableIcons(alignment)
 end
 
 function Overflow.updateAvailableIcons(alignment)
-
 	-- We only track items that are directly on the topbar (i.e. not within a parent icon)
 	local ourTotal = 0
 	local holder = holders[alignment]
@@ -67,7 +62,7 @@ function Overflow.updateAvailableIcons(alignment)
 	for _, icon in pairs(iconsDict) do
 		local parentUID = icon.parentIconUID
 		local isDirectlyOnTopbar = not parentUID or overflowIconUIDs[parentUID]
-		local isOverflow = false--overflowIconUIDs[icon.UID]
+		local isOverflow = false --overflowIconUIDs[icon.UID]
 		if isDirectlyOnTopbar and icon.alignment == alignment and not isOverflow then
 			table.insert(ourOrderedIcons, icon)
 			ourTotal += 1
@@ -103,15 +98,13 @@ function Overflow.updateAvailableIcons(alignment)
 		end
 		return iconA.widget.AbsolutePosition.X < iconB.widget.AbsolutePosition.X
 	end)
-	
+
 	-- Finish up
 	orderedAvailableIcons[alignment] = ourOrderedIcons
 	return ourOrderedIcons
-
 end
 
 function Overflow.updateBoundary(alignment)
-	
 	-- These are the icons with menus which icons will be moved into
 	-- when overflowing
 	local isCentral = alignment == "Central"
@@ -121,7 +114,7 @@ function Overflow.updateBoundary(alignment)
 	if not overflowIcon and not isCentral then
 		local order = (isLeft and -9999999) or 9999999
 		overflowIcon = Icon.new():setLabel(`{alignment}`)
-		overflowIcon:setName("Overflow"..alignment)
+		overflowIcon:setName("Overflow" .. alignment)
 		overflowIcon:setOrder(order)
 		overflowIcon:setAlignment(alignment)
 		overflowIcon.isAnOverflow = true
@@ -146,7 +139,7 @@ function Overflow.updateBoundary(alignment)
 	if ourTotal <= 0 then
 		return
 	end
-	
+
 	-- Calculate the start bounds and total bound
 	local lastIcon = (isLeft and ourOrderedIcons[1]) or ourOrderedIcons[ourTotal]
 	local lastXPos = lastIcon.widget.AbsolutePosition.X
@@ -159,7 +152,7 @@ function Overflow.updateBoundary(alignment)
 		print("BOUNDARY LEFT =", boundary, startBound, boundWidth)
 	end
 	--
-	
+
 	-- Now we get the left-most icon (if left alignment) or right-most-icon (if
 	-- right alignment) of the central icons group to see if we need to change
 	-- the boundary (if the central icon boundary is smaller than the alignment
@@ -169,7 +162,8 @@ function Overflow.updateBoundary(alignment)
 	local nearestCenterIcon = centerOrderedIcons[centerPos]
 	if nearestCenterIcon then
 		local nearestXPos = nearestCenterIcon.widget.AbsolutePosition.X
-		local centerBoundary = (isLeft and nearestXPos) or nearestXPos + nearestCenterIcon.widget.AbsoluteSize.X + topbarInset
+		local centerBoundary = (isLeft and nearestXPos)
+			or nearestXPos + nearestCenterIcon.widget.AbsoluteSize.X + topbarInset
 		if isLeft and centerBoundary - BOUNDARY_GAP < boundary then
 			boundary = centerBoundary
 		elseif isRight and centerBoundary + BOUNDARY_GAP > boundary then
@@ -191,7 +185,7 @@ function Overflow.updateBoundary(alignment)
 		local Themes = require(script.Parent.Themes)
 		local stateGroup = overflowIcon:getStateGroup()
 		local defaultIconWidth = Themes.getThemeValue(stateGroup, "Widget", "MinimumWidth") or 0
-		local requiredSideGap = (defaultIconWidth*3) + (BOUNDARY_GAP*2)
+		local requiredSideGap = (defaultIconWidth * 3) + (BOUNDARY_GAP * 2)
 		local viewportWidth = currentCamera.ViewportSize.X
 		if isRight and boundary < requiredSideGap then
 			-- FOR THIS, CONSIDER ICONS JOINING A SOLE SIDE OF THE SCREEN
@@ -206,14 +200,14 @@ function Overflow.updateBoundary(alignment)
 	if isRight then
 		print("boundary (3) =", boundary, hasExceededSide)
 	end
-	
+
 	-- If the dominant boundary exceeds the submissive boundary, its
 	-- important we shrink the submissive one to account
-	local isSubmissive = alignment == SUBMISSIVE_ALIGNMENT 
+	local isSubmissive = alignment == SUBMISSIVE_ALIGNMENT
 	local isDominant = not isSubmissive
 	local oppositeAlignment = (alignment == "Left" and "Right") or "Left"
 	local oppositeBoundary = boundaries[oppositeAlignment]
-	if ((isSubmissive and not hasExceededSide) or (isDominant and hasExceededSide)) then
+	if (isSubmissive and not hasExceededSide) or (isDominant and hasExceededSide) then
 		if oppositeBoundary and not hasExceededSide then
 			if isLeft and oppositeBoundary - topbarPadding < boundary then
 				boundary = oppositeBoundary
@@ -237,14 +231,14 @@ function Overflow.updateBoundary(alignment)
 	local holderWidth = (isLeft and boundary - holderXPos) or (viewportWidth - boundary)
 	holderWidth -= BOUNDARY_GAP
 	--holder.Size = UDim2.new(0, holderWidth, 1, 0)
-	
+
 	--Parent icons into the overflow if they exceed the bounds
 	--
 	if alignment == "Right" then
 		print("ourOrderedIcons =", boundary, #ourOrderedIcons, ourOrderedIcons)
 	end
 	--
-	
+
 	-- We calculate the the absolute position of icons instead of reading
 	-- directly to determine where they would be if not within an overflow
 	local absoluteX = (isLeft and holderXPos) or holderXPos + holderXSize
@@ -272,15 +266,12 @@ function Overflow.updateBoundary(alignment)
 		end
 		absoluteX += (isLeft and topbarInset) or -topbarInset
 	end
-	
+
 	-- If we're the dominant boundary it's important we recalculate the
 	-- submissive boundary as they depend on our boundary information
 	if isDominant then
 		Overflow.updateBoundary(oppositeAlignment)
 	end
-
 end
-
-
 
 return Overflow
