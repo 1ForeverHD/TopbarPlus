@@ -48,7 +48,7 @@ function Gamepad.start(incomingIcon)
 					local clickRegion = icon:getInstance("ClickRegion")
 					local selection = icon.selection
 					if not selection then
-						selection = icon.janitor:add(Selection(Icon))
+						selection = icon.janitor:add(Selection())
 						selection:SetAttribute("IgnoreVisibilityUpdater", true)
 						selection.Parent = icon.widget
 						icon.selection = selection

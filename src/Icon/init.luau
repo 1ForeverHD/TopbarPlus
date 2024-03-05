@@ -58,7 +58,7 @@ local Themes = require(iconModule.Features.Themes)
 local Gamepad = require(iconModule.Features.Gamepad)
 local Overflow = require(iconModule.Features.Overflow)
 local Typing = require(iconModule.Typing)
-local Icon = {} :: Typing.IconImpl
+local Icon = {} :: Icon
 Icon.__index = Icon
 
 --- LOCAL
@@ -81,6 +81,11 @@ type StateName = Typing.StateName
 type IconProto = Typing.IconProto
 type IconImpl = Typing.IconImpl
 export type Icon = Typing.Icon
+
+--[[
+
+]]
+--
 
 -- PUBLIC VARIABLES
 Icon.baseTheme = require(themes.Default)
@@ -149,8 +154,7 @@ end
 
 -- CONSTRUCTOR
 function Icon.new(): Icon
-	local self = {} :: IconProto
-	setmetatable(self, Icon)
+	local self = (setmetatable({}, Icon) :: any) :: Icon
 
 	--- Janitors (for cleanup)
 	local janitor = Janitor.new()
@@ -164,7 +168,7 @@ function Icon.new(): Icon
 
 	-- Register
 	local iconUID = Utility.generateUID()
-	iconsDict[iconUID] = self
+	iconsDict[iconUID] = (self :: any) :: Icon
 	janitor:add(function()
 		iconsDict[iconUID] = nil
 	end)
@@ -209,8 +213,8 @@ function Icon.new(): Icon
 	self.deselectWhenOtherIconSelected = true
 	self.totalNotices = 0
 	self.activeState = "Deselected"
-	self.alignment = ""
-	self.originalAlignment = ""
+	self.alignment = "Center"
+	self.originalAlignment = "Center"
 	self.appliedTheme = {}
 	self.appearance = {}
 	self.cachedInstances = {}
@@ -360,7 +364,7 @@ function Icon.new(): Icon
 	local sourcePath = string.split(source, ".")
 	local origin = game
 	local originsScreenGui
-	for i, sourceName in pairs(sourcePath) do
+	for i, sourceName in sourcePath do
 		origin = origin:FindFirstChild(sourceName)
 		if not origin then
 			break
@@ -379,13 +383,13 @@ function Icon.new(): Icon
 	local noticeLabel = self:getInstance("NoticeLabel")
 	self.toggled:Connect(function(isSelected)
 		self.noticeChanged:Fire(self.totalNotices)
-		for childIconUID, _ in pairs(self.childIconsDict) do
+		for childIconUID, _ in self.childIconsDict do
 			local childIcon = Icon.getIconByUID(childIconUID)
 			childIcon.noticeChanged:Fire(childIcon.totalNotices)
 			if not isSelected and childIcon.isSelected then
 				-- If an icon within a menu or dropdown is also
 				-- a dropdown or menu, then close it
-				for _, _ in pairs(childIcon.childIconsDict) do
+				for _, _ in childIcon.childIconsDict do
 					childIcon:deselect()
 				end
 			end
@@ -414,7 +418,7 @@ function Icon.setName(self: Icon, name: string): Icon
 	return self
 end
 
-function Icon.setState(self: Icon, incomingStateName: StateName?, fromInput: boolean?): ()
+function Icon.setState(self: Icon, incomingStateName: StateName?, fromInput: Icon?): ()
 	-- This is responsible for acknowleding a change in stage (such as from "Deselected" to "Viewing" when
 	-- a users mouse enters the widget), then informing other systems of this state change to then act upon
 	-- (such as the theme handler applying the theme which corresponds to that state).
@@ -447,7 +451,7 @@ function Icon.setState(self: Icon, incomingStateName: StateName?, fromInput: boo
 	self.stateChanged:Fire(stateName, fromInput)
 end
 
-function Icon.getInstance(self: Icon, name: string): { Instance }
+function Icon.getInstance(self: Icon, name: string): Instance
 	-- This enables us to easily retrieve instances located within the icon simply by passing its name.
 	-- Every important/significant instance is named uniquely therefore this is no worry of overlap.
 	-- We cache the result for more performant retrieval in the future.
@@ -479,7 +483,7 @@ function Icon.getInstance(self: Icon, name: string): { Instance }
 
 	local returnChild
 	local function scanChildren(parentInstance)
-		for _, child in pairs(parentInstance:GetChildren()) do
+		for _, child in parentInstance:GetChildren() do
 			local widgetUID = child:GetAttribute("WidgetUID")
 			if widgetUID and widgetUID ~= self.UID then
 				-- This prevents instances within other icons from being recorded
@@ -520,7 +524,7 @@ function Icon.getCollective(self: Icon, name: string): { Instance }
 		return collective
 	end
 	collective = {}
-	for instance, _ in pairs(self.cachedInstances) do
+	for instance, _ in self.cachedInstances do
 		if instance:GetAttribute("Collective") == name then
 			table.insert(collective, instance)
 		end
@@ -585,7 +589,7 @@ function Icon.setBehaviour(
 	self.customBehaviours[key] = callback
 	if refreshAppearance then
 		local instances = self:getInstanceOrCollective(collectiveOrInstanceName)
-		for _, instance in pairs(instances) do
+		for _, instance in instances do
 			self:refreshAppearance(instance, property)
 		end
 	end
@@ -638,12 +642,12 @@ function Icon.setEnabled(self: Icon, bool: boolean): Icon
 	return self
 end
 
-function Icon.select(self: Icon, fromInput: boolean): Icon
+function Icon.select(self: Icon, fromInput: Icon?): Icon
 	self:setState("Selected", fromInput)
 	return self
 end
 
-function Icon.deselect(self: Icon, fromInput: boolean): Icon
+function Icon.deselect(self: Icon, fromInput: Icon?): Icon
 	self:setState("Deselected", fromInput)
 	return self
 end
@@ -704,7 +708,7 @@ function Icon.align(self: Icon, leftCenterOrRight: Typing.Alignment?, isFromPare
 	end
 	local screenGui = (direction == "center" and Icon.container.TopbarCentered) or Icon.container.TopbarStandard
 	local holders = screenGui.Holders
-	local finalDirection = string.upper(string.sub(direction, 1, 1)) .. string.sub(direction, 2)
+	local finalDirection = (string.upper(string.sub(direction, 1, 1)) .. string.sub(direction, 2)) :: Typing.Alignment
 	if not isFromParentIcon then
 		self.originalAlignment = finalDirection
 	end
@@ -802,13 +806,9 @@ function Icon._updateSelectionInstances(self: Icon): ()
 	end
 end
 
-function Icon._setToggleItemsVisible(self: Icon, bool: boolean, fromInput: boolean | Icon): ()
-	for toggleItem, _ in pairs(self.toggleItems) do
-		if
-			not fromInput
-			or fromInput == self
-			or (typeof(fromInput) == "table" and fromInput.toggleItems[toggleItem] == nil)
-		then
+function Icon._setToggleItemsVisible(self: Icon, bool: boolean, fromInput: Icon?): ()
+	for toggleItem, _ in self.toggleItems do
+		if not fromInput or fromInput == self or fromInput.toggleItems[toggleItem] == nil then
 			local property = "Visible"
 			if toggleItem:IsA("LayerCollector") then
 				property = "Enabled"
