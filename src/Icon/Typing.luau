@@ -185,10 +185,10 @@ export type IconImpl = {
 	clipOutside: (self: Icon, instance: GuiObject) -> (Icon, GuiObject),
 	setIndicator: (self: Icon, keyCode: Enum.KeyCode) -> (),
 
-	destroy: (self: Icon) -> (),
 	Destroy: (self: Icon) -> (),
 
 	-- alias
+	destroy: (self: Icon) -> (),
 	setAlignment: (self: Icon, leftCenterOrRight: Alignment?, isFromParentIcon: boolean?) -> Icon,
 	disableStateOverlay: (self: Icon, bool: boolean) -> Icon,
 }
