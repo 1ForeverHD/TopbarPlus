@@ -1,6 +1,8 @@
+--!strict
+
 -- TYPINGS
 
------------- Janitor -----------
+------------ Janitor ------------
 
 export type Janitor = {
 	ClassName: "Janitor",
@@ -82,7 +84,7 @@ export type StrictGoodSignal<Variant... = ...any> = {
 	Once: (StrictGoodSignal<Variant...>, func: (Variant...) -> ()) -> StrictGoodSignalConnection<Variant...>,
 }
 
----------- UTILITY -----------
+---------- UTILITY ----------
 
 export type Utility = {
 	copyTable: <T>(t: T) -> T,
@@ -100,7 +102,7 @@ export type Utility = {
 	) -> (),
 }
 
----------- OVERFLOW -----------
+---------- OVERFLOW ----------
 
 export type Overflow = {
 	start: (incomingIcon: Icon) -> (),
@@ -117,7 +119,7 @@ export type Gamepad = {
 	registerButton: (buttonInstance: GuiObject) -> (),
 }
 
-------------- THEME ------------
+------------- THEME -------------
 
 export type ThemeData = { any }
 export type Theme = { ThemeData }
