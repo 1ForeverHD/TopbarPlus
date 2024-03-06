@@ -201,7 +201,7 @@ export type IconImpl = {
 	notify: (self: Icon, customClearSignal: StrictGoodSignal?, noticeId: string?) -> Icon,
 	clearNotices: (self: Icon) -> Icon,
 	disableOverlay: (self: Icon, bool: boolean) -> Icon,
-	setImage: (self: Icon, imageId: string, iconState: StateName?) -> Icon,
+	setImage: (self: Icon, imageId: string | number, iconState: StateName?) -> Icon,
 	setLabel: (self: Icon, text: string, iconState: StateName?) -> Icon,
 	setOrder: (self: Icon, int: number, iconState: StateName?) -> Icon,
 	setCornerRadius: (self: Icon, udim: UDim, iconState: StateName?) -> Icon,
