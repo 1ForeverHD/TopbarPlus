@@ -37,6 +37,9 @@ local UserInputService = game:GetService("UserInputService")
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 
+-- Due to how typechecker work, we need to require the module directly without using the reference handler
+local Typing = require(script.Typing)
+
 -- REFERENCE HANDLER
 -- Multiple Icons packages may exist at runtime (for instance if the developer additionally uses HD Admin)
 -- therefore this ensures that the first required package becomes the dominant and only functioning module
@@ -52,7 +55,6 @@ if not referenceObject then
 end
 
 -- MODULES
-local Typing = require(iconModule.Typing)
 local Signal = require(iconModule.Packages.GoodSignal)
 local Janitor = require(iconModule.Packages.Janitor) :: Typing.Janitor
 local Utility = require(iconModule.Utility) :: Typing.Utility

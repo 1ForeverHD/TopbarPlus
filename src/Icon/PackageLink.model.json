@@ -1,3 +1,8 @@
 {
-  "ClassName": "PackageLink"
+  "ClassName": "PackageLink",
+  "Properties": {
+    "AutoUpdate": true,
+    "ModifiedState": 1,
+    "PackageId": "rbxassetid://16049574146"
+  }
 }
