@@ -1,3 +1,5 @@
+--!strict
+
 local Typing = require(script.Parent.Parent.Typing)
 
 return function(icon: Typing.Icon): ScrollingFrame
@@ -68,8 +70,8 @@ return function(icon: Typing.Icon): ScrollingFrame
 
 		-- Apply a close selected image if the user hasn't applied thier own
 		local stateGroup = icon:getStateGroup()
-		local imageDeselected = Themes.getThemeValue(stateGroup, "IconImage", "Image", "Deselected")
-		local imageSelected = Themes.getThemeValue(stateGroup, "IconImage", "Image", "Selected")
+		local imageDeselected = Themes.getThemeValue(stateGroup, "IconImage", "Image")
+		local imageSelected = Themes.getThemeValue(stateGroup, "IconImage", "Image")
 		if imageDeselected == imageSelected then
 			local fontLink = "rbxasset://fonts/families/FredokaOne.json"
 			local fontFace = Font.new(fontLink, Enum.FontWeight.Light, Enum.FontStyle.Normal)
@@ -143,8 +145,6 @@ return function(icon: Typing.Icon): ScrollingFrame
 				icon.startMenuUpdate:Fire()
 			end)
 		end
-		local iconButton = icon:getInstance("IconButton")
-		local previousButtonWidth = iconButton.AbsoluteSize.X
 		menuJanitor:add(menu.ChildAdded:Connect(startMenuUpdate))
 		menuJanitor:add(menu.ChildRemoved:Connect(startMenuUpdate))
 		menuJanitor:add(menu:GetAttributeChangedSignal("MaxIcons"):Connect(startMenuUpdate))
@@ -152,16 +152,15 @@ return function(icon: Typing.Icon): ScrollingFrame
 	end
 
 	icon.menuChildAdded:Connect(totalChildrenChanged)
-	icon.menuSet:Connect(function(arrayOfIcons)
+	icon.menuSet:Connect(function(arrayOfIcons: { Typing.Icon })
 		-- Reset any previous icons
-		for i, otherIconUID in icon.menuIcons do
+		for _, otherIconUID in icon.menuIcons do
 			local otherIcon = Icon.getIconByUID(otherIconUID)
 			otherIcon:destroy()
 		end
 		-- Apply new icons
-		local totalNewIcons = #arrayOfIcons
 		if type(arrayOfIcons) == "table" then
-			for i, otherIcon in arrayOfIcons do
+			for _, otherIcon in arrayOfIcons do
 				otherIcon:joinMenu(icon)
 			end
 		end

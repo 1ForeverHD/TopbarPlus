@@ -2,6 +2,7 @@
 -- still enabling third-party applications (such as HDAdmin/Nanoblox) to locate it
 -- This is necessary to prevent two TopbarPlus applications initiating at runtime which would
 -- cause icons to overlap with each other
+--!strict
 
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local Reference = {}

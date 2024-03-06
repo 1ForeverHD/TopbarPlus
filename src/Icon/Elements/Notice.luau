@@ -1,3 +1,5 @@
+--!strict
+
 local Typing = require(script.Parent.Parent.Typing)
 
 return function(icon: Typing.Icon, Icon: Typing.Icon): Frame
@@ -48,7 +50,7 @@ return function(icon: Typing.Icon, Icon: Typing.Icon): Frame
 		end
 		local exceeded99 = totalNotices > 99
 		local noticeDisplay = (exceeded99 and "99+") or totalNotices
-		noticeLabel.Text = noticeDisplay
+		noticeLabel.Text = tostring(noticeDisplay)
 		if exceeded99 then
 			noticeLabel.TextSize = 11
 		end
@@ -72,6 +74,10 @@ return function(icon: Typing.Icon, Icon: Typing.Icon): Frame
 		if not customClearSignal then
 			customClearSignal = icon.deselected
 		end
+		-- give the type checker a hint that customClearSignal exists
+		if not customClearSignal then
+			return
+		end
 		local parentIcon = Icon.getIconByUID(icon.parentIconUID)
 		if parentIcon then
 			parentIcon:notify(customClearSignal)
@@ -86,11 +92,10 @@ return function(icon: Typing.Icon, Icon: Typing.Icon): Frame
 			noticeComplete:Fire()
 		end))
 		noticeId = noticeId or Utility.generateUID()
-		icon.notices[noticeId] = {
-			completeSignal = noticeComplete,
-			clearNoticeEvent = customClearSignal,
+		icon.notices[noticeId :: string] = {
+			completeSignal = noticeComplete :: any,
+			clearNoticeEvent = customClearSignal :: any,
 		}
-		local noticeLabel = icon:getInstance("NoticeLabel")
 		local function updateNotice()
 			icon.noticeChanged:Fire(icon.totalNotices)
 		end

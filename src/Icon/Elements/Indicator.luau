@@ -1,3 +1,5 @@
+--!strict
+
 local Typing = require(script.Parent.Parent.Typing)
 
 return function(icon: Typing.Icon): Frame

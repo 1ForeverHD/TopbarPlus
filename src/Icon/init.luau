@@ -30,6 +30,7 @@
 	   such as UILIstLayouts, etc)
 
 --]]
+--!strict
 
 -- SERVICES
 local UserInputService = game:GetService("UserInputService")
@@ -51,13 +52,13 @@ if not referenceObject then
 end
 
 -- MODULES
-local Signal = require(iconModule.Packages.GoodSignal)
-local Janitor = require(iconModule.Packages.Janitor)
-local Utility = require(iconModule.Utility)
-local Themes = require(iconModule.Features.Themes)
-local Gamepad = require(iconModule.Features.Gamepad)
-local Overflow = require(iconModule.Features.Overflow)
 local Typing = require(iconModule.Typing)
+local Signal = require(iconModule.Packages.GoodSignal)
+local Janitor = require(iconModule.Packages.Janitor) :: Typing.Janitor
+local Utility = require(iconModule.Utility) :: Typing.Utility
+local Themes = require(iconModule.Features.Themes) :: Typing.Themes
+local Gamepad = require(iconModule.Features.Gamepad) :: Typing.Gamepad
+local Overflow = require(iconModule.Features.Overflow) :: Typing.Overflow
 local Icon = {} :: Icon
 Icon.__index = Icon
 
@@ -66,7 +67,7 @@ local localPlayer = Players.LocalPlayer
 local themes = iconModule.Features.Themes
 local playerGui = localPlayer:WaitForChild("PlayerGui")
 local iconsDict = {}
-local anyIconSelected = Signal.new()
+local anyIconSelected = Signal.new() :: Typing.StrictGoodSignal<Icon>
 local elements = iconModule.Elements
 
 -- PRESETUP
@@ -118,7 +119,7 @@ function Icon.getIcon(nameOrUID: string): Icon?
 	return
 end
 
-function Icon.setTopbarEnabled(bool: boolean?, isInternal: boolean?)
+function Icon.setTopbarEnabled(bool: boolean?, isInternal: boolean?): ()
 	if typeof(bool) ~= "boolean" then
 		bool = Icon.topbarEnabled
 	end
@@ -130,7 +131,7 @@ function Icon.setTopbarEnabled(bool: boolean?, isInternal: boolean?)
 	end
 end
 
-function Icon.modifyBaseTheme(modifications: { { unknown } })
+function Icon.modifyBaseTheme(modifications: Typing.Theme): ()
 	modifications = Themes.getModifications(modifications)
 	for _, modification in modifications do
 		for _, detail in Icon.baseTheme do
@@ -239,7 +240,7 @@ function Icon.new(): Icon
 	self:setTheme(Icon.baseTheme)
 
 	-- Button Clicked (for states "Selected" and "Deselected")
-	local clickRegion = self:getInstance("ClickRegion")
+	local clickRegion = self:getInstance("ClickRegion") :: GuiButton
 	local function handleToggle()
 		if self.locked then
 			return
@@ -288,7 +289,7 @@ function Icon.new(): Icon
 	-- Button Hovering (for state "Viewing")
 	-- Hovering is a state only for devices with keyboards
 	-- and controllers (not touchpads)
-	local function viewingStarted(dontSetState)
+	local function viewingStarted(dontSetState: boolean?)
 		if self.locked then
 			return
 		end
@@ -336,7 +337,7 @@ function Icon.new(): Icon
 	end)
 
 	-- Handle overlay on viewing
-	local iconOverlay = self:getInstance("IconOverlay")
+	local iconOverlay = self:getInstance("IconOverlay") :: GuiObject
 	self.viewingStarted:Connect(function()
 		iconOverlay.Visible = not self.overlayDisabled
 	end)
@@ -364,7 +365,7 @@ function Icon.new(): Icon
 	local sourcePath = string.split(source, ".")
 	local origin = game
 	local originsScreenGui
-	for i, sourceName in sourcePath do
+	for _, sourceName in sourcePath do
 		origin = origin:FindFirstChild(sourceName)
 		if not origin then
 			break
@@ -380,7 +381,6 @@ function Icon.new(): Icon
 	end
 
 	-- Additional children behaviour when toggled (mostly notices)
-	local noticeLabel = self:getInstance("NoticeLabel")
 	self.toggled:Connect(function(isSelected)
 		self.noticeChanged:Fire(self.totalNotices)
 		for childIconUID, _ in self.childIconsDict do
@@ -425,13 +425,13 @@ function Icon.setState(self: Icon, incomingStateName: StateName?, fromInput: Ico
 	if not incomingStateName then
 		incomingStateName = (self.isSelected and "Selected") or "Deselected"
 	end
-	local stateName = Utility.formatStateName(incomingStateName)
+	local stateName = Utility.formatStateName((incomingStateName :: any) :: string) :: Typing.StateName
 	local previousStateName = self.activeState
 	if previousStateName == stateName then
 		return
 	end
 	local currentIsSelected = self.isSelected
-	self.activeState = stateName
+	self.activeState = stateName :: StateName
 	if stateName == "Deselected" then
 		self.isSelected = false
 		if currentIsSelected then
@@ -448,7 +448,7 @@ function Icon.setState(self: Icon, incomingStateName: StateName?, fromInput: Ico
 		end
 		self:_setToggleItemsVisible(true, fromInput)
 	end
-	self.stateChanged:Fire(stateName, fromInput)
+	self.stateChanged:Fire(stateName :: StateName, fromInput)
 end
 
 function Icon.getInstance(self: Icon, name: string): Instance
@@ -492,7 +492,6 @@ function Icon.getInstance(self: Icon, name: string): Instance
 			end
 			-- If the child is a fake placeholder instance (such as dropdowns, notices, etc)
 			-- then its important we scan the real original instance instead of this clone
-			local previousChild = child
 			local realChild = Themes.getRealInstance(child)
 			if realChild then
 				child = realChild
@@ -547,13 +546,12 @@ function Icon.getInstanceOrCollective(self: Icon, collectiveOrInstanceName: stri
 	return instances
 end
 
--- TODO: Type this
-function Icon.getStateGroup(self: Icon, iconState: StateName?): unknown
+function Icon.getStateGroup(self: Icon, iconState: StateName?): Typing.StateGroup
 	local chosenState = iconState or self.activeState
-	local stateGroup = self.appearance[chosenState]
+	local stateGroup = self.appearance[chosenState :: StateName]
 	if not stateGroup then
 		stateGroup = {}
-		self.appearance[chosenState] = stateGroup
+		self.appearance[chosenState :: StateName] = stateGroup
 	end
 	return stateGroup
 end
@@ -570,7 +568,7 @@ function Icon.refresh(self: Icon): Icon
 end
 
 function Icon.updateParent(self: Icon): ()
-	local parentIcon = Icon.getIconByUID(self.parentIconUID)
+	local parentIcon = Icon.getIconByUID(self.parentIconUID :: string)
 	if parentIcon then
 		parentIcon.updateSize:Fire()
 	end
@@ -580,12 +578,12 @@ function Icon.setBehaviour(
 	self: Icon,
 	collectiveOrInstanceName: string,
 	property: string,
-	callback: () -> (),
+	callback: ((...any) -> any?)?,
 	refreshAppearance: boolean?
 ): ()
 	-- You can specify your own custom callback to handle custom logic just before
 	-- an instances property is changed by using :setBehaviour()
-	local key = collectiveOrInstanceName .. "-" .. property
+	local key = `{collectiveOrInstanceName}-{property}`
 	self.customBehaviours[key] = callback
 	if refreshAppearance then
 		local instances = self:getInstanceOrCollective(collectiveOrInstanceName)
@@ -600,8 +598,7 @@ function Icon.modifyTheme(
 	modifications: Typing.ThemeData | { Typing.ThemeData },
 	modificationUID: string?
 ): (Icon, string)
-	local modificationUID = Themes.modify(self, modifications, modificationUID)
-	return self, modificationUID
+	return self, Themes.modify(self, modifications, modificationUID) :: string
 end
 
 function Icon.modifyChildTheme(
@@ -625,7 +622,7 @@ function Icon.removeModification(self: Icon, modificationUID: string): Icon
 	return self
 end
 
-function Icon.removeModificationWith(self: Icon, instanceName: string, property: unknown, state: StateName?): Icon
+function Icon.removeModificationWith(self: Icon, instanceName: string, property: string, state: StateName?): Icon
 	Themes.removeWith(self, instanceName, property, state)
 	return self
 end
@@ -652,7 +649,7 @@ function Icon.deselect(self: Icon, fromInput: Icon?): Icon
 	return self
 end
 
-function Icon.notify(self: Icon, customClearSignal: Typing.StrictGoodSignal, noticeId: string): Icon
+function Icon.notify(self: Icon, customClearSignal: Typing.StrictGoodSignal?, noticeId: string?): Icon
 	-- Generates a notification which appears in the top right of the icon. Useful for example for prompting
 	-- users of changes/updates within your UI such as a Catalog
 	-- 'customClearSignal' is a signal object (e.g. icon.deselected) or
@@ -708,17 +705,17 @@ function Icon.align(self: Icon, leftCenterOrRight: Typing.Alignment?, isFromPare
 	end
 	local screenGui = (direction == "center" and Icon.container.TopbarCentered) or Icon.container.TopbarStandard
 	local holders = screenGui.Holders
-	local finalDirection = (string.upper(string.sub(direction, 1, 1)) .. string.sub(direction, 2)) :: Typing.Alignment
+	local finalDirection = (`{string.upper(string.sub(direction, 1, 1))}{string.sub(direction, 2)}`) :: Typing.Alignment
 	if not isFromParentIcon then
-		self.originalAlignment = finalDirection
+		self.originalAlignment = finalDirection :: Typing.Alignment
 	end
 	local joinedFrame = self.joinedFrame
 	local alignmentHolder = holders[finalDirection]
 	self.screenGui = screenGui
 	self.alignmentHolder = alignmentHolder
 	self.widget.Parent = joinedFrame or alignmentHolder
-	self.alignment = finalDirection
-	self.alignmentChanged:Fire(finalDirection)
+	self.alignment = finalDirection :: Typing.Alignment
+	self.alignmentChanged:Fire(finalDirection :: Typing.Alignment)
 	return self
 end
 Icon.setAlignment = Icon.align
@@ -912,7 +909,7 @@ function Icon.oneClick(self: Icon, bool: boolean?): Icon
 	return self
 end
 
-function Icon.setCaption(self: Icon, text: string): Icon
+function Icon.setCaption(self: Icon, text: string?): Icon
 	if text == "_hotkey_" and self.captionText then
 		return self
 	end
@@ -964,7 +961,12 @@ end
 
 function Icon.joinDropdown(self: Icon, parentIcon: Icon): Icon
 	parentIcon:getDropdown()
-	Utility.joinFeature(self, parentIcon, parentIcon.dropdownIcons, parentIcon:getInstance("DropdownScroller"))
+	Utility.joinFeature(
+		self,
+		parentIcon,
+		parentIcon.dropdownIcons,
+		parentIcon:getInstance("DropdownScroller") :: ScrollingFrame
+	)
 	parentIcon.dropdownChildAdded:Fire(self)
 	return self
 end

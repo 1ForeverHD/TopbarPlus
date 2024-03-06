@@ -1,3 +1,5 @@
+--!strict
+
 local Typing = require(script.Parent.Parent.Typing)
 
 return function(Icon: Typing.Icon): Typing.Container
@@ -40,12 +42,12 @@ return function(Icon: Typing.Icon): Typing.Container
 	updateCenteredHoldersHeight()
 
 	local screenGuiClipped = screenGui:Clone()
-	screenGuiClipped.Name = screenGuiClipped.Name .. "Clipped"
+	screenGuiClipped.Name = `{screenGuiClipped.Name}Clipped`
 	screenGuiClipped.DisplayOrder += 1
 	container[screenGuiClipped.Name] = screenGuiClipped
 
 	local screenGuiCenterClipped = screenGuiCenter:Clone()
-	screenGuiCenterClipped.Name = screenGuiCenterClipped.Name .. "Clipped"
+	screenGuiCenterClipped.Name = `{screenGuiCenterClipped.Name}Clipped`
 	screenGuiCenterClipped.DisplayOrder += 1
 	container[screenGuiCenterClipped.Name] = screenGuiCenterClipped
 

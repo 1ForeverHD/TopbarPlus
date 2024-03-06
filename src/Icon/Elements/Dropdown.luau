@@ -1,3 +1,5 @@
+--!strict
+
 local Typing = require(script.Parent.Parent.Typing)
 
 return function(icon: Typing.Icon): Frame
@@ -78,13 +80,13 @@ return function(icon: Typing.Icon): Frame
 	end)
 	icon.dropdownSet:Connect(function(arrayOfIcons)
 		-- Destroy any previous icons
-		for i, otherIconUID in icon.dropdownIcons do
+		for _, otherIconUID in icon.dropdownIcons do
 			local otherIcon = Icon.getIconByUID(otherIconUID)
 			otherIcon:destroy()
 		end
 		-- Add new icons
 		if type(arrayOfIcons) == "table" then
-			for i, otherIcon in arrayOfIcons do
+			for _, otherIcon in arrayOfIcons do
 				otherIcon:joinDropdown(icon)
 			end
 		end
@@ -120,7 +122,7 @@ return function(icon: Typing.Icon): Frame
 		if not maxIcons then
 			return
 		end
-		local orderedInstances = {}
+		local orderedInstances: { { any } } = {}
 		for _, child in dropdownScroller:GetChildren() do
 			if child:IsA("GuiObject") then
 				table.insert(orderedInstances, { child, child.AbsolutePosition.Y })

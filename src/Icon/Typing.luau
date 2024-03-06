@@ -82,14 +82,77 @@ export type StrictGoodSignal<Variant... = ...any> = {
 	Once: (StrictGoodSignal<Variant...>, func: (Variant...) -> ()) -> StrictGoodSignalConnection<Variant...>,
 }
 
-------------- ICON -------------
+---------- UTILITY -----------
+
+export type Utility = {
+	copyTable: <T>(t: T) -> T,
+	generateUID: (length: number?) -> string,
+	setVisible: (instance: GuiObject, bool: boolean, sourceUID: string) -> (),
+	formatStateName: (incomingStateName: string) -> string,
+	localPlayerRespawned: (callback: () -> ()) -> (),
+	getClippedContainer: (screenGui: ScreenGui) -> Folder,
+	clipOutside: (icon: Icon, instance: GuiObject) -> Frame,
+	joinFeature: (
+		originalIcon: Icon,
+		parentIcon: Icon,
+		iconsArray: { string },
+		scrollingFrameOrFrame: ScrollingFrame | Frame
+	) -> (),
+}
+
+---------- OVERFLOW -----------
+
+export type Overflow = {
+	start: (incomingIcon: Icon) -> (),
+	getAvailableIcons: (alignment: Alignment) -> { Icon },
+	updateAvailableIcons: (alignment: Alignment) -> { Icon },
+	updateBoundary: (alignment: Alignment) -> (),
+}
+
+----------- GAMEPAD -----------
+
+export type Gamepad = {
+	start: (incomingIcon: Icon) -> (),
+	getIconToHighlight: () -> Icon,
+	registerButton: (buttonInstance: GuiObject) -> (),
+}
+
+------------- THEME ------------
 
 export type ThemeData = { any }
 export type Theme = { ThemeData }
+export type StateGroup = Theme
+
+export type Themes = {
+	getThemeValue: (stateGroup: StateGroup, instanceName: string, property: string) -> unknown,
+	getInstanceValue: (instance: Instance, property: string) -> unknown?,
+	getRealInstance: (instance: Instance) -> Instance?,
+	getClippedClone: (instance: Instance) -> Instance?,
+	refresh: (icon: Icon, instance: Instance, specificProperty: string?) -> (),
+	apply: (
+		icon: Icon,
+		collectiveOrInstanceNameOrInstance: Instance | string,
+		property: string,
+		value: unknown,
+		forceApply: boolean?
+	) -> (),
+	getModifications: (modifications: ThemeData | { ThemeData }) -> { ThemeData },
+	merge: (detail: ThemeData, modification: ThemeData, callback: ((ThemeData) -> ())?) -> boolean,
+	modify: (icon: Icon, modifications: ThemeData | { ThemeData }, modificationsUID: string?) -> string?,
+	remove: (icon: Icon, modificationsUID: string) -> (),
+	removeWith: (icon: Icon, instanceName: string, property: string, state: StateName?) -> (),
+	change: (icon: Icon) -> (),
+	set: (icon: Icon, theme: Theme | ModuleScript) -> (),
+	statesMatch: (state1: string, state2: string) -> boolean,
+	rebuild: (icon: Icon) -> (),
+}
+
+------------- ICON -------------
 
 export type IconDictionary = { [string]: Icon }
+-- Maybe... Empty can be here too?
 export type StateName = "Deselected" | "Selected" | "Viewing"
-export type Alignment = "Mid" | "Centre" | "Left" | "Center" | "Right"
+export type Alignment = "Mid" | "Centre" | "Central" | "Left" | "Center" | "Right"
 
 export type Container = {
 	TopbarStandard: ScreenGui,
@@ -108,7 +171,7 @@ export type IconImpl = {
 	getIconByUID: (uid: string) -> Icon?,
 	getIcon: (nameOrUid: string) -> Icon?,
 	setTopbarEnabled: (enabled: boolean?, isInternal: boolean?) -> (),
-	modifyBaseTheme: (modification: { { unknown } }) -> (),
+	modifyBaseTheme: (modification: Theme) -> (),
 
 	-- INSTANCE FUNCTIONS
 	setName: (self: Icon, name: string) -> Icon,
@@ -116,8 +179,7 @@ export type IconImpl = {
 	getInstance: (self: Icon, name: string) -> Instance,
 	getCollective: (self: Icon, name: string) -> { Instance },
 	getInstanceOrCollective: (self: Icon, collectiveOrInstanceName: string) -> { Instance },
-	-- TODO: Type this
-	getStateGroup: (self: Icon, iconState: StateName?) -> unknown,
+	getStateGroup: (self: Icon, iconState: StateName?) -> StateGroup,
 	refreshAppearance: (self: Icon, instance: Instance, specificProperty: string?) -> Icon,
 	refresh: (self: Icon) -> Icon,
 	updateParent: (self: Icon) -> (),
@@ -125,13 +187,13 @@ export type IconImpl = {
 		self: Icon,
 		collectiveOrInstanceName: string,
 		property: string,
-		callback: () -> (),
+		callback: ((...any) -> any?)?,
 		refreshAppearance: boolean?
 	) -> (),
 	modifyTheme: (self: Icon, modifications: ThemeData | { ThemeData }, modificationUID: string?) -> (Icon, string),
 	modifyChildTheme: (self: Icon, modifications: ThemeData | { ThemeData }, modificationUID: string) -> (),
 	removeModification: (self: Icon, modificationUID: string) -> Icon,
-	removeModificationWith: (self: Icon, instanceName: string, property: unknown, state: StateName?) -> Icon,
+	removeModificationWith: (self: Icon, instanceName: string, property: string, state: StateName?) -> Icon,
 	setTheme: (self: Icon, theme: Theme) -> Icon,
 	setEnabled: (self: Icon, bool: boolean) -> Icon,
 	select: (self: Icon, fromInput: Icon?) -> Icon,
@@ -147,7 +209,7 @@ export type IconImpl = {
 	setLeft: (self: Icon) -> Icon,
 	setMid: (self: Icon) -> Icon,
 	setRight: (self: Icon) -> Icon,
-	setWidth: (self: Icon, offsetMinimum: number, iconState: unknown?) -> Icon,
+	setWidth: (self: Icon, offsetMinimum: number, iconState: StateName?) -> Icon,
 	setImageScale: (self: Icon, number: number, iconState: StateName?) -> Icon,
 	setImageRatio: (self: Icon, number: number, iconState: StateName?) -> Icon,
 	setTextSize: (self: Icon, number: number, iconState: StateName?) -> Icon,
@@ -159,7 +221,7 @@ export type IconImpl = {
 		iconState: StateName?
 	) -> Icon,
 	bindToggleItem: (self: Icon, guiObjectOrLayerCollector: GuiObject | LayerCollector) -> Icon,
-	unbindToggleItem: (self: Instance, guiObjectOrLayerCollector: GuiObject | LayerCollector) -> Icon,
+	unbindToggleItem: (self: Icon, guiObjectOrLayerCollector: GuiObject | LayerCollector) -> Icon,
 	_updateSelectionInstances: (self: Icon) -> (),
 	_setToggleItemsVisible: (self: Icon, bool: boolean, fromInput: Icon?) -> (),
 	bindEvent: (self: Icon, iconEventName: string, eventFunction: (...any) -> ()) -> Icon,
@@ -195,11 +257,16 @@ export type IconImpl = {
 
 export type IconProto = {
 	-- PUBLIC VARIABLES
-	baseTheme: { { unknown } },
+	baseTheme: Theme,
 	isOldTopbar: boolean,
 	iconsDictionary: IconDictionary,
-	container: { [unknown]: ScreenGui },
+	container: Container,
 	topbarEnabled: boolean,
+
+	-- PUBLIC GAMEPAD VARIABLES
+	highlightIcon: (Icon | boolean)?,
+	lastHighlightedIcon: Icon?,
+	highlightKey: Enum.KeyCode?,
 
 	-- INSTANCE VARIABLES
 
@@ -214,12 +281,12 @@ export type IconProto = {
 
 	-- SIGNALS
 	-- TODO: Proofread these signals
-	selected: StrictGoodSignal<boolean, boolean?>,
-	deselected: StrictGoodSignal<boolean, boolean?>,
-	toggled: StrictGoodSignal<boolean, boolean?>,
+	selected: StrictGoodSignal<boolean? | Icon?>,
+	deselected: StrictGoodSignal<boolean? | Icon?>,
+	toggled: StrictGoodSignal<boolean, boolean? | Icon?>,
 	viewingStarted: StrictGoodSignal<boolean>,
 	viewingEnded: StrictGoodSignal<boolean>,
-	stateChanged: StrictGoodSignal<StateName, boolean?>,
+	stateChanged: StrictGoodSignal<StateName, boolean? | Icon?>,
 	notified: StrictGoodSignal<string>,
 	noticeStarted: StrictGoodSignal<StrictGoodSignal?, string?>,
 	noticeChanged: StrictGoodSignal<number>,
@@ -251,11 +318,11 @@ export type IconProto = {
 	childModificationsUID: string,
 
 	screenGui: ScreenGui,
-	alignmentHolder: ScreenGui,
+	alignmentHolder: ScrollingFrame,
 	captionText: string?,
 	dropdown: Icon?,
 	indicator: Frame?,
-	caption: Frame?,
+	caption: CanvasGroup?,
 	notice: Frame?,
 	widget: Frame?,
 
@@ -264,7 +331,7 @@ export type IconProto = {
 	isEnabled: boolean,
 	isSelected: boolean,
 	isViewing: boolean,
-	joinedFrame: boolean,
+	joinedFrame: boolean | Frame | ScrollingFrame,
 	parentIconUID: boolean | string,
 	deselectWhenOtherIconSelected: boolean,
 	totalNotices: number,
@@ -272,22 +339,24 @@ export type IconProto = {
 	alignment: Alignment,
 	originalAlignment: Alignment,
 	appliedTheme: Theme,
-	appearance: { [StateName]: unknown },
+	appearance: { [StateName]: StateGroup },
 	cachedInstances: { [Instance]: boolean },
 	cachedNamesToInstances: { [string]: Instance },
 	cachedCollectives: { [string]: { Instance } },
 	bindedToggleKeys: { [Enum.KeyCode]: boolean },
-	customBehaviours: { [string]: () -> () },
+	customBehaviours: { [string]: ((...any) -> any?)? },
 	toggleItems: { [GuiObject | LayerCollector]: TextButton | ImageButton | boolean },
 	bindedEvents: { [string]: StrictGoodSignalConnection },
 	notices: { [string]: {
 		completeSignal: StrictGoodSignal,
 		clearNoticeEvent: StrictGoodSignal,
 	} },
-	-- TODO: Unsure avout this one
-	menuIcons: { Icon },
-	dropdownIcons: { Icon },
-	childIconsDict: { [string]: Icon },
+
+	joinOverflowTime: number?,
+	creationTime: number,
+	menuIcons: { string },
+	dropdownIcons: { string },
+	childIconsDict: { [string]: Icon | boolean },
 }
 
 export type Icon = typeof(setmetatable({} :: IconProto, {} :: IconImpl))

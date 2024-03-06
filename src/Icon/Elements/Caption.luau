@@ -1,6 +1,8 @@
+--!strict
+
 local Typing = require(script.Parent.Parent.Typing)
 
-return function(icon: Typing.Icon): Frame
+return function(icon: Typing.Icon): CanvasGroup
 	-- Credit to lolmansReturn and Canary Software for
 	-- retrieving these values
 	local clickRegion = icon:getInstance("ClickRegion")

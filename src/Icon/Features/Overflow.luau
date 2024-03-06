@@ -10,9 +10,10 @@
 -- 3. Update the description above as might not reflect new behaviour (frames not overflow icons)
 -- 4. Ensure :clipOutside items acccount for this such as notices and captions
 
+--!strict
+
 -- LOCAL
 local SUBMISSIVE_ALIGNMENT = "Right" -- This boundary shrinks if the other alignments boundary gets too close
-local Overflow = {}
 local holders = {}
 local orderedAvailableIcons = {}
 local boundaries = {}
@@ -22,9 +23,14 @@ local overflowIcons = {}
 local overflowIconUIDs = {}
 local Icon
 
+-- MODULES
+local Typing = require(script.Parent.Parent.Typing)
+
+local Overflow = {} :: Typing.Overflow
+
 -- FUNCTIONS
 -- This is called upon the Icon initializing
-function Overflow.start(incomingIcon)
+function Overflow.start(incomingIcon: Typing.Icon): ()
 	Icon = incomingIcon
 	iconsDict = Icon.iconsDictionary
 	for _, screenGui in Icon.container do
@@ -45,7 +51,7 @@ function Overflow.start(incomingIcon)
 	end
 end
 
-function Overflow.getAvailableIcons(alignment)
+function Overflow.getAvailableIcons(alignment: Typing.Alignment): { Typing.Icon }
 	local ourOrderedIcons = orderedAvailableIcons[alignment]
 	if not ourOrderedIcons then
 		ourOrderedIcons = Overflow.updateAvailableIcons(alignment)
@@ -53,11 +59,9 @@ function Overflow.getAvailableIcons(alignment)
 	return ourOrderedIcons
 end
 
-function Overflow.updateAvailableIcons(alignment)
+function Overflow.updateAvailableIcons(alignment: Typing.Alignment): { Typing.Icon }
 	-- We only track items that are directly on the topbar (i.e. not within a parent icon)
 	local ourTotal = 0
-	local holder = holders[alignment]
-	local holderUIList = holder.UIListLayout
 	local ourOrderedIcons = {}
 	for _, icon in iconsDict do
 		local parentUID = icon.parentIconUID
@@ -104,7 +108,7 @@ function Overflow.updateAvailableIcons(alignment)
 	return ourOrderedIcons
 end
 
-function Overflow.updateBoundary(alignment)
+function Overflow.updateBoundary(alignment: Typing.Alignment): ()
 	-- These are the icons with menus which icons will be moved into
 	-- when overflowing
 	local isCentral = alignment == "Central"
@@ -114,7 +118,7 @@ function Overflow.updateBoundary(alignment)
 	if not overflowIcon and not isCentral then
 		local order = (isLeft and -9999999) or 9999999
 		overflowIcon = Icon.new():setLabel(`{alignment}`)
-		overflowIcon:setName("Overflow" .. alignment)
+		overflowIcon:setName(`Overflow{alignment}`)
 		overflowIcon:setOrder(order)
 		overflowIcon:setAlignment(alignment)
 		overflowIcon.isAnOverflow = true
@@ -182,16 +186,12 @@ function Overflow.updateBoundary(alignment)
 	-- to also shrink in addition to the submissive boundary)
 	local hasExceededSide = false
 	if not isCentral then
-		local Themes = require(script.Parent.Themes)
+		local Themes = require(script.Parent.Themes) :: Typing.Themes
 		local stateGroup = overflowIcon:getStateGroup()
 		local defaultIconWidth = Themes.getThemeValue(stateGroup, "Widget", "MinimumWidth") or 0
 		local requiredSideGap = (defaultIconWidth * 3) + (BOUNDARY_GAP * 2)
 		local viewportWidth = currentCamera.ViewportSize.X
-		if isRight and boundary < requiredSideGap then
-			-- FOR THIS, CONSIDER ICONS JOINING A SOLE SIDE OF THE SCREEN
-			--boundary = requiredSideGap
-			--hasExceededSide = true
-		elseif isLeft and boundary > viewportWidth - requiredSideGap then
+		if isLeft and boundary > viewportWidth - requiredSideGap then
 			boundary = viewportWidth - requiredSideGap
 			hasExceededSide = true
 		end
@@ -249,9 +249,6 @@ function Overflow.updateBoundary(alignment)
 		local holderIncrement = (isLeft and sizeX) or -sizeX
 		local isOverflow = overflowIconUIDs[icon.UID]
 		absoluteX += holderIncrement
-		if isRight then
-			--print("absoluteX =", boundary, icon.widget.Name, absoluteX, icon.widget.AbsolutePosition.X)
-		end
 		if (isLeft and absoluteX + sizeX >= boundary) or (isRight and absoluteX <= boundary) then
 			joinOverflow = true
 		end
@@ -270,7 +267,7 @@ function Overflow.updateBoundary(alignment)
 	-- If we're the dominant boundary it's important we recalculate the
 	-- submissive boundary as they depend on our boundary information
 	if isDominant then
-		Overflow.updateBoundary(oppositeAlignment)
+		Overflow.updateBoundary(oppositeAlignment :: Typing.Alignment)
 	end
 end
 

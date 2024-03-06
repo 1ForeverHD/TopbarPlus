@@ -3,19 +3,23 @@
 -- I created a separate module for gamepads (and not touchpads or
 -- keyboards) because gamepads are greatly more unqiue and require
 -- additional tailored programming
+--!strict
 
 -- SERVICES
-local GamepadService = game:GetService("GamepadService")
 local UserInputService = game:GetService("UserInputService")
+local GamepadService = game:GetService("GamepadService")
 local GuiService = game:GetService("GuiService")
 
+-- MODULES
+local Typing = require(script.Parent.Parent.Typing)
+
 -- LOCAL
-local Gamepad = {}
-local Icon
+local Gamepad = {} :: Typing.Gamepad
+local Icon: Typing.Icon
 
 -- FUNCTIONS
 -- This is called upon the Icon initializing
-function Gamepad.start(incomingIcon)
+function Gamepad.start(incomingIcon: Typing.Icon): ()
 	-- Public variables
 	Icon = incomingIcon
 	Icon.highlightKey = Enum.KeyCode.DPadUp -- What controller key to highlight the topbar (or set to false to disable)
@@ -35,10 +39,8 @@ function Gamepad.start(incomingIcon)
 
 		-- This enables users to instantly open up their last selected icon
 		local previousHighlightedIcon
-		local iconDisplayingHighlightKey
 		local usedIndicatorOnce = false
 		local usedBOnce = false
-		local Utility = require(script.Parent.Parent.Utility)
 		local Selection = require(script.Parent.Parent.Elements.Selection)
 		local function updateSelectedObject()
 			local icon = getIconFromSelectedObject()
@@ -76,11 +78,9 @@ function Gamepad.start(incomingIcon)
 					-- We only display the highlightKey once to show
 					-- the user how to highlight the topbar icon
 					usedIndicatorOnce = true
-				else
-					--usedBOnce = true
 				end
 				if previousHighlightedIcon then
-					previousHighlightedIcon:setIndicator(newIndicator)
+					previousHighlightedIcon:setIndicator(newIndicator :: Enum.KeyCode)
 				end
 			end
 		end
@@ -101,7 +101,7 @@ function Gamepad.start(incomingIcon)
 		-- This allows for easy highlighting of the topbar when the
 		-- when ``Icon.highlightKey`` (i.e. DPadUp) is pressed.
 		-- If you'd like to disable, do ``Icon.highlightKey = false``
-		UserInputService.InputBegan:Connect(function(input, touchingAnObject)
+		UserInputService.InputBegan:Connect(function(input)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				-- Sometimes the Roblox gamepad glitches when combined with a cursor
 				-- This fixes that by unhighlighting if the cursor is pressed down
@@ -128,7 +128,7 @@ function Gamepad.start(incomingIcon)
 	end)
 end
 
-function Gamepad.getIconToHighlight()
+function Gamepad.getIconToHighlight(): Typing.Icon
 	-- If an icon has already been selected, returns the last selected icon
 	-- Else if more than 0 icons, it selects the left-most icon
 	local iconsDict = Icon.iconsDictionary
@@ -150,13 +150,13 @@ function Gamepad.getIconToHighlight()
 end
 
 -- This called when the icon's ClickRegion is created
-function Gamepad.registerButton(buttonInstance)
+function Gamepad.registerButton(buttonInstance: GuiObject): ()
 	-- This provides a basic level of support for controllers by making
 	-- the icons easy to highlight via the virtual cursor, then
 	-- when selected, focuses in on the selected icon and hops
 	-- between other nearby icons simply by toggling the joystick
 	local inputBegan = false
-	buttonInstance.InputBegan:Connect(function(input)
+	buttonInstance.InputBegan:Connect(function()
 		-- Two wait frames required to ensure inputBegan is detected within
 		-- UserInputService.InputBegan. We do this because object.InputBegan
 		-- does not return the correct input objects (unlike the service)

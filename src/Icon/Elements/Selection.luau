@@ -1,3 +1,5 @@
+--!strict
+
 return function(): Frame
 	-- Credit to lolmansReturn and Canary Software for
 	-- retrieving these values

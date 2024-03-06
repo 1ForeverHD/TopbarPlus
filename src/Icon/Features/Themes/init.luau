@@ -3,13 +3,17 @@
 -- You don't need to use any of these functions, the useful ones
 -- have been abstracted as icon methods
 
+--!strict
+
 -- LOCAL
-local Themes = {}
 local Utility = require(script.Parent.Parent.Utility)
+local Typing = require(script.Parent.Parent.Typing)
 local baseTheme = require(script.Default)
 
+local Themes = {} :: Typing.Themes
+
 -- FUNCTIONS
-function Themes.getThemeValue(stateGroup, instanceName, property, iconState)
+function Themes.getThemeValue(stateGroup: Typing.StateGroup, instanceName: string, property: string): unknown
 	if stateGroup then
 		for _, detail in stateGroup do
 			local checkingInstanceName, checkingPropertyName, checkingValue = unpack(detail)
@@ -18,9 +22,11 @@ function Themes.getThemeValue(stateGroup, instanceName, property, iconState)
 			end
 		end
 	end
+
+	return
 end
 
-function Themes.getInstanceValue(instance, property)
+function Themes.getInstanceValue(instance: Instance, property: string): unknown
 	local success, value = pcall(function()
 		return instance[property]
 	end)
@@ -30,7 +36,7 @@ function Themes.getInstanceValue(instance, property)
 	return value
 end
 
-function Themes.getRealInstance(instance)
+function Themes.getRealInstance(instance: Instance): Instance?
 	if not instance:GetAttribute("IsAClippedClone") then
 		return
 	end
@@ -38,10 +44,10 @@ function Themes.getRealInstance(instance)
 	if not originalInstance then
 		return
 	end
-	return originalInstance.Value
+	return (originalInstance :: ObjectValue).Value
 end
 
-function Themes.getClippedClone(instance)
+function Themes.getClippedClone(instance: Instance): Instance?
 	if not instance:GetAttribute("HasAClippedClone") then
 		return
 	end
@@ -49,10 +55,10 @@ function Themes.getClippedClone(instance)
 	if not clippedClone then
 		return
 	end
-	return clippedClone.Value
+	return (clippedClone :: ObjectValue).Value
 end
 
-function Themes.refresh(icon, instance, specificProperty)
+function Themes.refresh(icon: Typing.Icon, instance: Instance, specificProperty: string?): ()
 	-- Some instances such as notices need immediate refreshing upon creation as
 	-- they're added in after the initial refresh period
 	if specificProperty then
@@ -86,7 +92,13 @@ function Themes.refresh(icon, instance, specificProperty)
 	return
 end
 
-function Themes.apply(icon, collectiveOrInstanceNameOrInstance, property, value, forceApply)
+function Themes.apply(
+	icon: Typing.Icon,
+	collectiveOrInstanceNameOrInstance: Instance | string,
+	property: string,
+	value: unknown,
+	forceApply: boolean?
+): ()
 	-- This is responsible for **applying** appearance changes to instances within the icon
 	-- however it IS NOT responsible for updating themes. Use :modifyTheme for that.
 	-- This also calls callbacks given by :setBehaviour before applying these property changes
@@ -102,7 +114,7 @@ function Themes.apply(icon, collectiveOrInstanceNameOrInstance, property, value,
 	else
 		instances = icon:getInstanceOrCollective(collectiveOrInstanceNameOrInstance)
 	end
-	local key = collectiveOrInstanceName .. "-" .. property
+	local key = `{collectiveOrInstanceName}-{property}`
 	local customBehaviour = icon.customBehaviours[key]
 	for _, instance in instances do
 		local clippedClone = Themes.getClippedClone(instance)
@@ -146,8 +158,8 @@ function Themes.apply(icon, collectiveOrInstanceNameOrInstance, property, value,
 	end
 end
 
-function Themes.getModifications(modifications)
-	if typeof(modifications[1]) ~= "table" then
+function Themes.getModifications(modifications: Typing.ThemeData | { Typing.ThemeData }): { Typing.ThemeData }
+	if typeof((modifications :: { any })[1]) ~= "table" then
 		-- This enables users to do :modifyTheme({a,b,c,d})
 		-- in addition of :modifyTheme({{a,b,c,d}})
 		modifications = { modifications }
@@ -155,7 +167,11 @@ function Themes.getModifications(modifications)
 	return modifications
 end
 
-function Themes.merge(detail, modification, callback)
+function Themes.merge(
+	detail: Typing.ThemeData,
+	modification: Typing.ThemeData,
+	callback: ((Typing.ThemeData) -> ())?
+): boolean
 	local instanceName, property, value, stateName = table.unpack(modification)
 	local checkingInstanceName, checkingPropertyName, _, checkingStateName = table.unpack(detail)
 	if
@@ -172,7 +188,11 @@ function Themes.merge(detail, modification, callback)
 	return false
 end
 
-function Themes.modify(icon, modifications, modificationsUID)
+function Themes.modify(
+	icon: Typing.Icon,
+	modifications: Typing.ThemeData | { Typing.ThemeData },
+	modificationsUID: string?
+): string?
 	-- This is what the 'old set' used to do (although for clarity that behaviour has now been
 	-- split into two methods, .modifyTheme and .apply).
 	-- modifyTheme is responsible for UPDATING the internal values within a theme for a particular
@@ -182,8 +202,7 @@ function Themes.modify(icon, modifications, modificationsUID)
 	-- the UID returned from this method
 	task.spawn(function()
 		modificationsUID = modificationsUID or Utility.generateUID()
-		modifications = Themes.getModifications(modifications)
-		for _, modification in modifications do
+		for _, modification in Themes.getModifications(modifications) do
 			local instanceName, property, value, iconState = table.unpack(modification)
 			if iconState == nil then
 				-- If no state specified, apply to all states
@@ -198,7 +217,7 @@ function Themes.modify(icon, modifications, modificationsUID)
 				end
 			end
 			local function updateRecord()
-				for stateName, detail in stateGroup do
+				for _, detail in stateGroup do
 					local didMerge = Themes.merge(detail, modification, function(detail)
 						detail[5] = modificationsUID
 						nowSetIt()
@@ -217,8 +236,8 @@ function Themes.modify(icon, modifications, modificationsUID)
 	return modificationsUID
 end
 
-function Themes.remove(icon, modificationsUID)
-	for iconState, stateGroup in icon.appearance do
+function Themes.remove(icon: Typing.Icon, modificationsUID: string): ()
+	for _, stateGroup in icon.appearance do
 		for i = #stateGroup, 1, -1 do
 			local detail = stateGroup[i]
 			local checkingUID = detail[5]
@@ -230,7 +249,7 @@ function Themes.remove(icon, modificationsUID)
 	Themes.rebuild(icon)
 end
 
-function Themes.removeWith(icon, instanceName, property, state)
+function Themes.removeWith(icon: Typing.Icon, instanceName: string, property: string, state: Typing.StateName?): ()
 	for iconState, stateGroup in icon.appearance do
 		if state == iconState or not state then
 			for i = #stateGroup, 1, -1 do
@@ -246,7 +265,7 @@ function Themes.removeWith(icon, instanceName, property, state)
 	Themes.rebuild(icon)
 end
 
-function Themes.change(icon)
+function Themes.change(icon: Typing.Icon): ()
 	-- This changes the theme to the appearance of whatever
 	-- state is currently active
 	local stateGroup = icon:getStateGroup()
@@ -256,7 +275,7 @@ function Themes.change(icon)
 	end
 end
 
-function Themes.set(icon, theme)
+function Themes.set(icon: Typing.Icon, theme: Typing.Theme | ModuleScript): ()
 	-- This is responsible for processing the final appearance of a given theme (such as
 	-- ensuring Deselected merge into missing Selected, saving that internal state,
 	-- then checking to see if the appearance of the icon needs to be updated
@@ -268,18 +287,18 @@ function Themes.set(icon, theme)
 	if typeof(theme) == "Instance" and theme:IsA("ModuleScript") then
 		theme = require(theme)
 	end
-	icon.appliedTheme = theme
+	icon.appliedTheme = theme :: Typing.Theme
 	Themes.rebuild(icon)
 end
 
-function Themes.statesMatch(state1, state2)
+function Themes.statesMatch(state1: string, state2: string): boolean
 	-- States match if they have the same name OR if nil (because unspecified represents all states)
 	local state1lower = (state1 and string.lower(state1))
 	local state2lower = (state2 and string.lower(state2))
 	return state1lower == state2lower or not state1 or not state2
 end
 
-function Themes.rebuild(icon)
+function Themes.rebuild(icon: Typing.Icon): ()
 	-- A note for my future self: this code can be optimised further by
 	-- converting appearance into a instanceName-property dictionary
 	-- as apposed to an array of every potential change. When converting
@@ -292,7 +311,7 @@ function Themes.rebuild(icon)
 			-- The last layers take higher priority as they overwrite
 			-- any duplicate earlier applied effects
 			local stateAppearance = {}
-			local function updateDetails(theme, incomingStateName)
+			local function updateDetails(theme: Typing.Theme, incomingStateName: string)
 				-- This ensures there's always a base 'default' layer
 				if not theme then
 					return
@@ -301,7 +320,7 @@ function Themes.rebuild(icon)
 					local modificationsUID = detail[5]
 					local detailStateName = detail[4]
 					if Themes.statesMatch(incomingStateName, detailStateName) then
-						local key = detail[1] .. "-" .. detail[2]
+						local key = `{detail[1]}-{detail[2]}`
 						local newDetail = Utility.copyTable(detail)
 						newDetail[5] = modificationsUID
 						stateAppearance[key] = newDetail
@@ -325,7 +344,7 @@ function Themes.rebuild(icon)
 			-- Finally we apply any modifications that have already been made
 			-- Modifiers are all the changes made using icon:modifyTheme(...)
 			local alreadyAppliedTheme = {}
-			local alreadyAppliedGroup = icon.appearance[stateName]
+			local alreadyAppliedGroup = icon.appearance[stateName :: any]
 			if alreadyAppliedGroup then
 				for _, modifier in alreadyAppliedGroup do
 					local modificationsUID = modifier[5]
@@ -341,7 +360,7 @@ function Themes.rebuild(icon)
 			for _, detail in stateAppearance do
 				table.insert(finalStateAppearance, detail)
 			end
-			icon.appearance[stateName] = finalStateAppearance
+			icon.appearance[stateName :: any] = finalStateAppearance
 		end
 		Themes.change(icon)
 	end

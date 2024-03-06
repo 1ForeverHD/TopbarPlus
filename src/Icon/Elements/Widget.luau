@@ -2,6 +2,7 @@
 -- the icon (aka Widget) instance.
 -- This contains the core components of the icon such as the button, image, label and notice. It's
 -- also responsible for handling the automatic resizing of the widget (based upon image visibility and text length)
+--!strict
 
 local Typing = require(script.Parent.Parent.Typing)
 
@@ -183,7 +184,7 @@ return function(icon: Typing.Icon): Frame
 	local updateCount = 0
 	local resizingCount = 0
 	local repeating = false
-	local function handleLabelAndImageChanges(forceUpdateString)
+	local function handleLabelAndImageChanges(forceUpdateString: string?)
 		-- We defer changes by a frame to eliminate all but 1 requests which
 		-- could otherwise stack up to 20+ requests in a single frame
 		-- We then repeat again once to account for any final changes
@@ -207,7 +208,6 @@ return function(icon: Typing.Icon): Frame
 			local usingIndicator = indicator and indicator.Visible
 			local usingText = usingIndicator or iconLabel.Text ~= ""
 			local usingImage = iconImage.Image ~= "" and iconImage.Image ~= nil
-			local alignment = Enum.HorizontalAlignment.Center
 			local NORMAL_BUTTON_SIZE = UDim2.fromScale(1, 1)
 			local buttonSize = NORMAL_BUTTON_SIZE
 			if usingImage and not usingText then
@@ -228,11 +228,10 @@ return function(icon: Typing.Icon): Frame
 				paddingLeft.Visible = true
 				paddingCenter.Visible = not usingIndicator
 				paddingRight.Visible = not usingIndicator
-				alignment = Enum.HorizontalAlignment.Left
 			end
 			button.Size = buttonSize
 
-			local function getItemWidth(item)
+			local function getItemWidth(item: GuiObject)
 				local targetWidth = item:GetAttribute("TargetWidth") or item.AbsoluteSize.X
 				return targetWidth
 			end
@@ -343,12 +342,13 @@ return function(icon: Typing.Icon): Frame
 			handleLabelAndImageChanges()
 			if firstTimeSettingFontFace then
 				firstTimeSettingFontFace = false
-				for i = 1, 10 do
+				for _ = 1, 10 do
 					task.wait(1)
 					handleLabelAndImageChanges()
 				end
 			end
 		end)
+		return
 	end)
 	local function updateBorderSize()
 		task.defer(function()
@@ -375,7 +375,7 @@ return function(icon: Typing.Icon): Frame
 	icon:setBehaviour("Indicator", "Visible", handleLabelAndImageChanges)
 	icon:setBehaviour("IconImageRatio", "AspectRatio", handleLabelAndImageChanges)
 	icon:setBehaviour("IconImage", "Image", function(value)
-		local textureId = (tonumber(value) and "http://www.roblox.com/asset/?id=" .. value) or value or ""
+		local textureId = (tonumber(value) and `http://www.roblox.com/asset/?id={value}`) or value or ""
 		if iconImage.Image ~= textureId then
 			handleLabelAndImageChanges()
 		end
