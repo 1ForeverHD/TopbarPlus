@@ -8,15 +8,16 @@ realm = "shared"
 exclude = [
     ".github",
     ".vscode",
+    "assets",
     "docs",
     "site",
-    "TopbarPlus.rbxlx",
     ".gitattributes",
     ".gitignore",
     "aftman.toml",
     "mkdocs.yml",
     "selene.toml",
     "sourcemap.json",
+    "TopbarPlus.rbxlx",
 ]
 
 [dependencies]
