@@ -58,8 +58,6 @@ export type Janitor = {
 
 ------ Strict Good Signal ------
 
--- Not that accurate, but works for now.
-
 export type StrictGoodSignalConnection<Variant... = ...any> = {
 	new: (signal: StrictGoodSignal<Variant...>, fn: (Variant...) -> ()) -> StrictGoodSignalConnection<Variant...>,
 
@@ -69,19 +67,25 @@ export type StrictGoodSignalConnection<Variant... = ...any> = {
 	_next: boolean,
 
 	Disconnect: (self: StrictGoodSignalConnection<Variant...>) -> (),
+
+	-- alias
 	Destroy: (self: StrictGoodSignalConnection<Variant...>) -> (),
 }
 
 export type StrictGoodSignal<Variant... = ...any> = {
 	new: () -> StrictGoodSignal<Variant...>,
 
-	Connect: (StrictGoodSignal<Variant...>, func: (Variant...) -> ()) -> StrictGoodSignalConnection<Variant...>,
-	DisconnectAll: (StrictGoodSignal<Variant...>) -> (),
-	Destroy: (StrictGoodSignal<Variant...>) -> (),
+	_handlerListHead: boolean | StrictGoodSignalConnection<Variant...>,
 
-	Fire: (StrictGoodSignal<Variant...>, Variant...) -> (),
-	Wait: (StrictGoodSignal<Variant...>) -> Variant...,
-	Once: (StrictGoodSignal<Variant...>, func: (Variant...) -> ()) -> StrictGoodSignalConnection<Variant...>,
+	Connect: (self: StrictGoodSignal<Variant...>, func: (Variant...) -> ()) -> StrictGoodSignalConnection<Variant...>,
+	DisconnectAll: (self: StrictGoodSignal<Variant...>) -> (),
+	
+	Fire: (self: StrictGoodSignal<Variant...>, Variant...) -> (),
+	Wait: (self: StrictGoodSignal<Variant...>) -> Variant...,
+	Once: (self: StrictGoodSignal<Variant...>, func: (Variant...) -> ()) -> StrictGoodSignalConnection<Variant...>,
+	
+	-- alias
+	Destroy: (self: StrictGoodSignal<Variant...>) -> (),
 }
 
 ---------- UTILITY ----------
