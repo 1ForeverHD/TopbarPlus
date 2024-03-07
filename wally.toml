@@ -14,6 +14,7 @@ exclude = [
     ".gitattributes",
     ".gitignore",
     "aftman.toml",
+    "Icon.rbxm",
     "mkdocs.yml",
     "selene.toml",
     "sourcemap.json",
