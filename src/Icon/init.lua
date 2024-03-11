@@ -80,6 +80,7 @@ local playerGui = localPlayer:WaitForChild("PlayerGui")
 local iconsDict = {}
 local anyIconSelected = Signal.new()
 local elements = iconModule.Elements
+local totalCreatedIcons = 0
 
 
 
@@ -94,11 +95,16 @@ end
 
 
 -- PUBLIC VARIABLES
+Icon.baseDisplayOrderChanged = Signal.new()
+Icon.baseDisplayOrder = 10
 Icon.baseTheme = require(themes.Default)
 Icon.isOldTopbar = GuiService.TopbarInset.Height == 36
 Icon.iconsDictionary = iconsDict
 Icon.container = require(elements.Container)(Icon)
 Icon.topbarEnabled = true
+Icon.iconAdded = Signal.new()
+Icon.iconRemoved = Signal.new()
+Icon.iconChanged = Signal.new()
 
 
 
@@ -148,6 +154,11 @@ function Icon.modifyBaseTheme(modifications)
 	for _, icon in pairs(iconsDict) do
 		icon:setTheme(Icon.baseTheme)
 	end
+end
+
+function Icon.setDisplayOrder(int)
+	Icon.baseDisplayOrder = int
+	Icon.baseDisplayOrderChanged:Fire(int)
 end
 
 
@@ -242,11 +253,18 @@ function Icon.new()
 	self.dropdownIcons = {}
 	self.childIconsDict = {}
 	self.isOldTopbar = Icon.isOldTopbar
+	self.creationTime = os.clock()
 
 	-- Widget is the new name for an icon
 	local widget = janitor:add(require(elements.Widget)(self, Icon))
 	self.widget = widget
 	self:setAlignment()
+	
+	-- It's important we set an order otherwise icons will not align
+	-- correctly within menus
+	totalCreatedIcons += 1
+	local ourOrder = totalCreatedIcons
+	self:setOrder(ourOrder)
 
 	-- This applies the default them
 	self:setTheme(Icon.baseTheme)
@@ -404,18 +422,43 @@ function Icon.new()
 			end
 		end
 	end)
-
+	
+	-- This closes/reopens the chat if the icon containers a dropdown
+	-- In the future I'd prefer to use the position+size of the chat
+	-- to determine whether to close dropdown (instead of non-right-set)
+	-- but for reasons mentioned here it's unreliable at the time of
+	-- writing this: https://devforum.roblox.com/t/here/2794915
+	-- I could also make this better by accounting for multiple
+	-- dropdowns being open (not just this one) but this will work
+	-- fine for almost every use case for now.
+	self.selected:Connect(function()
+		local isDropdown = #self.dropdownIcons > 0
+		if isDropdown and StarterGui:GetCore("ChatActive") and self.alignment ~= "Right" then
+			self.chatWasPreviouslyActive = true
+			StarterGui:SetCore("ChatActive", false)
+		end
+	end)
+	self.deselected:Connect(function()
+		if self.chatWasPreviouslyActive then
+			self.chatWasPreviouslyActive = nil
+			StarterGui:SetCore("ChatActive", true)
+		end
+	end)
+	
+	-- There's a rare occassion where the appearance is not
+	-- fully set to deselected so this ensures the icons
+	-- appearance is fully as it should be
+	--print("self.activeState =", self.activeState)
 	task.delay(0.1, function()
-		-- There's a rare occassion where the appearance is not
-		-- fully set to deselected so this ensures the icons
-		-- appearance is fully as it should be
-		--print("self.activeState =", self.activeState)
 		if self.activeState == "Deselected" then
 			--print("YOOOOOO!")
 			self.stateChanged:Fire("Deselected")
 			self:refresh()
 		end
 	end)
+	
+	-- Call icon added
+	Icon.iconAdded:Fire(self)
 
 	return self
 end
@@ -715,6 +758,7 @@ function Icon:align(leftCenterOrRight, isFromParentIcon)
 	self.widget.Parent = joinedFrame or alignmentHolder
 	self.alignment = finalDirection
 	self.alignmentChanged:Fire(finalDirection)
+	Icon.iconChanged:Fire(self)
 	return self
 end
 Icon.setAlignment = Icon.align
@@ -1008,6 +1052,7 @@ function Icon:destroy()
 	end
 	self.isDestroyed = true
 	self.janitor:clean()
+	Icon.iconRemoved:Fire(self)
 end
 Icon.Destroy = Icon.destroy
 

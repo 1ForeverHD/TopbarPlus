@@ -10,6 +10,18 @@ local localPlayer = Players.LocalPlayer
 
 
 -- FUNCTIONS
+function Utility.round(n)
+	-- Credit to Darkmist101 for this
+	return math.floor(n + 0.5)
+end
+
+function Utility.reverseTable(t)
+	for i = 1, math.floor(#t/2) do
+		local j = #t - i + 1
+		t[i], t[j] = t[j], t[i]
+	end
+end
+
 function Utility.copyTable(t)
 	-- Credit to Stephen Leitnick (September 13, 2017) for this function from TableUtil
 	assert(type(t) == "table", "First argument must be a table")
@@ -172,14 +184,33 @@ function Utility.clipOutside(icon, instance)
 		Utility.setVisible(instance, isVisible, "ClipHandler")
 	end
 	cloneJanitor:add(widget:GetPropertyChangedSignal("Visible"):Connect(updateVisibility))
-
+	
+	local previousScroller
+	local Icon = require(icon.iconModule)
 	local function checkIfOutsideParentXBounds()
 		-- Defer so that roblox's properties reflect their true values
 		task.defer(function()
 			-- If the instance is within a parent item (such as a dropdown or menu)
 			-- then we hide it if it exceeds the bounds of that parent
+			local parentInstance
+			local ourUID = icon.UID
+			local nextIconUID = ourUID
 			local shouldClipToParent = instance:GetAttribute("ClipToJoinedParent")
-			local parentInstance = shouldClipToParent and icon.joinedFrame
+			if shouldClipToParent then
+				for i = 1, 10 do -- sure i could use while do but this is safer and should never be > 4 parents
+					local nextIcon = Icon.getIconByUID(nextIconUID)
+					if not nextIcon then
+						break
+					end
+					local nextParentInstance = nextIcon.joinedFrame
+					nextIconUID = nextIcon.parentIconUID
+					if not nextParentInstance then
+						break
+					end
+					parentInstance = nextParentInstance
+				end
+			end
+			
 			if not parentInstance then
 				return
 			end
@@ -196,6 +227,13 @@ function Utility.clipOutside(icon, instance)
 			if hasExceeded ~= isOutsideParent then
 				isOutsideParent = hasExceeded
 				updateVisibility()
+			end
+			if parentInstance:IsA("ScrollingFrame") and previousScroller ~= parentInstance then
+				previousScroller = parentInstance
+				local connection = parentInstance:GetPropertyChangedSignal("AbsoluteWindowSize"):Connect(function()
+					checkIfOutsideParentXBounds()
+				end)
+				cloneJanitor:add(connection, "Disconnect", "TrackUtilityScroller-"..ourUID)
 			end
 		end)
 	end

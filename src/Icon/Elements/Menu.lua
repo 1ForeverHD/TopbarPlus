@@ -66,6 +66,21 @@ return function(icon)
 			end)
 		end)
 		
+		-- For right-aligned icons, this ensures their menus
+		-- close button appear instantly when selected (instead
+		-- of partially hidden from view)
+		local previousCanvasX = menu.AbsoluteCanvasSize.X
+		local function rightAlignCanvas()
+			if icon.alignment == "Right" then
+				local newCanvasX = menu.AbsoluteCanvasSize.X
+				local difference = previousCanvasX - newCanvasX
+				previousCanvasX = newCanvasX
+				menu.CanvasPosition = Vector2.new(menu.CanvasPosition.X - difference, 0)
+			end
+		end
+		menuJanitor:add(icon.selected:Connect(rightAlignCanvas))
+		menuJanitor:add(menu:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(rightAlignCanvas))
+		
 		-- Apply a close selected image if the user hasn't applied thier own
 		local stateGroup = icon:getStateGroup()
 		local imageDeselected = Themes.getThemeValue(stateGroup, "IconImage", "Image", "Deselected")
@@ -132,10 +147,6 @@ return function(icon)
 				local width = child.AbsoluteSize.X + menuUIListLayout.Padding.Offset
 				totalWidth += width
 			end
-			local maxWidth = menu:GetAttribute("MaxWidth")
-			if maxWidth then
-				totalWidth = math.min(maxWidth, totalWidth)
-			end
 			menu:SetAttribute("MenuWidth", totalWidth)
 		end))
 		local function startMenuUpdate()
@@ -148,6 +159,7 @@ return function(icon)
 		menuJanitor:add(menu.ChildAdded:Connect(startMenuUpdate))
 		menuJanitor:add(menu.ChildRemoved:Connect(startMenuUpdate))
 		menuJanitor:add(menu:GetAttributeChangedSignal("MaxIcons"):Connect(startMenuUpdate))
+		menuJanitor:add(menu:GetAttributeChangedSignal("MaxWidth"):Connect(startMenuUpdate))
 		startMenuUpdate()
 	end
 	

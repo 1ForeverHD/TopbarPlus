@@ -4,24 +4,36 @@ return function(Icon)
 	local isOldTopbar = Icon.isOldTopbar
 	local container = {}
 	local guiInset = GuiService:GetGuiInset()
+	local isConsoleScreen = GuiService:IsTenFootInterface()
 	local startInset = if isOldTopbar then 12 else guiInset.Y - (44 + 2)
+	if isConsoleScreen then
+		startInset = 10
+	end
 	local screenGui = Instance.new("ScreenGui")
 	screenGui:SetAttribute("StartInset", startInset)
 	screenGui.Name = "TopbarStandard"
 	screenGui.Enabled = true
 	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	screenGui.DisplayOrder = 10 -- We make it 10 so items like Captions appear in front of the chat
 	screenGui.IgnoreGuiInset = true
 	screenGui.ResetOnSpawn = false
 	screenGui.ScreenInsets = Enum.ScreenInsets.TopbarSafeInsets
 	container[screenGui.Name] = screenGui
+	screenGui.DisplayOrder = Icon.baseDisplayOrder
+	Icon.baseDisplayOrderChanged:Connect(function()
+		screenGui.DisplayOrder = Icon.baseDisplayOrder
+	end)
 
 	local holders = Instance.new("Frame")
 	local yDownOffset = if isOldTopbar then 1 else 0
+	local ySizeOffset = -2
+	if isConsoleScreen then
+		yDownOffset += 13
+		ySizeOffset = 50
+	end
 	holders.Name = "Holders"
 	holders.BackgroundTransparency = 1
 	holders.Position = UDim2.new(0, 0, 0, yDownOffset)
-	holders.Size = UDim2.new(1, 0, 1, -2)
+	holders.Size = UDim2.new(1, 0, 1, ySizeOffset)
 	holders.Visible = true
 	holders.ZIndex = 1
 	holders.Parent = screenGui
@@ -34,6 +46,9 @@ return function(Icon)
 	end
 	screenGuiCenter.Name = "TopbarCentered"
 	screenGuiCenter.ScreenInsets = Enum.ScreenInsets.None
+	Icon.baseDisplayOrderChanged:Connect(function()
+		screenGuiCenter.DisplayOrder = Icon.baseDisplayOrder
+	end)
 	container[screenGuiCenter.Name] = screenGuiCenter
 	GuiService:GetPropertyChangedSignal("TopbarInset"):Connect(updateCenteredHoldersHeight)
 	updateCenteredHoldersHeight()
@@ -41,11 +56,17 @@ return function(Icon)
 	local screenGuiClipped = screenGui:Clone()
 	screenGuiClipped.Name = screenGuiClipped.Name.."Clipped"
 	screenGuiClipped.DisplayOrder += 1
+	Icon.baseDisplayOrderChanged:Connect(function()
+		screenGuiClipped.DisplayOrder = Icon.baseDisplayOrder + 1
+	end)
 	container[screenGuiClipped.Name] = screenGuiClipped
 	
 	local screenGuiCenterClipped = screenGuiCenter:Clone()
 	screenGuiCenterClipped.Name = screenGuiCenterClipped.Name.."Clipped"
 	screenGuiCenterClipped.DisplayOrder += 1
+	Icon.baseDisplayOrderChanged:Connect(function()
+		screenGuiCenterClipped.DisplayOrder = Icon.baseDisplayOrder + 1
+	end)
 	container[screenGuiCenterClipped.Name] = screenGuiCenterClipped
 	
 	if isOldTopbar then

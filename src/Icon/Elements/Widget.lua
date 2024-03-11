@@ -278,6 +278,10 @@ return function(icon, Icon)
 			local menuWidth = menu:GetAttribute("MenuWidth")
 			local totalMenuWidth = menuWidth and menuWidth + spotWidth + menuUIListLayout.Padding.Offset + 10
 			if totalMenuWidth then
+				local maxWidth = menu:GetAttribute("MaxWidth")
+				if maxWidth then
+					totalMenuWidth = math.max(maxWidth, widgetMinimumWidth)
+				end
 				menu:SetAttribute("MenuCanvasWidth", widgetWidth)
 				if totalMenuWidth < widgetWidth then
 					widgetWidth = totalMenuWidth
@@ -309,6 +313,11 @@ return function(icon, Icon)
 			})
 			movingTween:Play()
 			resizingCount += 1
+			for i = 1, widgetTweenInfo.Time * 100 do
+				task.delay(i/100, function()
+					Icon.iconChanged:Fire(icon)
+				end)
+			end
 			task.delay(widgetTweenInfo.Time-0.2, function()
 				resizingCount -= 1
 				task.defer(function()
