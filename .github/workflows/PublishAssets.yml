@@ -3,7 +3,7 @@ name: Publish To Roblox
 on:
   push:
     branches: #  Act on master branch commit
-    - main
+      - main
 
 jobs:
   ci:
@@ -11,20 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
+      - uses: actions/checkout@v4
 
-    - uses: rojo-rbx/setup-foreman@v1
-      with:
-        version: "^1.0.0"
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ok-nick/setup-aftman@v0.4.2
 
-    - name: Report tool versions
-      run: rojo --version
+      - name: Report tool versions
+        run: rojo --version
 
-    - name: Deploy
-      run: |
-        rojo upload --cookie "$ROBLOSECURITY" --asset_id 6311707237 src
-      env:
-        ROBLOSECURITY: ${{ secrets.ROBLOSECURITY }} # d
+      - name: Deploy
+        run: |
+          rojo upload --cookie "$ROBLOSECURITY" --asset_id 7164826016 src
+        env:
+          ROBLOSECURITY: ${{ secrets.ROBLOSECURITY }}
