@@ -1,5 +1,9 @@
 # Project place file
 /TopbarPlus.rbxlx
+/Icon.rbxm
+
+# Built documentation
+/stie
 
 # Roblox Studio lock files
 /*.rbxlx.lock

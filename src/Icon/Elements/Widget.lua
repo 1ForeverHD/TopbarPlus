@@ -4,7 +4,6 @@
 -- also responsible for handling the automatic resizing of the widget (based upon image visibility and text length)
 
 return function(icon, Icon)
-
 	local widget = Instance.new("Frame")
 	widget:SetAttribute("WidgetUID", icon.UID)
 	widget.Name = "Widget"
@@ -76,7 +75,7 @@ return function(icon, Icon)
 	clickRegion.Selectable = true
 	clickRegion.SelectionGroup = true
 	clickRegion.Parent = iconSpot
-	
+
 	local Gamepad = require(script.Parent.Parent.Features.Gamepad)
 	Gamepad.registerButton(clickRegion)
 
@@ -140,7 +139,7 @@ return function(icon, Icon)
 	iconLabelContainer.Parent = contents
 
 	local iconLabel = Instance.new("TextLabel")
-	local viewportX = workspace.CurrentCamera.ViewportSize.X+200
+	local viewportX = workspace.CurrentCamera.ViewportSize.X + 200
 	iconLabel.Name = "IconLabel"
 	iconLabel.LayoutOrder = 4
 	iconLabel.ZIndex = 15
@@ -183,13 +182,12 @@ return function(icon, Icon)
 	local resizingCount = 0
 	local repeating = false
 	local function handleLabelAndImageChanges(forceUpdateString)
-
 		-- We defer changes by a frame to eliminate all but 1 requests which
 		-- could otherwise stack up to 20+ requests in a single frame
 		-- We then repeat again once to account for any final changes
 		-- Deferring is also essential because properties are set immediately
 		-- afterwards (therefore calculations will use the correct values)
-		updateCount+= 1
+		updateCount += 1
 		local myUpdateCount = updateCount
 		task.defer(function()
 			if updateCount ~= myUpdateCount and forceUpdateString ~= "FORCE_UPDATE" then
@@ -202,12 +200,11 @@ return function(icon, Icon)
 				end
 				return
 			end
-			
+
 			local indicator = icon.indicator
 			local usingIndicator = indicator and indicator.Visible
 			local usingText = usingIndicator or iconLabel.Text ~= ""
 			local usingImage = iconImage.Image ~= "" and iconImage.Image ~= nil
-			local alignment = Enum.HorizontalAlignment.Center
 			local NORMAL_BUTTON_SIZE = UDim2.fromScale(1, 1)
 			local buttonSize = NORMAL_BUTTON_SIZE
 			if usingImage and not usingText then
@@ -228,7 +225,6 @@ return function(icon, Icon)
 				paddingLeft.Visible = true
 				paddingCenter.Visible = not usingIndicator
 				paddingRight.Visible = not usingIndicator
-				alignment = Enum.HorizontalAlignment.Left
 			end
 			button.Size = buttonSize
 
@@ -240,7 +236,7 @@ return function(icon, Icon)
 			local initialWidgetWidth = contentsPadding --0
 			local textWidth = iconLabel.TextBounds.X
 			iconLabelContainer.Size = UDim2.new(0, textWidth, iconLabel.Size.Y.Scale, 0)
-			for _, child in pairs(contents:GetChildren()) do
+			for _, child in contents:GetChildren() do
 				if child:IsA("GuiObject") and child.Visible == true then
 					local itemWidth = getItemWidth(child)
 					initialWidgetWidth += itemWidth + contentsPadding
@@ -255,16 +251,16 @@ return function(icon, Icon)
 			local hasMenu = #menuIcons > 0
 			local showMenu = hasMenu and icon.isSelected
 			if showMenu then
-				for _, frame in pairs(menu:GetChildren()) do
+				for _, frame in menu:GetChildren() do
 					if frame ~= iconSpot and frame:IsA("GuiObject") and frame.Visible then
 						additionalWidth += getItemWidth(frame) + menuUIListLayout.Padding.Offset
 					end
 				end
 				if not iconSpot.Visible then
-					widgetWidth -= (getItemWidth(iconSpot) + menuUIListLayout.Padding.Offset*2 + widgetBorderSize)
+					widgetWidth -= (getItemWidth(iconSpot) + menuUIListLayout.Padding.Offset * 2 + widgetBorderSize)
 				end
-				additionalWidth -= (widgetBorderSize*0.5)
-				widgetWidth += additionalWidth - (widgetBorderSize*0.75)
+				additionalWidth -= (widgetBorderSize * 0.5)
+				widgetWidth += additionalWidth - (widgetBorderSize * 0.75)
 			end
 			menuGap.Visible = showMenu and iconSpot.Visible
 			local desiredWidth = widget:GetAttribute("DesiredWidth")
@@ -273,8 +269,8 @@ return function(icon, Icon)
 			end
 
 			icon.updateMenu:Fire()
-			local preWidth = math.max(widgetWidth-additionalWidth, widgetMinimumWidth)
-			local spotWidth = preWidth-(widgetBorderSize*2)
+			local preWidth = math.max(widgetWidth - additionalWidth, widgetMinimumWidth)
+			local spotWidth = preWidth - (widgetBorderSize * 2)
 			local menuWidth = menu:GetAttribute("MenuWidth")
 			local totalMenuWidth = menuWidth and menuWidth + spotWidth + menuUIListLayout.Padding.Offset + 10
 			if totalMenuWidth then
@@ -293,11 +289,11 @@ return function(icon, Icon)
 			local spotWidthMax = math.max(spotWidth, getItemWidth(iconSpot), iconSpot.AbsoluteSize.X)
 			local widgetWidthMax = math.max(widgetWidth, getItemWidth(widget), widget.AbsoluteSize.X)
 			local SPEED = 750
-			local spotTweenInfo = TweenInfo.new(spotWidthMax/SPEED, style, direction)
-			local widgetTweenInfo = TweenInfo.new(widgetWidthMax/SPEED, style, direction)
+			local spotTweenInfo = TweenInfo.new(spotWidthMax / SPEED, style, direction)
+			local widgetTweenInfo = TweenInfo.new(widgetWidthMax / SPEED, style, direction)
 			TweenService:Create(iconSpot, spotTweenInfo, {
 				Position = UDim2.new(0, widgetBorderSize, 0.5, 0),
-				Size = UDim2.new(0, spotWidth, 1, -widgetBorderSize*2),
+				Size = UDim2.new(0, spotWidth, 1, -widgetBorderSize * 2),
 			}):Play()
 			TweenService:Create(clickRegion, spotTweenInfo, {
 				Size = UDim2.new(0, spotWidth, 1, 0),
@@ -314,11 +310,11 @@ return function(icon, Icon)
 			movingTween:Play()
 			resizingCount += 1
 			for i = 1, widgetTweenInfo.Time * 100 do
-				task.delay(i/100, function()
+				task.delay(i / 100, function()
 					Icon.iconChanged:Fire(icon)
 				end)
 			end
-			task.delay(widgetTweenInfo.Time-0.2, function()
+			task.delay(widgetTweenInfo.Time - 0.2, function()
 				resizingCount -= 1
 				task.defer(function()
 					if resizingCount == 0 then
@@ -337,22 +333,13 @@ return function(icon, Icon)
 			return
 		end
 		task.spawn(function()
-			--[[
-			local fontLink = value.Family
-			if string.match(fontLink, "rbxassetid://") then
-				local ContentProvider = game:GetService("ContentProvider")
-				local assets = {fontLink}
-				ContentProvider:PreloadAsync(assets)
-				print("FONT LOADED!!!")
-			end--]]
-
 			-- Afaik there's no way to determine when a Font Family has
 			-- loaded (even with ContentProvider), so we just have to try
 			-- a few times and hope it loads within the refresh period
 			handleLabelAndImageChanges()
 			if firstTimeSettingFontFace then
 				firstTimeSettingFontFace = false
-				for i = 1, 10 do
+				for _ = 1, 10 do
 					task.wait(1)
 					handleLabelAndImageChanges()
 				end
@@ -363,7 +350,9 @@ return function(icon, Icon)
 		task.defer(function()
 			local borderOffset = widget:GetAttribute("BorderSize")
 			local alignment = icon.alignment
-			local alignmentOffset = (iconSpot.Visible == false and 0) or (alignment == "Right" and -borderOffset) or borderOffset
+			local alignmentOffset = (iconSpot.Visible == false and 0)
+				or (alignment == "Right" and -borderOffset)
+				or borderOffset
 			menu.Position = UDim2.new(0, alignmentOffset, 0, 0)
 			menuGap.Size = UDim2.fromOffset(borderOffset, 0)
 			menuUIListLayout.Padding = UDim.new(0, 0)
@@ -382,7 +371,7 @@ return function(icon, Icon)
 	icon:setBehaviour("Indicator", "Visible", handleLabelAndImageChanges)
 	icon:setBehaviour("IconImageRatio", "AspectRatio", handleLabelAndImageChanges)
 	icon:setBehaviour("IconImage", "Image", function(value)
-		local textureId = (tonumber(value) and "http://www.roblox.com/asset/?id="..value) or value or ""
+		local textureId = (tonumber(value) and `http://www.roblox.com/asset/?id={value}`) or value or ""
 		if iconImage.Image ~= textureId then
 			handleLabelAndImageChanges()
 		end

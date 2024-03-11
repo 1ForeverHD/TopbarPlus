@@ -1,5 +1,4 @@
 return function(icon)
-
 	local menu = Instance.new("ScrollingFrame")
 	menu.Name = "Menu"
 	menu.BackgroundTransparency = 1
@@ -19,7 +18,7 @@ return function(icon)
 	menu.ScrollBarImageTransparency = 0.8
 	menu.BorderSizePixel = 0
 	menu.Selectable = false
-	
+
 	local Icon = require(icon.iconModule)
 	local menuUIListLayout = Icon.container.TopbarStandard:FindFirstChild("UIListLayout", true):Clone()
 	menuUIListLayout.Name = "MenuUIListLayout"
@@ -33,11 +32,9 @@ return function(icon)
 	menuGap.AnchorPoint = Vector2.new(0, 0.5)
 	menuGap.ZIndex = 5
 	menuGap.Parent = menu
-	
+
 	local hasStartedMenu = false
-	local Themes = require(script.Parent.Parent.Features.Themes)
 	local function totalChildrenChanged()
-		
 		local menuJanitor = icon.menuJanitor
 		local totalIcons = #icon.menuIcons
 		if hasStartedMenu then
@@ -48,24 +45,24 @@ return function(icon)
 			return
 		end
 		hasStartedMenu = true
-		
+
 		-- Listen for changes
 		menuJanitor:add(icon.toggled:Connect(function()
 			if #icon.menuIcons > 0 then
 				icon.updateSize:Fire()
 			end
 		end))
-		
+
 		-- Modify appearance of menu icon when joined
 		local _, modificationUID = icon:modifyTheme({
-			{"Menu", "Active", true},
+			{ "Menu", "Active", true },
 		})
 		task.defer(function()
 			menuJanitor:add(function()
 				icon:removeModification(modificationUID)
 			end)
 		end)
-		
+
 		-- For right-aligned icons, this ensures their menus
 		-- close button appear instantly when selected (instead
 		-- of partially hidden from view)
@@ -80,24 +77,19 @@ return function(icon)
 		end
 		menuJanitor:add(icon.selected:Connect(rightAlignCanvas))
 		menuJanitor:add(menu:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(rightAlignCanvas))
-		
+
 		-- Apply a close selected image if the user hasn't applied thier own
-		local stateGroup = icon:getStateGroup()
-		local imageDeselected = Themes.getThemeValue(stateGroup, "IconImage", "Image", "Deselected")
-		local imageSelected = Themes.getThemeValue(stateGroup, "IconImage", "Image", "Selected")
-		if imageDeselected == imageSelected then
-			local fontLink = "rbxasset://fonts/families/FredokaOne.json"
-			local fontFace = Font.new(fontLink, Enum.FontWeight.Light, Enum.FontStyle.Normal)
-			icon:removeModificationWith("IconLabel", "Text", "Viewing")
-			icon:removeModificationWith("IconLabel", "Image", "Viewing")
-			icon:modifyTheme({
-				{"IconLabel", "FontFace", fontFace, "Selected"},
-				{"IconLabel", "Text", "X", "Selected"},
-				{"IconLabel", "TextSize", 20, "Selected"},
-				{"IconLabel", "TextStrokeTransparency", 0.8, "Selected"},
-				{"IconImage", "Image", "", "Selected"},
-			})
-		end
+		local fontLink = "rbxasset://fonts/families/FredokaOne.json"
+		local fontFace = Font.new(fontLink, Enum.FontWeight.Light, Enum.FontStyle.Normal)
+		icon:removeModificationWith("IconLabel", "Text", "Viewing")
+		icon:removeModificationWith("IconLabel", "Image", "Viewing")
+		icon:modifyTheme({
+			{ "IconLabel", "FontFace", fontFace, "Selected" },
+			{ "IconLabel", "Text", "X", "Selected" },
+			{ "IconLabel", "TextSize", 20, "Selected" },
+			{ "IconLabel", "TextStrokeTransparency", 0.8, "Selected" },
+			{ "IconImage", "Image", "", "Selected" },
+		})
 
 		-- Change order of spot when alignment changes
 		local iconSpot = icon:getInstance("IconSpot")
@@ -114,7 +106,7 @@ return function(icon)
 		end
 		menuJanitor:add(icon.alignmentChanged:Connect(updateAlignent))
 		updateAlignent()
-		
+
 		-- This updates the scrolling frame to only display a scroll
 		-- length equal to the distance produced by its MaxIcons
 		menu:GetAttributeChangedSignal("MenuCanvasWidth"):Connect(function()
@@ -128,10 +120,10 @@ return function(icon)
 				return
 			end
 			local orderedInstances = {}
-			for _, child in pairs(menu:GetChildren()) do
+			for _, child in menu:GetChildren() do
 				local widgetUID = child:GetAttribute("WidgetUID")
 				if widgetUID and child.Visible then
-					table.insert(orderedInstances, {child, child.AbsolutePosition.X})
+					table.insert(orderedInstances, { child, child.AbsolutePosition.X })
 				end
 			end
 			table.sort(orderedInstances, function(groupA, groupB)
@@ -154,30 +146,27 @@ return function(icon)
 				icon.startMenuUpdate:Fire()
 			end)
 		end
-		local iconButton = icon:getInstance("IconButton")
-		local previousButtonWidth = iconButton.AbsoluteSize.X
 		menuJanitor:add(menu.ChildAdded:Connect(startMenuUpdate))
 		menuJanitor:add(menu.ChildRemoved:Connect(startMenuUpdate))
 		menuJanitor:add(menu:GetAttributeChangedSignal("MaxIcons"):Connect(startMenuUpdate))
 		menuJanitor:add(menu:GetAttributeChangedSignal("MaxWidth"):Connect(startMenuUpdate))
 		startMenuUpdate()
 	end
-	
+
 	icon.menuChildAdded:Connect(totalChildrenChanged)
 	icon.menuSet:Connect(function(arrayOfIcons)
 		-- Reset any previous icons
-		for i, otherIconUID in pairs(icon.menuIcons) do
+		for _, otherIconUID in icon.menuIcons do
 			local otherIcon = Icon.getIconByUID(otherIconUID)
 			otherIcon:destroy()
 		end
 		-- Apply new icons
-		local totalNewIcons = #arrayOfIcons
 		if type(arrayOfIcons) == "table" then
-			for i, otherIcon in pairs(arrayOfIcons) do
+			for _, otherIcon in arrayOfIcons do
 				otherIcon:joinMenu(icon)
 			end
 		end
 	end)
-	
+
 	return menu
 end
