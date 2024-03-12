@@ -39,7 +39,7 @@ return function(icon)
 		local totalIcons = #icon.menuIcons
 		if hasStartedMenu then
 			if totalIcons <= 0 then
-				menuJanitor:clean()
+				menuJanitor:Cleanup()
 				hasStartedMenu = false
 			end
 			return
@@ -47,18 +47,21 @@ return function(icon)
 		hasStartedMenu = true
 
 		-- Listen for changes
-		menuJanitor:add(icon.toggled:Connect(function()
-			if #icon.menuIcons > 0 then
-				icon.updateSize:Fire()
-			end
-		end))
+		menuJanitor:Add(
+			icon.toggled:Connect(function()
+				if #icon.menuIcons > 0 then
+					icon.updateSize:Fire()
+				end
+			end),
+			"Disconnect"
+		)
 
 		-- Modify appearance of menu icon when joined
 		local _, modificationUID = icon:modifyTheme({
 			{ "Menu", "Active", true },
 		})
 		task.defer(function()
-			menuJanitor:add(function()
+			menuJanitor:Add(function()
 				icon:removeModification(modificationUID)
 			end)
 		end)
@@ -75,8 +78,8 @@ return function(icon)
 				menu.CanvasPosition = Vector2.new(menu.CanvasPosition.X - difference, 0)
 			end
 		end
-		menuJanitor:add(icon.selected:Connect(rightAlignCanvas))
-		menuJanitor:add(menu:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(rightAlignCanvas))
+		menuJanitor:Add(icon.selected:Connect(rightAlignCanvas), "Disconnect")
+		menuJanitor:Add(menu:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(rightAlignCanvas))
 
 		-- Apply a close selected image if the user hasn't applied thier own
 		local fontLink = "rbxasset://fonts/families/FredokaOne.json"
@@ -104,7 +107,7 @@ return function(icon)
 				menuGap.LayoutOrder = -99998
 			end
 		end
-		menuJanitor:add(icon.alignmentChanged:Connect(updateAlignent))
+		menuJanitor:Add(icon.alignmentChanged:Connect(updateAlignent), "Disconnect")
 		updateAlignent()
 
 		-- This updates the scrolling frame to only display a scroll
@@ -114,42 +117,45 @@ return function(icon)
 			local canvasY = menu.CanvasSize.Y
 			menu.CanvasSize = UDim2.new(0, canvasWidth, canvasY.Scale, canvasY.Offset)
 		end)
-		menuJanitor:add(icon.updateMenu:Connect(function()
-			local maxIcons = menu:GetAttribute("MaxIcons")
-			if not maxIcons then
-				return
-			end
-			local orderedInstances = {}
-			for _, child in menu:GetChildren() do
-				local widgetUID = child:GetAttribute("WidgetUID")
-				if widgetUID and child.Visible then
-					table.insert(orderedInstances, { child, child.AbsolutePosition.X })
+		menuJanitor:Add(
+			icon.updateMenu:Connect(function()
+				local maxIcons = menu:GetAttribute("MaxIcons")
+				if not maxIcons then
+					return
 				end
-			end
-			table.sort(orderedInstances, function(groupA, groupB)
-				return groupA[2] < groupB[2]
-			end)
-			local totalWidth = 0
-			for i = 1, maxIcons do
-				local group = orderedInstances[i]
-				if not group then
-					break
+				local orderedInstances = {}
+				for _, child in menu:GetChildren() do
+					local widgetUID = child:GetAttribute("WidgetUID")
+					if widgetUID and child.Visible then
+						table.insert(orderedInstances, { child, child.AbsolutePosition.X })
+					end
 				end
-				local child = group[1]
-				local width = child.AbsoluteSize.X + menuUIListLayout.Padding.Offset
-				totalWidth += width
-			end
-			menu:SetAttribute("MenuWidth", totalWidth)
-		end))
+				table.sort(orderedInstances, function(groupA, groupB)
+					return groupA[2] < groupB[2]
+				end)
+				local totalWidth = 0
+				for i = 1, maxIcons do
+					local group = orderedInstances[i]
+					if not group then
+						break
+					end
+					local child = group[1]
+					local width = child.AbsoluteSize.X + menuUIListLayout.Padding.Offset
+					totalWidth += width
+				end
+				menu:SetAttribute("MenuWidth", totalWidth)
+			end),
+			"Disconnect"
+		)
 		local function startMenuUpdate()
 			task.delay(0.1, function()
 				icon.startMenuUpdate:Fire()
 			end)
 		end
-		menuJanitor:add(menu.ChildAdded:Connect(startMenuUpdate))
-		menuJanitor:add(menu.ChildRemoved:Connect(startMenuUpdate))
-		menuJanitor:add(menu:GetAttributeChangedSignal("MaxIcons"):Connect(startMenuUpdate))
-		menuJanitor:add(menu:GetAttributeChangedSignal("MaxWidth"):Connect(startMenuUpdate))
+		menuJanitor:Add(menu.ChildAdded:Connect(startMenuUpdate))
+		menuJanitor:Add(menu.ChildRemoved:Connect(startMenuUpdate))
+		menuJanitor:Add(menu:GetAttributeChangedSignal("MaxIcons"):Connect(startMenuUpdate))
+		menuJanitor:Add(menu:GetAttributeChangedSignal("MaxWidth"):Connect(startMenuUpdate))
 		startMenuUpdate()
 	end
 
@@ -158,7 +164,7 @@ return function(icon)
 		-- Reset any previous icons
 		for _, otherIconUID in icon.menuIcons do
 			local otherIcon = Icon.getIconByUID(otherIconUID)
-			otherIcon:destroy()
+			otherIcon:Destroy()
 		end
 		-- Apply new icons
 		if type(arrayOfIcons) == "table" then

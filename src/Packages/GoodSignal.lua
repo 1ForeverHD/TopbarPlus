@@ -85,7 +85,6 @@ function Connection:Disconnect()
 		end
 	end
 end
-Connection.Destroy = Connection.Disconnect
 
 -- Make Connection strict
 setmetatable(Connection, {
@@ -123,7 +122,6 @@ end
 function Signal:DisconnectAll()
 	self._handlerListHead = false
 end
-Signal.Destroy = Signal.DisconnectAll
 
 -- Signal:Fire(...) implemented by running the handler functions on the
 -- coRunnerThread, and any time the resulting thread yielded without returning

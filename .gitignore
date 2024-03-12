@@ -1,9 +1,14 @@
 # Project place file
-/TopbarPlus.rbxlx
 /Icon.rbxm
 
+# macOS
+.DS_Store
+
+# Rojo
+sourcemap.json
+
 # Built documentation
-/stie
+/site
 
 # Roblox Studio lock files
 /*.rbxlx.lock

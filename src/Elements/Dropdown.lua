@@ -69,17 +69,17 @@ return function(icon)
 			{ "Selection", "Position", UDim2.new(0, 4, 0, 4) },
 		})
 		task.defer(function()
-			childIcon.joinJanitor:add(function()
+			childIcon.joinJanitor:Add(function()
 				childIcon:removeModification(modificationUID)
 			end)
 		end)
 	end)
-	
+
 	icon.dropdownSet:Connect(function(arrayOfIcons)
 		-- Destroy any previous icons
 		for _, otherIconUID in icon.dropdownIcons do
 			local otherIcon = Icon.getIconByUID(otherIconUID)
-			otherIcon:destroy()
+			otherIcon:Destroy()
 		end
 		-- Add new icons
 		if type(arrayOfIcons) == "table" then
@@ -93,7 +93,7 @@ return function(icon)
 	local function updateVisibility()
 		icon:modifyTheme({ "Dropdown", "Visible", icon.isSelected })
 	end
-	dropdownJanitor:add(icon.toggled:Connect(updateVisibility))
+	dropdownJanitor:Add(icon.toggled:Connect(updateVisibility), "Disconnect")
 	updateVisibility()
 
 	-- This updates the scrolling frame to only display a scroll
@@ -153,11 +153,11 @@ return function(icon)
 		totalHeight += dropdownPadding.PaddingBottom.Offset
 		dropdownScroller.Size = UDim2.fromOffset(0, totalHeight)
 	end
-	dropdownJanitor:add(dropdownScroller:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(updateMaxIcons))
-	dropdownJanitor:add(dropdownScroller.ChildAdded:Connect(updateMaxIcons))
-	dropdownJanitor:add(dropdownScroller.ChildRemoved:Connect(updateMaxIcons))
-	dropdownJanitor:add(dropdown:GetAttributeChangedSignal("MaxIcons"):Connect(updateMaxIcons))
-	dropdownJanitor:add(icon.childThemeModified:Connect(updateMaxIcons))
+	dropdownJanitor:Add(dropdownScroller:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(updateMaxIcons))
+	dropdownJanitor:Add(dropdownScroller.ChildAdded:Connect(updateMaxIcons))
+	dropdownJanitor:Add(dropdownScroller.ChildRemoved:Connect(updateMaxIcons))
+	dropdownJanitor:Add(dropdown:GetAttributeChangedSignal("MaxIcons"):Connect(updateMaxIcons))
+	dropdownJanitor:Add(icon.childThemeModified:Connect(updateMaxIcons), "Disconnect")
 	updateMaxIcons()
 
 	return dropdown

@@ -74,14 +74,20 @@ return function(icon, Icon)
 			parentIcon:notify(customClearSignal)
 		end
 
-		local noticeJanitor = icon.janitor:add(Janitor.new())
-		local noticeComplete = noticeJanitor:add(Signal.new())
-		noticeJanitor:add(icon.endNotices:Connect(function()
-			noticeComplete:Fire()
-		end))
-		noticeJanitor:add(customClearSignal:Connect(function()
-			noticeComplete:Fire()
-		end))
+		local noticeJanitor = icon.janitor:Add(Janitor.new())
+		local noticeComplete = noticeJanitor:Add(Signal.new(), "DisconnectAll")
+		noticeJanitor:Add(
+			icon.endNotices:Connect(function()
+				noticeComplete:Fire()
+			end),
+			"Disconnect"
+		)
+		noticeJanitor:Add(
+			customClearSignal:Connect(function()
+				noticeComplete:Fire()
+			end),
+			"Disconnect"
+		)
 		noticeId = noticeId or Utility.generateUID()
 		icon.notices[noticeId] = {
 			completeSignal = noticeComplete,
@@ -94,7 +100,7 @@ return function(icon, Icon)
 		icon.totalNotices += 1
 		updateNotice()
 		noticeComplete:Once(function()
-			noticeJanitor:destroy()
+			noticeJanitor:Destroy()
 			icon.totalNotices -= 1
 			icon.notices[noticeId] = nil
 			updateNotice()

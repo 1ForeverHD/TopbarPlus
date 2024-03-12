@@ -15,11 +15,8 @@ jobs:
 
       - uses: ok-nick/setup-aftman@v0.4.2
 
-      - name: Report tool versions
-        run: rojo --version
+      - name: Deploy to Roblox
+        run: rojo upload --cookie "${{ secrets.ROBLOSECURITY }}" --asset_id 16049574146
 
-      - name: Deploy
-        run: |
-          rojo upload --cookie "$ROBLOSECURITY" --asset_id 7164826016 src
-        env:
-          ROBLOSECURITY: ${{ secrets.ROBLOSECURITY }}
+      - name: Publish to Wally
+        run: wally publish --token "${{ secrets.WALLY_AUTH }}"

@@ -148,7 +148,7 @@ return function(icon)
 		local absolute = caption.AbsoluteSize
 		captionClone.Size = UDim2.fromOffset(absolute.X, absolute.Y)
 	end
-	captionJanitor:add(caption:GetPropertyChangedSignal("AbsoluteSize"):Connect(matchSize))
+	captionJanitor:Add(caption:GetPropertyChangedSignal("AbsoluteSize"):Connect(matchSize))
 	matchSize()
 
 	local isCompletelyEnabled = false
@@ -236,12 +236,12 @@ return function(icon)
 			updateCaretConnection:Disconnect()
 		end)
 	end
-	captionJanitor:add(clickRegion:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+	captionJanitor:Add(clickRegion:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
 		updatePosition()
 	end))
 	updatePosition(false)
 
-	captionJanitor:add(icon.toggleKeyAdded:Connect(updateHotkey))
+	captionJanitor:Add(icon.toggleKeyAdded:Connect(updateHotkey), "Disconnect")
 	for keyCodeEnum, _ in icon.bindedToggleKeys do
 		updateHotkey(keyCodeEnum)
 		break
@@ -269,21 +269,24 @@ return function(icon)
 	local WAIT_DURATION = 0.5
 	local RECOVER_PERIOD = 0.3
 	local Icon = require(icon.iconModule)
-	captionJanitor:add(icon.stateChanged:Connect(function(stateName)
-		if stateName == "Viewing" then
-			local lastClock = Icon.captionLastClosedClock
-			local clockDifference = (lastClock and os.clock() - lastClock) or 999
-			local waitDuration = (clockDifference < RECOVER_PERIOD and 0) or WAIT_DURATION
-			task.delay(waitDuration, function()
-				if icon.activeState == "Viewing" then
-					setCaptionEnabled(true)
-				end
-			end)
-		else
-			Icon.captionLastClosedClock = os.clock()
-			setCaptionEnabled(false)
-		end
-	end))
+	captionJanitor:Add(
+		icon.stateChanged:Connect(function(stateName)
+			if stateName == "Viewing" then
+				local lastClock = Icon.captionLastClosedClock
+				local clockDifference = (lastClock and os.clock() - lastClock) or 999
+				local waitDuration = (clockDifference < RECOVER_PERIOD and 0) or WAIT_DURATION
+				task.delay(waitDuration, function()
+					if icon.activeState == "Viewing" then
+						setCaptionEnabled(true)
+					end
+				end)
+			else
+				Icon.captionLastClosedClock = os.clock()
+				setCaptionEnabled(false)
+			end
+		end),
+		"Disconnect"
+	)
 
 	return caption
 end

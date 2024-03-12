@@ -36,7 +36,7 @@ return function(icon)
 			indicatorButton.Size = UDim2.fromScale(1, 1)
 		end
 	end
-	icon.janitor:add(GuiService:GetPropertyChangedSignal("SelectedObject"):Connect(selectionChanged))
+	icon.janitor:Add(GuiService:GetPropertyChangedSignal("SelectedObject"):Connect(selectionChanged))
 	selectionChanged()
 
 	local imageLabel = Instance.new("ImageLabel")
@@ -69,7 +69,7 @@ return function(icon)
 		icon:modifyTheme({ "Indicator", "Visible", visibility })
 		icon.updateSize:Fire()
 	end
-	icon.janitor:add(GamepadService:GetPropertyChangedSignal("GamepadCursorEnabled"):Connect(setIndicatorVisible))
+	icon.janitor:Add(GamepadService:GetPropertyChangedSignal("GamepadCursorEnabled"):Connect(setIndicatorVisible))
 	icon.indicatorSet:Connect(function(keyCode)
 		local visibility = false
 		if keyCode then

@@ -18,7 +18,6 @@ exclude = [
     "mkdocs.yml",
     "selene.toml",
     "sourcemap.json",
-    "TopbarPlus.rbxlx",
+    "withLink.project.json",
+    "src/PackageLink.model.json",
 ]
-
-[dependencies]
