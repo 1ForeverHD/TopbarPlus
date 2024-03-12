@@ -16,7 +16,7 @@ jobs:
       - uses: ok-nick/setup-aftman@v0.4.2
 
       - name: Deploy to Roblox
-        run: rojo upload --cookie "${{ secrets.ROBLOSECURITY }}" --asset_id 16049574146
+        run: rojo upload --cookie "${{ secrets.ROBLOSECURITY }}" --asset_id 16049574146 withoutLink.project.json
 
       - name: Publish to Wally
         run: wally publish --token "${{ secrets.WALLY_AUTH }}"
