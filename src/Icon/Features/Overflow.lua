@@ -184,6 +184,7 @@ function Overflow.updateBoundary(alignment)
 		overflowIcon:setName("Overflow"..alignment)
 		overflowIcon:setOrder(order)
 		overflowIcon:setAlignment(alignment)
+		overflowIcon:autoDeselect(false)
 		overflowIcon.isAnOverflow = true
 		--overflowIcon:freezeMenu()
 		overflowIcon:select()

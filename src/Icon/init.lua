@@ -451,7 +451,6 @@ function Icon.new()
 	--print("self.activeState =", self.activeState)
 	task.delay(0.1, function()
 		if self.activeState == "Deselected" then
-			--print("YOOOOOO!")
 			self.stateChanged:Fire("Deselected")
 			self:refresh()
 		end
