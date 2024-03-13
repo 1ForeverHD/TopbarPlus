@@ -929,6 +929,7 @@ function Icon:oneClick(bool)
 			"Disconnect"
 		)
 	end
+	self.oneClickEnabled = true
 	return self
 end
 

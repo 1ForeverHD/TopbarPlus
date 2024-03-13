@@ -21,3 +21,5 @@ exclude = [
     "withLink.project.json",
     "src/PackageLink.model.json",
 ]
+
+[dependencies]

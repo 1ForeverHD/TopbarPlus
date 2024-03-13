@@ -1,5 +1,5 @@
-site_name: TopbarPlus
-site_description: Documentation for TopbarPlus
+site_name: TopbarPlus v3
+site_description: Documentation for TopbarPlus v3
 site_author: Ben Horton
 site_url: https://1ForeverHD.github.io/TopbarPlus/
 
@@ -62,9 +62,5 @@ nav:
     - Features: features.md
     - Installation: installation.md
     - Third Parties: third_parties.md
-    - API:
-      - Icon: api/icon.md
-      - IconController: api/icon_controller.md
-    - Resources: resources.md
+    - API: api.md
   - Contributing: contributing.md
-  - Changelog: changelog.md
