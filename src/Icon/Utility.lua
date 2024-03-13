@@ -143,13 +143,13 @@ function Utility.clipOutside(icon, instance)
 	valueInstance.Name = "OriginalInstance"
 	valueInstance.Value = instance
 	valueInstance.Parent = clone
-	
+
 	local valueInstanceCopy = valueInstance:Clone()
 	instance:SetAttribute("HasAClippedClone", true)
 	valueInstanceCopy.Name = "ClippedClone"
 	valueInstanceCopy.Value = clone
 	valueInstanceCopy.Parent = instance
-	
+
 	local screenGui
 	local function updateScreenGui()
 		local originalScreenGui = originalParent:FindFirstAncestorWhichIsA("ScreenGui")
@@ -166,7 +166,7 @@ function Utility.clipOutside(icon, instance)
 			child:Clone().Parent = clone
 		end
 	end
-	
+
 	-- If the icon is hidden, its important we are too (as
 	-- setting a parent to visible = false no longer makes
 	-- this hidden)
@@ -184,7 +184,7 @@ function Utility.clipOutside(icon, instance)
 		Utility.setVisible(instance, isVisible, "ClipHandler")
 	end
 	cloneJanitor:add(widget:GetPropertyChangedSignal("Visible"):Connect(updateVisibility))
-	
+
 	local previousScroller
 	local Icon = require(icon.iconModule)
 	local function checkIfOutsideParentXBounds()
@@ -197,7 +197,7 @@ function Utility.clipOutside(icon, instance)
 			local nextIconUID = ourUID
 			local shouldClipToParent = instance:GetAttribute("ClipToJoinedParent")
 			if shouldClipToParent then
-				for i = 1, 10 do -- sure i could use while do but this is safer and should never be > 4 parents
+				for i = 1, 10 do -- This is safer than while true do and should never be > 4 parents
 					local nextIcon = Icon.getIconByUID(nextIconUID)
 					if not nextIcon then
 						break
@@ -210,8 +210,9 @@ function Utility.clipOutside(icon, instance)
 					parentInstance = nextParentInstance
 				end
 			end
-			
 			if not parentInstance then
+				isOutsideParent = false
+				updateVisibility()
 				return
 			end
 			local pos = instance.AbsolutePosition
@@ -258,7 +259,7 @@ function Utility.clipOutside(icon, instance)
 						inputX = limitX
 					end
 					absoluteValue = UDim2.fromOffset(inputX, absoluteValue.Y.Offset)
-					
+
 					-- AbsolutePosition does not perfectly match with TopbarInsets enabled
 					-- This corrects this
 					local topbarInset = GuiService.TopbarInset
@@ -268,19 +269,20 @@ function Utility.clipOutside(icon, instance)
 					local widthDifference = guiOffset - topbarInset.Min.X
 					local oldTopbarCenterOffset = 0--widthDifference/30 -- I have no idea why this works, it just does
 					local offsetX = if icon.isOldTopbar then guiOffset else viewportWidth - guiWidth - oldTopbarCenterOffset
-					
+
 					-- Also add additionalOffset
 					offsetX -= additionalOffsetX
 					absoluteValue += UDim2.fromOffset(-offsetX, topbarInset.Height)
-					
+
 					-- Finally check if within its direct parents bounds
 					checkIfOutsideParentXBounds()
-					
+
 				end
 				instance[property] = absoluteValue
 			end)
 		end))
 	end
+	task.delay(0.1, checkIfOutsideParentXBounds)
 	checkIfOutsideParentXBounds()
 	updateVisibility()
 	trackProperty("Position")
@@ -335,7 +337,7 @@ function Utility.joinFeature(originalIcon, parentIcon, iconsArray, scrollingFram
 		clickRegion.Selectable = true
 	end)
 	--
-	
+
 	-- We track icons in arrays and dictionaries using their UID instead of the icon
 	-- itself to prevent heavy cyclical tables when printing the icons
 	local originalIconUID = originalIcon.UID
@@ -378,7 +380,7 @@ function Utility.joinFeature(originalIcon, parentIcon, iconsArray, scrollingFram
 			parentIcon:setEnabled(false)
 		end
 		updateAlignent()
-		
+
 	end)
 
 end
