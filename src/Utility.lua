@@ -269,7 +269,7 @@ function Utility.clipOutside(icon, instance)
 			local nextIconUID = ourUID
 			local shouldClipToParent = instance:GetAttribute("ClipToJoinedParent")
 			if shouldClipToParent then
-				for _ = 1, 10 do -- sure i could use while do but this is safer and should never be > 4 parents
+				for _ = 1, 10 do -- This is safer than while true do and should never be > 4 parents
 					local nextIcon = Icon.getIconByUID(nextIconUID)
 					if not nextIcon then
 						break
@@ -284,6 +284,8 @@ function Utility.clipOutside(icon, instance)
 			end
 
 			if not parentInstance then
+				isOutsideParent = false
+				updateVisibility()
 				return
 			end
 			local pos = instance.AbsolutePosition
@@ -354,6 +356,7 @@ function Utility.clipOutside(icon, instance)
 			)
 		end))
 	end
+	task.delay(0.1, checkIfOutsideParentXBounds)
 	checkIfOutsideParentXBounds()
 	updateVisibility()
 	trackProperty("Position")

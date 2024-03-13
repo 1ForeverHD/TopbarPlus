@@ -66,7 +66,7 @@ Icon.new()
 
 <a><img src="https://i.imgur.com/0QrDmi6.gif" width="50%"/></a>
 
-By default icons will deselect when another icon is selected. You can disable this behaviour by doing:
+By default icons will deselect when another icon is selected. You can disable this behaviour doing:
 ```lua
 icon:autoDeselect(false)
 ```
