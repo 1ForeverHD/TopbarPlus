@@ -939,6 +939,7 @@ function Icon:oneClick(bool)
 			self:deselect()
 		end))
 	end
+	self.oneClickEnabled = true
 	return self
 end
 
