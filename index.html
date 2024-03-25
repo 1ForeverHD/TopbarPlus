@@ -432,15 +432,16 @@
 <span class="kd">local</span> <span class="n">Icon</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="n">game</span><span class="p">:</span><span class="n">GetService</span><span class="p">(</span><span class="s2">&quot;ReplicatedStorage&quot;</span><span class="p">).</span><span class="n">Icon</span><span class="p">)</span>
 <span class="kd">local</span> <span class="n">icon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
 </code></pre></div>
+<p>This constructs an empty <code>32x32</code> icon on the topbar.</p>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p>The order icons appear are determined by their construction sequence. Icons constructed first will have a smaller order number, therefore will appear left of icons with a higher order. For instance, if you construct a shop icon then an inventory icon, the shop icon will appear furthest left. You can modify this behaviour using <a href="https://1foreverhd.github.io/TopbarPlus/api/icon/#setorder">icon:setOrder</a>.</p>
+<p>The order icons appear are determined by their construction sequence. Icons constructed first will have a smaller order therefore will appear left of icons with a higher order. For instance, if you construct a shop icon then an inventory icon, the shop icon will appear furthest left. You can modify this behaviour using <a href="https://1foreverhd.github.io/TopbarPlus/api/icon/#setorder">icon:setOrder</a>.</p>
 </div>
-<p>This constructs an empty <code>32x32</code> icon on the topbar. To add an image and label, do:
+<p>To add an image and label, do:
 <div class="highlight"><pre><span></span><code><span class="n">icon</span><span class="p">:</span><span class="n">setImage</span><span class="p">(</span><span class="n">imageId</span><span class="p">)</span>
 <span class="n">icon</span><span class="p">:</span><span class="n">setLabel</span><span class="p">(</span><span class="s2">&quot;Label&quot;</span><span class="p">)</span>
 </code></pre></div></p>
-<p>These methods are 'chainable' therefore can alternatively be called by doing:
+<p>These methods are 'chainable' therefore can alternatively be called doing:
 <div class="highlight"><pre><span></span><code><span class="n">Icon</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
     <span class="p">:</span><span class="n">setImage</span><span class="p">(</span><span class="n">imageId</span><span class="p">)</span>
     <span class="p">:</span><span class="n">setLabel</span><span class="p">(</span><span class="s2">&quot;Label&quot;</span><span class="p">)</span>
@@ -458,14 +459,14 @@ which returns the icon as the first argument within the function you pass:
 <p class="admonition-title">Info</p>
 <p>Chainable methods have a <code>chainable</code> tag next to their name within the API Icon docs.</p>
 </div>
-<p>Sometimes you'll want an item to appear only when <em>deselected</em>, and similarily only when <em>selected</em>. You can achieve this by specifying a string value within the <code>iconState</code> parameter of methods containing the <code>toggleable</code> tag. These are:</p>
+<p>Sometimes you'll want an item to appear only when <em>deselected</em> and similarily only when <em>selected</em>. You can achieve this by specifying a string value within the <code>iconState</code> parameter of methods containing the <code>toggleable</code> tag. These are:</p>
 <div class="highlight"><pre><span></span><code><span class="s2">&quot;Deselected&quot;</span> <span class="c1">-- Applies the value when the icon is deselected (i.e. not pressed)</span>
 <span class="s2">&quot;Selected&quot;</span> <span class="c1">-- Applies the value when the icon is selected (i.e. pressed)</span>
 <span class="s2">&quot;Viewing&quot;</span> <span class="c1">-- Formerly known as Hovering, applies the value when a cursor is hovering above, a controller highlighting, or touchpad (mobile) long-pressing (but before releasing) an icon</span>
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p>If no argument is specified, the value will be applied to all states</p>
+<p>If no <code>iconState</code> is specified (i.e. is nil) the value will be applied to all states.</p>
 </div>
 <div class="highlight"><pre><span></span><code><span class="n">Icon</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
     <span class="p">:</span><span class="n">setImage</span><span class="p">(</span><span class="mi">4882429582</span><span class="p">)</span>

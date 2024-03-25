@@ -724,7 +724,7 @@
         <span class="p">,</span>
     <span class="p">})</span>
 </code></pre></div>
-<p><a><img src="https://i.imgur.com/tXLrD8t.gif" width="100%"/></a></p>
+<p><a><img src="https://i.imgur.com/tXLrD8t.gif" width="50%"/></a></p>
 <hr />
 <h3 id="modify-theme">Modify Theme<a class="headerlink" href="#modify-theme" title="Permanent link">&para;</a></h3>
 <p>You can modify the appearance of an icon doing:
@@ -746,33 +746,31 @@
 <p>A modification array has 4 components:
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="n">name</span><span class="p">,</span> <span class="n">property</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">iconState</span><span class="p">}</span>
 </code></pre></div></p>
-<ol>
-<li>
-<p><code>`name</code> (required)
-This can be:</p>
+<blockquote>
+<p><strong>1. <code>name</code></strong> <em>required</em></p>
+</blockquote>
+<p>This can be:</p>
 <ul>
 <li>"Widget" (which is the icon container frame)</li>
 <li>The name of an instance within the widget such as <code>IconGradient</code>, <code>IconSpot</code>, <code>Menu</code>, etc</li>
 <li>A 'collective' - the value of an attribute called 'Collective' applied to some instances. This enables them to be acted upon all at once. For example, 'IconCorners'.</li>
 </ul>
-</li>
-<li>
-<p><code>property</code> (required)
-This can be either:</p>
+<blockquote>
+<p><strong>2. <code>property</code></strong> <em>required</em></p>
+</blockquote>
+<p>This can be either:</p>
 <ul>
 <li>A property from the instance (Name, BackgroundColor3, Text, etc)</li>
 <li>Or if the property doesn't exist, an attribute of that property name will be set</li>
 </ul>
-</li>
-<li>
-<p><code>value</code> (required)
-The value you want the property to become ("Hello", <code>Color3.fromRGB(255, 100, 50)</code>, etc)</p>
-</li>
-<li>
-<p><code>iconState</code> (optional)
-This determines <em>when</em> the modification is applied. See the <a href="https://1foreverhd.github.io/TopbarPlus/">home page</a> for more details on icon states.</p>
-</li>
-</ol>
+<blockquote>
+<p><strong>3. <code>value</code></strong> <em>required</em></p>
+</blockquote>
+<p>The value you want the property to become (<code>"Hello"</code>, <code>Color3.fromRGB(255, 100, 50)</code>, etc)</p>
+<blockquote>
+<p><strong>4. <code>iconState</code></strong> <em>optional</em></p>
+</blockquote>
+<p>This determines <em>when</em> the modification is applied. See the <a href="https://1foreverhd.github.io/TopbarPlus/">home page</a> for more details on icon states.</p>
 <p>You can find example arrays under the 'Default' module:</p>
 <p><a><img src="https://i.imgur.com/idH1SRi.png" width="100%"/></a></p>
 <hr />
@@ -825,7 +823,7 @@ To change the default trigger keycode (from DPadUp) do:
 <hr />
 <h3 id="overflows">Overflows<a class="headerlink" href="#overflows" title="Permanent link">&para;</a></h3>
 <p>When accounting for device types and screen sizes, icons may occasionally overlap. This is especially common for phones when they enter portrait mode. TopbarPlus solves this with overflows:</p>
-<p><a><img src="https://i.imgur.com/GsdNfXr.gif" width="100%"/></a></p>
+<p><a><img src="https://i.vgy.me/Bd4qi2.gif" width="100%"/></a></p>
 <p>Overflows will appear when left-set or right-set icons exceed the boundary of the closest opposite-aligned icon or viewport.</p>
 <p>If a center-aligned icon exceeds the bounds of another icon, its alignment will be set to the alignment of the icon it exceeded:</p>
 <p><a><img src="https://i.imgur.com/fAds4Ph.gif" width="100%"/></a></p>
