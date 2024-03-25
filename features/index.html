@@ -747,7 +747,7 @@
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="n">name</span><span class="p">,</span> <span class="n">property</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">iconState</span><span class="p">}</span>
 </code></pre></div></p>
 <blockquote>
-<p><strong>1. <code>name</code></strong> <em>required</em></p>
+<p><strong>1. <code>name</code></strong> {required}</p>
 </blockquote>
 <p>This can be:</p>
 <ul>
@@ -756,7 +756,7 @@
 <li>A 'collective' - the value of an attribute called 'Collective' applied to some instances. This enables them to be acted upon all at once. For example, 'IconCorners'.</li>
 </ul>
 <blockquote>
-<p><strong>2. <code>property</code></strong> <em>required</em></p>
+<p><strong>2. <code>property</code></strong> {required}</p>
 </blockquote>
 <p>This can be either:</p>
 <ul>
@@ -764,11 +764,11 @@
 <li>Or if the property doesn't exist, an attribute of that property name will be set</li>
 </ul>
 <blockquote>
-<p><strong>3. <code>value</code></strong> <em>required</em></p>
+<p><strong>3. <code>value</code></strong> {required}</p>
 </blockquote>
 <p>The value you want the property to become (<code>"Hello"</code>, <code>Color3.fromRGB(255, 100, 50)</code>, etc)</p>
 <blockquote>
-<p><strong>4. <code>iconState</code></strong> <em>optional</em></p>
+<p><strong>4. <code>iconState</code></strong> {optional}</p>
 </blockquote>
 <p>This determines <em>when</em> the modification is applied. See the <a href="https://1foreverhd.github.io/TopbarPlus/">home page</a> for more details on icon states.</p>
 <p>You can find example arrays under the 'Default' module:</p>
