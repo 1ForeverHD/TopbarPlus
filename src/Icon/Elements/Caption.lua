@@ -137,13 +137,16 @@ return function(icon)
 	dropShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
 	dropShadow.ImageRectOffset = Vector2.new(217, 486)
 	dropShadow.ImageRectSize = Vector2.new(25, 25)
-	dropShadow.ImageTransparency = 0.5
+	dropShadow.ImageTransparency = 0.45
 	dropShadow.ScaleType = Enum.ScaleType.Slice
 	dropShadow.SliceCenter = Rect.new(12, 12, 13, 13)
 	dropShadow.BackgroundTransparency = 1
 	dropShadow.Position = UDim2.fromOffset(0, 5)
 	dropShadow.Size = UDim2.new(1, 0, 0, 48)
 	dropShadow.Parent = caption
+	box:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+		dropShadow.Size = UDim2.new(1, 0, 0, box.AbsoluteSize.Y + 8)
+	end)
 	
 	-- It's important we match the sizes as this is not
 	-- handles within clipOutside (as it assumes the sizes
@@ -225,10 +228,20 @@ return function(icon)
 		end
 		
 		-- We initially default to the opposite state
+		local previousCaretX
 		local function updateCaret()
 			local caretX = clickRegion.AbsolutePosition.X - caption.AbsolutePosition.X + clickRegion.AbsoluteSize.X/2 - caret.AbsoluteSize.X/2
 			local caretY = caret.Position.Y.Offset
 			local newCaretPosition = UDim2.fromOffset(caretX, caretY)
+			if previousCaretX ~= caretX then
+				-- Again, it's essential we reset the caret if
+				-- a difference in X position is detected otherwise
+				-- a slight quirk with AutomaticCanvas can cause
+				-- the caption to infinitely scale
+				previousCaretX = caretX
+				caret.Position = UDim2.fromOffset(0, caretY)
+				task.wait()
+			end
 			caret.Position = newCaretPosition
 		end
 		captionClone.Position = startPosition
@@ -253,6 +266,11 @@ return function(icon)
 	for keyCodeEnum, _ in pairs(icon.bindedToggleKeys) do
 		updateHotkey(keyCodeEnum)
 		break
+	end
+	captionJanitor:add(icon.fakeToggleKeyChanged:Connect(updateHotkey))
+	local fakeToggleKey = icon.fakeToggleKey
+	if fakeToggleKey then
+		updateHotkey(fakeToggleKey)
 	end
 
 	local function setCaptionEnabled(enabled)

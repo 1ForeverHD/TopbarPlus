@@ -208,11 +208,8 @@ function Icon.new()
 	self.noticeStarted = janitor:add(Signal.new())
 	self.noticeChanged = janitor:add(Signal.new())
 	self.endNotices = janitor:add(Signal.new())
-	self.dropdownOpened = janitor:add(Signal.new())
-	self.dropdownClosed = janitor:add(Signal.new())
-	self.menuOpened = janitor:add(Signal.new())
-	self.menuClosed = janitor:add(Signal.new())
 	self.toggleKeyAdded = janitor:add(Signal.new())
+	self.fakeToggleKeyChanged = janitor:add(Signal.new())
 	self.alignmentChanged = janitor:add(Signal.new())
 	self.updateSize = janitor:add(Signal.new())
 	self.resizingComplete = janitor:add(Signal.new())
@@ -656,6 +653,7 @@ function Icon:modifyChildTheme(modifications, modificationUID)
 		childIcon:modifyTheme(modifications, modificationUID)
 	end
 	self.childThemeModified:Fire()
+	return self
 end
 
 function Icon:removeModification(modificationUID)
@@ -802,10 +800,23 @@ function Icon:setTextSize(number, iconState)
 	return self
 end
 
-function Icon:setTextFont(fontNameOrAssetId, fontWeight, fontStyle, iconState)
+function Icon:setTextFont(font, fontWeight, fontStyle, iconState)
 	fontWeight = fontWeight or Enum.FontWeight.Regular
 	fontStyle = fontStyle or Enum.FontStyle.Normal
-	local fontFace = Font.new(fontNameOrAssetId, fontWeight, fontStyle)
+	local fontFace
+	local fontType = typeof(font)
+	if fontType == "number" then
+		fontFace = Font.fromId(font, fontWeight, fontStyle)
+	elseif fontType == "EnumItem" then
+		fontFace = Font.fromEnum(font)
+	elseif fontType == "string" then
+		if not font:match("rbxasset") then
+			fontFace = Font.fromName(font, fontWeight, fontStyle)
+		end
+	end
+	if not fontFace then
+		fontFace = Font.new(font, fontWeight, fontStyle)
+	end
 	self:modifyTheme({"IconLabel", "FontFace", fontFace, iconState})
 	return self
 end
@@ -958,6 +969,14 @@ function Icon:setCaption(text)
 	caption:SetAttribute("CaptionText", text)
 	self.caption = caption
 	self.captionText = text
+	return self
+end
+
+function Icon:setCaptionHint(keyCodeEnum)
+	assert(typeof(keyCodeEnum) == "EnumItem", "argument[1] must be a KeyCode EnumItem!")
+	self.fakeToggleKey = keyCodeEnum
+	self.fakeToggleKeyChanged:Fire(keyCodeEnum)
+	self:setCaption("_hotkey_")
 	return self
 end
 

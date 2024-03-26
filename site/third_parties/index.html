@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Documentation for TopbarPlus">
+        <meta name="description" content="Documentation for TopbarPlus v3">
       
       
         <meta name="author" content="Ben Horton">
@@ -19,7 +19,7 @@
     
     
       
-        <title>Third Parties - TopbarPlus</title>
+        <title>Third Parties - TopbarPlus v3</title>
       
     
     
@@ -81,7 +81,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="TopbarPlus" class="md-header__button md-logo" aria-label="TopbarPlus" data-md-component="logo">
+    <a href=".." title="TopbarPlus v3" class="md-header__button md-logo" aria-label="TopbarPlus v3" data-md-component="logo">
       
   <img src="https://user-images.githubusercontent.com/51117782/104590568-71724f80-5663-11eb-9bc1-344fc2a4193c.png" alt="logo">
 
@@ -93,7 +93,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            TopbarPlus
+            TopbarPlus v3
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -220,18 +220,6 @@
   </li>
 
       
-        
-  
-  
-
-
-  <li class="md-tabs__item">
-    <a href="../changelog/" class="md-tabs__link">
-      Changelog
-    </a>
-  </li>
-
-      
     </ul>
   </div>
 </nav>
@@ -253,12 +241,12 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="TopbarPlus" class="md-nav__button md-logo" aria-label="TopbarPlus" data-md-component="logo">
+    <a href=".." title="TopbarPlus v3" class="md-nav__button md-logo" aria-label="TopbarPlus v3" data-md-component="logo">
       
   <img src="https://user-images.githubusercontent.com/51117782/104590568-71724f80-5663-11eb-9bc1-344fc2a4193c.png" alt="logo">
 
     </a>
-    TopbarPlus
+    TopbarPlus v3
   </label>
   
     <div class="md-nav__source">
@@ -374,70 +362,9 @@
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_5" type="checkbox" id="__nav_1_5" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_1_5">
-          API
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="API" data-md-level="2">
-        <label class="md-nav__title" for="__nav_1_5">
-          <span class="md-nav__icon md-icon"></span>
-          API
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../api/icon/" class="md-nav__link">
-        Icon
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../api/icon_controller/" class="md-nav__link">
-        IconController
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../resources/" class="md-nav__link">
-        Resources
+      <a href="../api/" class="md-nav__link">
+        API
       </a>
     </li>
   
@@ -460,21 +387,6 @@
     <li class="md-nav__item">
       <a href="../contributing/" class="md-nav__link">
         Contributing
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../changelog/" class="md-nav__link">
-        Changelog
       </a>
     </li>
   
@@ -513,8 +425,10 @@
 
   <h1>Third Parties</h1>
 
-<p>TopbarPlus supports the use of multiple Icon packages within a single experience. It achieves this by assigning the first-required package as the 'lead' package, then whenever a second package is required (such as via the Icon module), the lead package modules are used instead. Without this errors would occur such as overlapping icons.</p>
-<p>You don't have to do anything for your third-party applications. Simply use TopbarPlus as normal.</p>
+<p>TopbarPlus supports the use of multiple Icon packages within a single experience assuming all required packages are <code>v3.0.0</code> or above.</p>
+<p>When a package is required it will 'check' to see if a TopbarPlus package has already been required within the experience. If one has, it cancels loading itself and will instead refer to the already initialized package.</p>
+<p>This prevents weird quirks from occuring and means third party applications, libraries etc that use TopbarPlus can be used safely without interferring with your own implementation of TopbarPlus.</p>
+<p>You don't have to do anything to support multiple packages. Simply use TopbarPlus as normal.</p>
 
 
 
@@ -551,13 +465,13 @@
       
       
         
-        <a href="../api/icon/" class="md-footer__link md-footer__link--next" aria-label="Next: Icon" rel="next">
+        <a href="../api/" class="md-footer__link md-footer__link--next" aria-label="Next: API" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Icon
+              API
             </div>
           </div>
           <div class="md-footer__button md-icon">

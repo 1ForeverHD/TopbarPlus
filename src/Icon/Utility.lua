@@ -10,6 +10,48 @@ local localPlayer = Players.LocalPlayer
 
 
 -- FUNCTIONS
+function Utility.createStagger(delayTime, callback, delayInitially)
+	-- This creates and returns a function which when called
+	-- acts identically to callback, however will only be called
+	-- for a maximum of once per delayTime. If the returned function
+	-- is called more than once during the delayTime, then it will
+	-- wait until the expiryTime then perform another recall.
+	-- This is useful for visual interfaces and effects which may be
+	-- triggered multiple times within a frame or short period, but which
+	-- we don't necessary need to (for performance reasons).
+	local staggerActive = false
+	local multipleCalls = false
+	if not delayTime or delayTime == 0 then
+		-- We make 0.01 instead of 0 because devices can now run at
+		-- different frame rates
+		delayTime = 0.01
+	end
+	local function staggeredCallback(...)
+		if staggerActive then
+			multipleCalls = true
+			return
+		end
+		local packedArgs = table.pack(...)
+		staggerActive = true
+		multipleCalls = false
+		task.spawn(function()
+			if delayInitially then
+				task.wait(delayTime)
+			end
+			callback(table.unpack(packedArgs))
+		end)
+		task.delay(delayTime, function()
+			staggerActive = false
+			if multipleCalls then
+				-- This means it has been called at least once during
+				-- the stagger period, so call again
+				staggeredCallback(table.unpack(packedArgs))
+			end
+		end)
+	end
+	return staggeredCallback
+end
+
 function Utility.round(n)
 	-- Credit to Darkmist101 for this
 	return math.floor(n + 0.5)
@@ -178,6 +220,7 @@ function Utility.clipOutside(icon, instance)
 			return
 		end
 		local isVisible = widget.Visible
+		
 		if isOutsideParent then
 			isVisible = false
 		end
@@ -243,49 +286,69 @@ function Utility.clipOutside(icon, instance)
 	local additionalOffsetX = instance:GetAttribute("AdditionalOffsetX") or 0
 	local function trackProperty(property)
 		local absoluteProperty = "Absolute"..property
-		cloneJanitor:add(clone:GetPropertyChangedSignal(absoluteProperty):Connect(function()
-			task.defer(function() -- This defer is essential as the listener may be in a different screenGui to the actor
-				local cloneValue = clone[absoluteProperty]
-				local absoluteValue = UDim2.fromOffset(cloneValue.X, cloneValue.Y)
-				if property == "Position" then
+		local function updateProperty()
+			local cloneValue = clone[absoluteProperty]
+			local absoluteValue = UDim2.fromOffset(cloneValue.X, cloneValue.Y)
+			if property == "Position" then
 
-					-- This binds the instances within the bounds of the screen
-					local SIDE_PADDING = 4
-					local limitX = camera.ViewportSize.X - instance.AbsoluteSize.X - SIDE_PADDING
-					local inputX = absoluteValue.X.Offset
-					if inputX < SIDE_PADDING then
-						inputX = SIDE_PADDING
-					elseif inputX > limitX then
-						inputX = limitX
-					end
-					absoluteValue = UDim2.fromOffset(inputX, absoluteValue.Y.Offset)
-
-					-- AbsolutePosition does not perfectly match with TopbarInsets enabled
-					-- This corrects this
-					local topbarInset = GuiService.TopbarInset
-					local viewportWidth = workspace.CurrentCamera.ViewportSize.X
-					local guiWidth = screenGui.AbsoluteSize.X
-					local guiOffset = screenGui.AbsolutePosition.X
-					local widthDifference = guiOffset - topbarInset.Min.X
-					local oldTopbarCenterOffset = 0--widthDifference/30 -- I have no idea why this works, it just does
-					local offsetX = if icon.isOldTopbar then guiOffset else viewportWidth - guiWidth - oldTopbarCenterOffset
-
-					-- Also add additionalOffset
-					offsetX -= additionalOffsetX
-					absoluteValue += UDim2.fromOffset(-offsetX, topbarInset.Height)
-
-					-- Finally check if within its direct parents bounds
-					checkIfOutsideParentXBounds()
-
+				-- This binds the instances within the bounds of the screen
+				local SIDE_PADDING = 4
+				local limitX = camera.ViewportSize.X - instance.AbsoluteSize.X - SIDE_PADDING
+				local inputX = absoluteValue.X.Offset
+				if inputX < SIDE_PADDING then
+					inputX = SIDE_PADDING
+				elseif inputX > limitX then
+					inputX = limitX
 				end
-				instance[property] = absoluteValue
-			end)
-		end))
+				absoluteValue = UDim2.fromOffset(inputX, absoluteValue.Y.Offset)
+
+				-- AbsolutePosition does not perfectly match with TopbarInsets enabled
+				-- This corrects this
+				local topbarInset = GuiService.TopbarInset
+				local viewportWidth = workspace.CurrentCamera.ViewportSize.X
+				local guiWidth = screenGui.AbsoluteSize.X
+				local guiOffset = screenGui.AbsolutePosition.X
+				local widthDifference = guiOffset - topbarInset.Min.X
+				local oldTopbarCenterOffset = 0--widthDifference/30 -- I have no idea why this works, it just does
+				local offsetX = if icon.isOldTopbar then guiOffset else viewportWidth - guiWidth - oldTopbarCenterOffset
+				
+				-- Also add additionalOffset
+				offsetX -= additionalOffsetX
+				absoluteValue += UDim2.fromOffset(-offsetX, topbarInset.Height)
+
+				-- Finally check if within its direct parents bounds
+				checkIfOutsideParentXBounds()
+
+			end
+			instance[property] = absoluteValue
+		end
+		
+		-- This defer is essential as the listener may be in a different screenGui to the actor
+		local updatePropertyStaggered = Utility.createStagger(0.01, updateProperty)
+		cloneJanitor:add(clone:GetPropertyChangedSignal(absoluteProperty):Connect(updatePropertyStaggered))
+		
+		-- This is to patch a weirddddd bug with ScreenGuis with SreenInsets set to
+		-- 'TopbarSafeInsets'. For some reason the absolute position of gui instances
+		-- within this type of screenGui DO NOT accurately update to match their new
+		-- real world position; instead they jump around almost randomly for a few frames.
+		-- I have spent way too many hours trying to solve this bug, I think the only way
+		-- for the time being is to not use ScreenGuis with TopbarSafeInsets, but I don't
+		-- have time to redesign the entire system around that at the moment.
+		-- Here's a GIF of this bug: https://i.imgur.com/VitHdC1.gif
+		local updatePropertyPatch = Utility.createStagger(0.5, updateProperty, true)
+		cloneJanitor:add(clone:GetPropertyChangedSignal(absoluteProperty):Connect(updatePropertyPatch))
+		
 	end
 	task.delay(0.1, checkIfOutsideParentXBounds)
 	checkIfOutsideParentXBounds()
 	updateVisibility()
 	trackProperty("Position")
+	
+	-- Track visiblity changes
+	cloneJanitor:add(instance:GetPropertyChangedSignal("Visible"):Connect(function()
+		--print("Visiblity changed:", instance, clone, instance.Visible)
+		--clone.Visible = instance.Visible
+	end))
 
 	-- To ensure accurate positioning, it's important the clone also remains the same size as the instance
 	local shouldTrackCloneSize = instance:GetAttribute("TrackCloneSize")
@@ -324,7 +387,12 @@ function Utility.joinFeature(originalIcon, parentIcon, iconsArray, scrollingFram
 	originalIcon:modifyTheme({"IconButton", "BackgroundTransparency", 1}, "JoinModification")
 	originalIcon:modifyTheme({"ClickRegion", "Active", false}, "JoinModification")
 	if parentIcon.childModifications then
-		originalIcon:modifyTheme(parentIcon.childModifications, parentIcon.childModificationsUID)
+		-- We defer so that the default values (such as dropdown
+		-- minimum width can be applied before any custom
+		-- child modifications from the user)
+		task.defer(function()
+			originalIcon:modifyTheme(parentIcon.childModifications, parentIcon.childModificationsUID)
+		end)
 	end
 	--
 	local clickRegion = originalIcon:getInstance("ClickRegion")

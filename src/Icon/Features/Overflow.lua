@@ -6,7 +6,6 @@
 
 
 -- LOCAL
-local SUBMISSIVE_ALIGNMENT = "Right" -- This boundary shrinks if the other alignments boundary gets too close 
 local Overflow = {}
 local holders = {}
 local orderedAvailableIcons = {}
@@ -24,7 +23,11 @@ local Icon
 function Overflow.start(incomingIcon)
 	Icon = incomingIcon
 	iconsDict = Icon.iconsDictionary
+	local primaryScreenGui
 	for _, screenGui in pairs(Icon.container) do
+		if primaryScreenGui == nil and screenGui.ScreenInsets == Enum.ScreenInsets.TopbarSafeInsets then
+			primaryScreenGui = screenGui
+		end
 		for _, holder in pairs(screenGui.Holders:GetChildren()) do
 			if holder:GetAttribute("IsAHolder") then
 				holders[holder.Name] = holder
@@ -34,25 +37,31 @@ function Overflow.start(incomingIcon)
 
 	-- We listen for changes in icons (such as them being added, removed,
 	-- the setting of a different alignment, the widget size changing, etc)
-	local updateCount = 0
-	local function updateBoundaries(ignoreAvailable)
-		updateCount += 1
-		local ourUpdateCount = updateCount
-		task.defer(function()
-			if ourUpdateCount ~= updateCount then
-				return
-			end
-			if not ignoreAvailable then
-				Overflow.updateAvailableIcons("Center")
-			end
-			Overflow.updateBoundary("Left")
-			Overflow.updateBoundary("Right")
-		end)
-	end
+	local beginOverflow = false
+	local updateBoundaries = Utility.createStagger(0.1, function(ignoreAvailable)
+		if not beginOverflow then
+			return
+		end
+		if not ignoreAvailable then
+			Overflow.updateAvailableIcons("Center")
+		end
+		Overflow.updateBoundary("Left")
+		Overflow.updateBoundary("Right")
+	end)
+	task.delay(1, function()
+		-- This is essential to prevent central icons begin added
+		-- left or right due to incomplete UIListLayout calculations
+		-- within the first few frames
+		beginOverflow = true
+		updateBoundaries()
+	end)
 	Icon.iconAdded:Connect(updateBoundaries)
 	Icon.iconRemoved:Connect(updateBoundaries)
 	Icon.iconChanged:Connect(updateBoundaries)
 	currentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+		updateBoundaries(true)
+	end)
+	primaryScreenGui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
 		updateBoundaries(true)
 	end)
 end
@@ -216,24 +225,22 @@ function Overflow.updateBoundary(alignment)
 	local centerPos = (isLeft and 1) or #centerOrderedIcons
 	local nearestCenterIcon = centerOrderedIcons[centerPos]
 	local usingNearestCenter = false
-	if nearestCenterIcon then
-		local REMOVAL_MARGIN = 100
-		local nearestXPos = nearestCenterIcon.widget.AbsolutePosition.X
-		local centerBoundary = (isLeft and nearestXPos-BOUNDARY_GAP) or nearestXPos + Overflow.getWidth(nearestCenterIcon) + BOUNDARY_GAP
-		local removeBoundary = (isLeft and holderXPos + REMOVAL_MARGIN) or holderXPos + holderXSize - REMOVAL_MARGIN
+	if nearestCenterIcon and not nearestCenterIcon.hasRelocatedInOverflow then
+		local ourNearestIcon = (isLeft and ourOrderedIcons[#ourOrderedIcons]) or (isRight and ourOrderedIcons[1])
+		local centralNearestXPos = nearestCenterIcon.widget.AbsolutePosition.X
+		local ourNearestXPos = ourNearestIcon.widget.AbsolutePosition.X
+		local ourNearestXSize = Overflow.getWidth(ourNearestIcon)
+		local centerBoundary = (isLeft and centralNearestXPos-BOUNDARY_GAP) or centralNearestXPos + Overflow.getWidth(nearestCenterIcon) + BOUNDARY_GAP
+		local removeBoundary = (isLeft and ourNearestXPos + ourNearestXSize) or ourNearestXPos
 		if isLeft then
 			if centerBoundary < removeBoundary then
 				nearestCenterIcon:align("Left")
-			elseif centerBoundary < boundary then
-				boundary = centerBoundary
-				usingNearestCenter = true
+				nearestCenterIcon.hasRelocatedInOverflow = true
 			end
 		elseif isRight then
 			if centerBoundary > removeBoundary then
 				nearestCenterIcon:align("Right")
-			elseif centerBoundary > boundary then
-				boundary = centerBoundary
-				usingNearestCenter = true
+				nearestCenterIcon.hasRelocatedInOverflow = true
 			end
 		end
 	end

@@ -51,7 +51,6 @@ return {
 	{"Dropdown", "BackgroundColor3", Color3.fromRGB(0, 0, 0), "Deselected"},
 	{"Dropdown", "BackgroundTransparency", 0.3, "Deselected"},
 	{"Dropdown", "MaxIcons", 4, "Deselected"},
-	{"Dropdown", "Visible", false, "Deselected"},
 	{"Menu", "MaxIcons", 4, "Deselected"},
 	{"Notice", "Position", UDim2.new(1, -12, 0, -1), "Deselected"},
 	{"Notice", "Size", UDim2.new(0, 20, 0, 20), "Deselected"},

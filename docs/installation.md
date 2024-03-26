@@ -1,18 +1,36 @@
-## Method 1 - Take the model
-1. Take the [TopbarPlus model](https://www.roblox.com/library/6311707237/TopbarPlus) by Nanoblox.
+#### Take the model
+{recommended}
+
+1. Take the [TopbarPlus model](https://www.roblox.com/library/6311707237/TopbarPlus).
 2. Open the toolbox and navigate to Inventory -> My Models.
-3. Click TopbarPlus to insert into your game and place anywhere within ``ReplicatedStorage``. 
+3. Click TopbarPlus to insert into your game and place anywhere within ``ReplicatedStorage`` or ``Workspace``. 
+4. TopbarPlus is a package so you can update it instantly (instead of re-adding) by right-clicking the Icon module and selecting an option such as 'Get Latest Package':
+
+    <a><img src="https://i.imgur.com/kIZdT83.png" width="50%"/></a>
+
+5. You can receive automatic updates by enabling 'AutoUpdate' within the PackageLink:
+
+    <a><img src="https://i.imgur.com/2hGbjTS.png" width="50%"/></a>
+
+!!! info
+    All v3 updates will be backwards compatible so you don't need to worry about updates interfering with your code.
+
+!!! warning
+    Try not to modify any code within the Icon package otherwise it will break the package link.
+
+!!! important
+    As of 27th March 2024 public packages haven't been rolled out by Roblox. Only after their full release will you be able to benefit from easily installable updates. For the time being, attempting to use 'Get Latest Package' and other package features will throw an error.
 
 -------------------------------------
 
-## Method 2 - Download from Releases
+#### Download from Releases
 1. Visit the [latest release](https://github.com/1ForeverHD/TopbarPlus/releases/latest).
 2. Under *Assets*, download ``TopbarPlus.rbxm``.
 3. Within studio, navigate to MODEL -> Model and insert the file anywhere within ``ReplicatedStorage``. 
 
 -------------------------------------
 
-## Method 3 - With Rojo
+#### With Rojo
 1. Setup with [Rojo](https://rojo.space/).
 2. Visit the [TopbarPlus repository](https://github.com/1ForeverHD/TopbarPlus).
 3. Click *Fork* in the top right corner.

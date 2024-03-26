@@ -63,7 +63,7 @@ return function(icon)
 			{"Widget", "MinimumWidth", 190},
 			{"Widget", "MinimumHeight", 56},
 			{"IconLabel", "TextSize", 19},
-			{"PaddingLeft", "Size", UDim2.fromOffset(20, 0)},
+			{"PaddingLeft", "Size", UDim2.fromOffset(25, 0)},
 			{"Notice", "Position", UDim2.new(1, -24, 0, 5)},
 			{"ContentsList", "HorizontalAlignment", Enum.HorizontalAlignment.Left},
 			{"Selection", "Size", UDim2.new(1, -8, 1, -8)},
@@ -91,11 +91,14 @@ return function(icon)
 	end)
 
 	-- Update visibiliy of dropdown
+	local Utility = require(script.Parent.Parent.Utility)
 	local function updateVisibility()
-		icon:modifyTheme({"Dropdown", "Visible", icon.isSelected})
+		--icon:modifyTheme({"Dropdown", "Visible", icon.isSelected})
+		Utility.setVisible(dropdown, icon.isSelected, "InternalDropdown")
 	end
 	dropdownJanitor:add(icon.toggled:Connect(updateVisibility))
 	updateVisibility()
+	--task.delay(0.2, updateVisibility)
 	
 	-- This updates the scrolling frame to only display a scroll
 	-- length equal to the distance produced by its MaxIcons

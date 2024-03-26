@@ -1,5 +1,49 @@
-[themes]: https://1foreverhd.github.io/TopbarPlus/features/#themes
-[set method]: https://1foreverhd.github.io/TopbarPlus/api/icon/#set
+[themes]: https://1foreverhd.github.io/TopbarPlus/features/#modify-theme
+[alignments]: https://1foreverhd.github.io/TopbarPlus/features/#alignments
+[font family]: https://create.roblox.com/docs/reference/engine/datatypes/Font/#fromEnum
+[toggle keys]: https://1foreverhd.github.io/TopbarPlus/features/#toggle-keys
+[captions]: https://1foreverhd.github.io/TopbarPlus/features/#captions
+[icon event]: https://1foreverhd.github.io/TopbarPlus/api/#events
+
+## Functions
+
+#### getIcons
+```lua
+local icons = Icon.getIcons()
+```
+Returns a dictionary of icons where the key is the icon's UID and value the icon.
+
+----
+#### getIcon
+```lua
+local icon = Icon.getIcon(nameOrUID)
+```
+Returns an icon of the given name or UID.
+
+----
+#### setTopbarEnabled
+```lua
+Icon.setTopbarEnabled(bool)
+```
+When set to ``false`` all TopbarPlus ScreenGuis are hidden. This does not impact Roblox's Topbar.
+
+----
+#### modifyBaseTheme
+```lua
+Icon.modifyBaseTheme(modifications)
+```
+Updates the appearance of *all* icons. See [themes] for more details.
+
+----
+#### setDisplayOrder
+```lua
+Icon.setDisplayOrder(integer)
+```
+Sets the base DisplayOrder of all TopbarPlus ScreenGuis.
+
+----
+
+
 
 ## Constructors
 
@@ -15,34 +59,35 @@ Constructs an empty ``32x32`` icon on the topbar.
 
 ## Methods
 
-#### set
+#### setName
 {chainable}
 ```lua
-icon:set(settingName, value, iconState)
+icon:set(name)
 ```
-Applies a specific setting to an icon. All settings can be found [here](https://github.com/1ForeverHD/TopbarPlus/blob/main/src/Icon/Themes/Default.lua). If the setting falls under the 'toggleable' category then an iconState can be specified. For most scenarious it's recommended instead to apply settings using [themes].
+Sets the name of the Widget instance. This can be used in conjunction with ``Icon.getIcon(name)``.
 
 ----
-#### get
+#### getInstance
 ```lua
-local value = icon:get(settingName, iconState)
+local instance = icon:getInstance(instanceName)
 ```
-Retrieves the given settings value. If the setting falls under the 'toggleable' category then an iconState can be specified.
+Returns the first descendant found within the widget of name ``instanceName``.
 
 ----
-#### getToggleState
-```lua
-local selectedOrDeselectedString = icon:getToggleState()
-```
-Returns the current toggleState, either "deselected" or "selected".
-
-----
-#### setTheme
+#### modifyTheme
 {chainable}
 ```lua
-icon:setTheme(theme)
+icon:modifyTheme(modifications)
 ```
-Applies a theme to the given icon. See [themes] for more information.
+Updates the appearance of the icon. See [themes] for more details.
+
+----
+#### modifyChildTheme
+{chainable}
+```lua
+icon:modifyChildTheme(modifications)
+```
+Updates the appearance of all icons that are parented to this icon (for example when a menu or dropdown). See [themes] for more details.
 
 ----
 #### setEnabled
@@ -50,23 +95,7 @@ Applies a theme to the given icon. See [themes] for more information.
 ```lua
 icon:setEnabled(bool)
 ```
-When set to ``false``, the icon will be disabled and hidden.
-
-----
-#### setName
-{chainable}
-```lua
-icon:setName(string)
-```
-Associates the given name to the icon which enables it to be retrieved with ``IconController.getIcon(name)``.
-
-----
-#### setProperty
-{chainable}
-```lua
-icon:setProperty(propertyName, value)
-```
-An alternative way of doing ``zone[propertyName] = value``. This enables the easy-configuration of icon properties within chained methods.
+When set to ``false`` the icon will be disabled and hidden.
 
 ----
 #### select
@@ -100,43 +129,12 @@ icon:clearNotices()
 ```
 
 ----
-#### disableStateOverlay
+#### disableOverlay
 {chainable}
 ```lua
 icon:disableStateOverlay(bool)
 ```
 When set to ``true``, disables the shade effect which appears when the icon is pressed and released.
-
-----
-#### convertLabelToNumberSpinner
-{chainable}
-```lua
-icon:convertLabelToNumberSpinner(numberSpinner)
-```
-Takes a [NumberSpinner](https://devforum.roblox.com/t/numberspinner-module/1105961) object (by boatbomber) and converts it into the icons label.
-
-Example usage:
-
-```lua
-Icon.new()
-    :setName("CashSpinnerIcon")
-    :setRight()
-    :lock()
-    :setSize(100, 32)
-    :give(function(icon)
-        local NumberSpinner = require(replicatedStorage.NumberSpinner)
-        local labelSpinner = NumberSpinner.new()
-        icon:convertLabelToNumberSpinner(labelSpinner)
-        labelSpinner.Name = "LabelSpinner"
-        labelSpinner.Decimals = 3
-        labelSpinner.Duration = 0.25
-        coroutine.wrap(function()
-            while wait(0.5) do
-                labelSpinner.Value = math.random(100000)/1000
-            end
-        end)()
-    end)
-```
 
 ----
 #### setImage
@@ -168,81 +166,52 @@ icon:setCornerRadius(scale, offset, iconState)
 ```
 
 ----
-#### setLeft
-{chainable} {toggleable}
+#### align
+{chainable}
 ```lua
-icon:setLeft(iconState)
+icon:align(alignment)
 ```
+This enables you to set the icon to the ``"Left"`` (default), ``"Center"`` or ``"Right"`` side of the screen. See [alignments] for more details.
 
 ----
-#### setMid
+#### setWidth
 {chainable} {toggleable}
 ```lua
-icon:setMid(iconState)
+icon:setWidth(minimumSize, iconState)
 ```
+This sets the minimum width the icon can be (it can be larger for instance when setting a long label). The default width is ``44``.
 
 ----
-#### setRight
+#### setImageScale
 {chainable} {toggleable}
 ```lua
-icon:setRight(iconState)
+icon:setImageScale(number, iconState)
 ```
-
-----
-#### setImageYScale
-{chainable} {toggleable}
-```lua
-icon:setImageYScale(YScale, iconState)
-```
-Defines the proportional space the icons image takes up within the icons container.
+How large the image is relative to the icon. The default value is ``0.5``.
 
 ----
 #### setImageRatio
 {chainable} {toggleable}
 ```lua
-icon:setImageRatio(ratio, iconState)
+icon:setImageRatio(number, iconState)
 ```
-Defines the x:y ratio dimensions as a number. By default ``ratio`` is ``1.00``.
+How stretched the image will appear. The default value is ``1`` (a perfect square).
 
 ----
-#### setLabelYScale
+#### setTextSize
 {chainable} {toggleable}
 ```lua
-icon:setLabelYScale(YScale, iconState)
+icon:setTextSize(number, iconState)
 ```
-Defines how large label text appears.By default ``YScale`` is ``0.45``.
+The size of the icon labels' text. The default value is ``16``.
 
 ----
-#### setBaseZIndex
+#### setTextFont
 {chainable} {toggleable}
 ```lua
-icon:setBaseZIndex(ZIndex, iconState)
+icon:setTextFont(font, fontWeight, fontStyle, iconState)
 ```
-Calculates the difference between the existing baseZIndex (i.e. ``instances.iconContainer.ZIndex``) and new value, then updates the ZIndex of all objects within the icon accoridngly using this difference.
-
-----
-#### setSize
-{chainable} {toggleable}
-```lua
-icon:setSize(XOffset, YOffset, iconState)
-```
-Determines the icons container size. By default ``XOffset`` and ``YOffset`` are ``32``.
-
-----
-#### setXSize
-{chainable} {toggleable}
-```lua
-icon:setXSize(XOffset, iconState)
-```
-Same as ``icon:setSize`` except only for the X Offset (the Y offset is generated automatically).
-
-----
-#### setYSize
-{chainable} {toggleable}
-```lua
-icon:setYSize(XOffset, iconState)
-```
-Same as ``icon:setSize`` except only for the Y Offset (the X offset is generated automatically).
+Sets the labels FontFace. ``font`` can be a [font family] name (such as `"Creepster"`), a font enum (such as `Enum.Font.Bangers`), a font ID (such as `12187370928`) or [font family] link (such as `"rbxasset://fonts/families/Sarpanch.json"`).
 
 ----
 #### bindToggleItem
@@ -264,9 +233,9 @@ Unbinds the given GuiObject or LayerCollector from the toggle.
 #### bindEvent
 {chainable}
 ```lua
-icon:bindEvent(iconEventName, eventFunction)
+icon:bindEvent(iconEventName, callback)
 ```
-Connects to an [icon event](https://1foreverhd.github.io/TopbarPlus/api/icon/#events) based upon the given ``iconEventName`` and call ``eventFunction`` with arguments ``(self, ...)`` when the event is triggered.
+Connects to an [icon event] with ``iconEventName``. It's important to remember all event names are in camelCase. ``callback`` is called with arguments ``(self, ...)`` when the event is triggered.
 
 ----
 #### unbindEvent
@@ -282,7 +251,7 @@ Unbinds the connection of the associated ``iconEventName``.
 ```lua
 icon:bindToggleKey(keyCodeEnum)
 ```
-Binds a [keycode](https://developer.roblox.com/en-us/api-reference/enum/KeyCode) which toggles the icon when pressed.
+Binds a [keycode](https://developer.roblox.com/en-us/api-reference/enum/KeyCode) which toggles the icon when pressed. See [toggle keys] for more details.
 
 ----
 #### unbindToggleKey
@@ -298,15 +267,15 @@ Unbinds the given keycode.
 ```lua
 icon:call(func)
 ```
-Calls the function as a separate coroutine with the first argument being the icon itself. This is useful when needing to extend the behaviour of an icon while remaining in the chain.
+Calls the function immediately via ``task.spawn``. The first argument passed is the icon itself. This is useful when needing to extend the behaviour of an icon while remaining in the chain.
 
 ----
-#### give
+#### addToJanitor
 {chainable}
 ```lua
-icon:give(userdata)
+icon:addToJanitor(userdata)
 ```
-Passes the given userdata to the Icons maid to be destroyed/disconnected on the icons destruction. If a function is passed, it will be executed right away with its self (the icon) being passed as the first argument. The return value is then given to the maid (instead of the function).
+Passes the given userdata to the icons janitor to be destroyed/disconnected on the icons destruction. If a function is passed, it will be called when the icon is destroyed.
 
 ----
 #### lock
@@ -338,23 +307,15 @@ Locks the icon, yields for the given time, then unlocks the icon, effectively sh
 ```lua
 icon:autoDeselect(true)
 ```
-When set to ``true`` (the default) the icon is deselected when another icon (with autoDeselect enabled) is pressed. Set to ``false`` to prevent the icon being deselected when another icon is selected (a useful behaviour in dropdowns). This is a shorthand alternative to doing ``icon:setProperty("deselectWhenOtherIconSelected", true)``.
+When set to ``true`` (the default) the icon is deselected when another icon (with autoDeselect enabled) is pressed. Set to ``false`` to prevent the icon being deselected when another icon is selected (a useful behaviour in dropdowns).
 
 ----
-#### setTopPadding
+#### oneClick
 {chainable}
 ```lua
-icon:setTopPadding(offset, scale)
+icon:oneClick(bool)
 ```
-The gap between the top of the screen and the icon.
-
-----
-#### setTip
-{chainable}
-```lua
-icon:setTip(text)
-```
-Sets a tip. To remove, pass ``nil`` as ``text``.
+When set to true the icon will automatically deselect when selected. This creates the effect of a single click button.
 
 ----
 #### setCaption
@@ -362,15 +323,47 @@ Sets a tip. To remove, pass ``nil`` as ``text``.
 ```lua
 icon:setCaption(text)
 ```
-Sets a caption. To remove, pass ``nil`` as ``text``.
+Sets a caption. To remove, pass ``nil`` as ``text``. See [captions] for more details.
 
 ----
-#### join
+#### setCaptionHint
 {chainable}
 ```lua
-icon:join(parentIcon, featureName)
+icon:setCaptionHint(keyCodeEnum)
 ```
-Parents the icon to the given parentIcon under the specified feature, either "dropdown" or "menu".
+This customizes the appearance of the caption's hint without having to use ``icon:bindToggleKey``. 
+
+----
+#### setDropdown
+{chainable}
+```lua
+icon:setDropdown(arrayOfIcons)
+```
+Creates a vertical dropdown based upon the given ``table array`` of ``icons``. Pass an empty table ``{}`` to remove the dropdown. See [dropdowns] for more details.
+
+----
+#### joinDropdown
+{chainable}
+```lua
+icon:joinDropdown(parentIcon)
+```
+Joins the dropdown of `parentIcon`. This is what ``icon:setDropdown`` calls internally on the icons within its array.
+
+----
+#### setMenu
+{chainable}
+```lua
+icon:setMenu(arrayOfIcons)
+```
+Creates a horizontal menu based upon the given array of icons. Pass an empty table ``{}`` to remove the menu. See [menus] for more details.
+
+----
+#### joinMenu
+{chainable}
+```lua
+icon:joinMenu(parentIcon)
+```
+Joins the menu of `parentIcon`. This is what ``icon:setMenu`` calls internally on the icons within its array.
 
 ----
 #### leave
@@ -379,22 +372,6 @@ Parents the icon to the given parentIcon under the specified feature, either "dr
 icon:leave()
 ```
 Unparents an icon from a parentIcon if it belongs to a dropdown or menu.
-
-----
-#### setDropdown
-{chainable}
-```lua
-icon:setDropdown(arrayOfIcons)
-```
-Creates a vertical dropdown based upon the given ``table array`` of ``icons``. Pass an empty table ``{}`` to remove the dropdown. Dropdown settings can be configured using [themes] or the [set method].
-
-----
-#### setMenu
-{chainable}
-```lua
-icon:setMenu(arrayOfIcons)
-```
-Creates a horizontal menu based upon the given ``table array`` of ``icons``. Pass an empty table ``{}`` to remove the menu. Menu settings can be configured using [themes] or the [set method].
 
 ----
 #### destroy
@@ -412,7 +389,7 @@ Clears all connections and destroys all instances associated with the icon.
 #### selected 
 ```lua
 icon.selected:Connect(function()
-    print("The icon was selected (either via localscript or the user)")
+    print("The icon was selected")
 end)
 ```
 
@@ -420,7 +397,7 @@ end)
 #### deselected 
 ```lua
 icon.deselected:Connect(function()
-    print("The icon was deselected (either via localscript or the user)")
+    print("The icon was deselected")
 end)
 ```
 
@@ -428,78 +405,24 @@ end)
 #### toggled 
 ```lua
 icon.toggled:Connect(function(isSelected)
-    print(("The icon was %s (either via localscript or the user)"):format(icon:getToggleState(isSelected)))
-end)
-```
-
-#### userSelected 
-```lua
-icon.userSelected:Connect(function()
-    print("The icon was selected (solely by the user)")
+    local stateName = (isSelected and "selected") or "deselected"
+    print(`The icon was {stateName}!`)
 end)
 ```
 
 ----
-#### userDeselected 
+#### viewingStarted 
 ```lua
-icon.userDeselected:Connect(function()
-    print("The icon was deselected (solely by the user)")
+icon.viewingStarted:Connect(function()
+    print("A mouse, long-pressed finger or gamepad selection is hovering over the icon")
 end)
 ```
 
 ----
-#### userToggled 
+#### viewingEnded 
 ```lua
-icon.userToggled:Connect(function(isSelected)
-    print(("The icon was %s (solely by the user)"):format(icon:getToggleState(isSelected)))
-end)
-```
-
-----
-#### hoverStarted 
-```lua
-icon.hoverStarted:Connect(function()
-    print("A mouse, finger or controller selection is hovering over the icon")
-end)
-```
-
-----
-#### hoverEnded 
-```lua
-icon.hoverEnded:Connect(function()
-    print("The item is no longer hovering over the icon")
-end)
-```
-
-----
-#### dropdownOpened 
-```lua
-icon.dropdownOpened:Connect(function()
-    print("The dropdown was opened")
-end)
-```
-
-----
-#### dropdownClosed 
-```lua
-icon.dropdownClosed:Connect(function()
-    print("The dropdown was closed")
-end)
-```
-
-----
-#### menuOpened 
-```lua
-icon.menuOpened:Connect(function()
-    print("The menu was opened")
-end)
-```
-
-----
-#### menuClosed 
-```lua
-icon.menuClosed:Connect(function()
-    print("The menu was closed")
+icon.viewingEnded:Connect(function()
+    print("The input is no longer viewing (hovering over) the icon")
 end)
 ```
 
@@ -516,25 +439,10 @@ end)
 
 
 ## Properties
-#### deselectWhenOtherIconSelected
-```lua
-local bool = icon.deselectWhenOtherIconSelected --[default: 'true']
-```
-A bool deciding whether the icon will be deselected when another icon is selected. Defaults to ``true``.
-This property can be updated either by doing ``icon:autoDeselect(bool)`` or ``icon:setProperty("deselectWhenOtherIconSelected", bool)``.
-
-----
-#### accountForWhenDisabled
-```lua
-local bool = icon.accountForWhenDisabled --[default: 'false']
-```
-A bool deciding whether to continue accounting for and updating the icons position on the topbar when disabled
-
-----
 #### name
 {read-only}
 ```lua
-local string = icon.name --[default: '"Unnamed Icon"']
+local string = icon.name --[default: "Widget"]
 ```
 
 ----
@@ -552,59 +460,10 @@ local bool = icon.enabled
 ```
 
 ----
-#### hovering
-{read-only}
-```lua
-local bool = icon.hovering
-```
-
-----
-#### tipText
-{read-only}
-```lua
-local stringOrNil = icon.tipText
-```
-
-----
-#### captionText
-{read-only}
-```lua
-local stringOrNil = icon.captionText
-```
-
-----
 #### totalNotices
 {read-only}
 ```lua
 local int = icon.totalNotices
-```
-
-----
-#### dropdownIcons
-{read-only}
-```lua
-local arrayOfIcons = icon.dropdownIcons
-```
-
-----
-#### menuIcons
-{read-only}
-```lua
-local arrayOfIcons = icon.menuIcons
-```
-
-----
-#### dropdownOpen
-{read-only}
-```lua
-local bool = icon.dropdownOpen
-```
-
-----
-#### menuOpen
-{read-only}
-```lua
-local bool = icon.menuOpen
 ```
 
 ----
@@ -613,18 +472,3 @@ local bool = icon.menuOpen
 ```lua
 local bool = icon.locked
 ```
-
-----
-#### topPadding
-{read-only}
-```lua
-local udim = icon.topPadding
-```
-
-----
-#### targetPosition
-{read-only}
-```lua
-local udim2 = icon.targetPosition
-```
-The position the icon is at or aims to move to.

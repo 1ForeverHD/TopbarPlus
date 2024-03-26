@@ -1,4 +1,4 @@
--- v3 alone has taken 200+ hours so please consider keeping this
+-- v3 alone has taken 250+ hours so please consider keeping this
 -- required attribute and linking to TopbarPlus within your games
 -- description or devforum post. An in-game readable version also
 -- makes it easier for me to debug and compare differences betewen

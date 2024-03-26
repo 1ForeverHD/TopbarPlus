@@ -42,7 +42,7 @@ return function(Icon)
 	local holdersCenter = screenGuiCenter.Holders
 	local GuiService = game:GetService("GuiService")
 	local function updateCenteredHoldersHeight()
-		holdersCenter.Size = UDim2.new(1, 0, 0, GuiService.TopbarInset.Height-2)
+		holdersCenter.Size = UDim2.new(1, 0, 0, GuiService.TopbarInset.Height+ySizeOffset)
 	end
 	screenGuiCenter.Name = "TopbarCentered"
 	screenGuiCenter.ScreenInsets = Enum.ScreenInsets.None

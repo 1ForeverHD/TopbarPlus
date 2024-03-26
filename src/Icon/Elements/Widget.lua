@@ -179,30 +179,16 @@ return function(icon, Icon)
 	iconImageCorner.Parent = iconImage
 
 	local TweenService = game:GetService("TweenService")
-	local updateCount = 0
 	local resizingCount = 0
 	local repeating = false
-	local function handleLabelAndImageChanges(forceUpdateString)
+	local function handleLabelAndImageChangesUnstaggered(forceUpdateString)
 
 		-- We defer changes by a frame to eliminate all but 1 requests which
 		-- could otherwise stack up to 20+ requests in a single frame
 		-- We then repeat again once to account for any final changes
 		-- Deferring is also essential because properties are set immediately
 		-- afterwards (therefore calculations will use the correct values)
-		updateCount+= 1
-		local myUpdateCount = updateCount
 		task.defer(function()
-			if updateCount ~= myUpdateCount and forceUpdateString ~= "FORCE_UPDATE" then
-				if not repeating then
-					repeating = true
-					task.delay(0.01, function()
-						handleLabelAndImageChanges()
-						repeating = false
-					end)
-				end
-				return
-			end
-			
 			local indicator = icon.indicator
 			local usingIndicator = indicator and indicator.Visible
 			local usingText = usingIndicator or iconLabel.Text ~= ""
@@ -329,6 +315,8 @@ return function(icon, Icon)
 			icon:updateParent()
 		end)
 	end
+	local Utility = require(script.Parent.Parent.Utility)
+	local handleLabelAndImageChanges = Utility.createStagger(0.01, handleLabelAndImageChangesUnstaggered)
 	local firstTimeSettingFontFace = true
 	icon:setBehaviour("IconLabel", "Text", handleLabelAndImageChanges)
 	icon:setBehaviour("IconLabel", "FontFace", function(value)

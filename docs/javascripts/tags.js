@@ -29,6 +29,15 @@ const style = `.tag {
 .chainable {
     background-color: rgb(122, 103, 231);
 }
+.recommended {
+    background-color: rgb(126, 194, 136);
+}
+.required {
+    background-color: rgb(231, 101, 104);
+}
+.optional {
+    background-color: rgb(188, 176, 116);
+}
 .unstable {
     background-color: rgb(204, 134, 80);
 }
@@ -54,6 +63,9 @@ var replaceStuff = [
     ["{yields}", '<p class="tag yields">yields</p>'],
     ["{critical}", '<p class="tag critical">critical</p>'],
     ["{chainable}", '<p class="tag chainable">chainable</p>'],
+    ["{required}", '<p class="tag required">required</p>'],
+    ["{optional}", '<p class="tag optional">optional</p>'],
+    ["{recommended}", '<p class="tag recommended">recommended</p>'],
     ["{unstable}", '<p class="tag unstable">unstable</p>'],
     ["{toggleable}", '<p class="tag toggleable">toggleable</p>'],
 ];
