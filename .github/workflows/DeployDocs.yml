@@ -2,14 +2,9 @@ name: MkDocs Deploy
 
 on:
   push:
-<<<<<<< HEAD
-    branches: #  Act on master branch commit
-    - main
-=======
     branches: #  Act on main branch commit
       - main
 
->>>>>>> development
 jobs:
   deploy:
     runs-on: ubuntu-latest
