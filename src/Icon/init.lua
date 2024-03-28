@@ -420,7 +420,7 @@ function Icon.new()
 		end
 	end)
 	
-	-- This closes/reopens the chat if the icon containers a dropdown
+	-- This closes/reopens the chat or playerlist if the icon is a dropdown
 	-- In the future I'd prefer to use the position+size of the chat
 	-- to determine whether to close dropdown (instead of non-right-set)
 	-- but for reasons mentioned here it's unreliable at the time of
@@ -430,15 +430,25 @@ function Icon.new()
 	-- fine for almost every use case for now.
 	self.selected:Connect(function()
 		local isDropdown = #self.dropdownIcons > 0
-		if isDropdown and StarterGui:GetCore("ChatActive") and self.alignment ~= "Right" then
-			self.chatWasPreviouslyActive = true
-			StarterGui:SetCore("ChatActive", false)
+		if isDropdown then
+			if StarterGui:GetCore("ChatActive") and self.alignment ~= "Right" then
+				self.chatWasPreviouslyActive = true
+				StarterGui:SetCore("ChatActive", false)
+			end
+			if StarterGui:GetCoreGuiEnabled("PlayerList") and self.alignment ~= "Left" then
+				self.playerlistWasPreviouslyActive = true
+				StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
+			end
 		end
 	end)
 	self.deselected:Connect(function()
 		if self.chatWasPreviouslyActive then
 			self.chatWasPreviouslyActive = nil
 			StarterGui:SetCore("ChatActive", true)
+		end
+		if self.playerlistWasPreviouslyActive then
+			self.playerlistWasPreviouslyActive = nil
+			StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, true)
 		end
 	end)
 	
