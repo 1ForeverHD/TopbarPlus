@@ -37,3 +37,8 @@
 4. Clone this fork into your local repository.
 5. Modify the ``default.project.json`` file to your desired location (by default TopbarPlus is built directly into ``ReplicatedStorage``).
 6. Call ``rojo serve`` (terminal or VSC plugin) and connect to the rojo studio plugin.
+
+-------------------------------------
+
+#### With Wally
+TopbarPlus is now on Wally! You can find it [here](https://wally.run/package/1foreverhd/topbarplus).
