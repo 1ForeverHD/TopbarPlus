@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build:
@@ -11,25 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
-        
-      - name: Setup foreman
-        uses: rojo-rbx/setup-foreman@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/checkout@v4
+
+      - uses: ok-nick/setup-aftman@v0.4.2
 
       - name: Build asset
-        run: rojo build src/default.project.json --output Icon.rbxm
+        run: rojo build --output Icon.rbxm withLink.project.json
 
       - name: Git Release
-        uses: anton-yurchenko/git-release@v3.4.3
+        uses: anton-yurchenko/git-release@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DRAFT_RELEASE: "false"
-          PRE_RELEASE: "false"
-          CHANGELOG_FILE: "docs/changelog.md"
-          ALLOW_EMPTY_CHANGELOG: "false"
-          ALLOW_TAG_PREFIX: "true"
         with:
           args: |
-              ./Icon.rbxm
+            ./Icon.rbxm
