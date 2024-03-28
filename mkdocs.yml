@@ -62,5 +62,13 @@ nav:
     - Features: features.md
     - Installation: installation.md
     - Third Parties: third_parties.md
+<<<<<<< HEAD
     - API: api.md
   - Contributing: contributing.md
+=======
+    - API:
+      - Icon: api/icon.md
+      - IconController: api/icon_controller.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+>>>>>>> 621f66572deb1b1cff4842788ab45180ee365d83
