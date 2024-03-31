@@ -9,16 +9,32 @@ return function(Icon)
 	if isConsoleScreen then
 		startInset = 10
 	end
-	local screenGui = Instance.new("ScreenGui")
-	screenGui:SetAttribute("StartInset", startInset)
-	screenGui.Name = "TopbarStandard"
-	screenGui.Enabled = true
-	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	screenGui.IgnoreGuiInset = true
-	screenGui.ResetOnSpawn = false
-	screenGui.ScreenInsets = Enum.ScreenInsets.TopbarSafeInsets
+	local screenGui, existingScreenGui = game.Players.LocalPlayer.PlayerGui:FindFirstChild("TopbarStandard"), true
+	if screenGui == nil then
+		screenGui = Instance.new("ScreenGui")
+		screenGui:SetAttribute("StartInset", startInset)
+		screenGui.Name = "TopbarStandard"
+		screenGui.Enabled = true
+		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		screenGui.IgnoreGuiInset = true
+		screenGui.ResetOnSpawn = false
+		screenGui.ScreenInsets = Enum.ScreenInsets.TopbarSafeInsets
+		screenGui.DisplayOrder = Icon.baseDisplayOrder
+				
+		existingScreenGui = false
+	end
 	container[screenGui.Name] = screenGui
-	screenGui.DisplayOrder = Icon.baseDisplayOrder
+	
+	if existingScreenGui then
+		local topbarCentered = game.Players.LocalPlayer.PlayerGui:FindFirstChild("TopbarCentered")
+		
+		container["TopbarCentered"] = topbarCentered
+		container[screenGui.Name.."Clipped"] = game.Players.LocalPlayer.PlayerGui:FindFirstChild(screenGui.Name.."Clipped")
+		container[topbarCentered.Name.."Clipped"] = game.Players.LocalPlayer.PlayerGui:FindFirstChild(topbarCentered.Name.."Clipped")
+		
+		return container 
+	end
+	
 	Icon.baseDisplayOrderChanged:Connect(function()
 		screenGui.DisplayOrder = Icon.baseDisplayOrder
 	end)
