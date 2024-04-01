@@ -11,7 +11,7 @@ return {
 	{"Widget", "MinimumWidth", 32, "Deselected"},
 	{"Widget", "MinimumHeight", 32, "Deselected"},
 	{"Widget", "BorderSize", 0, "Deselected"},
-	{"IconCorners", "CornerRadius", UDim.new(0.25, 0), "Deselected"},
+	{"IconCorners", "CornerRadius", UDim.new(0, 9), "Deselected"},
 	{"IconButton", "BackgroundTransparency", 0.5, "Deselected"},
 	{"IconLabel", "TextSize", 14, "Deselected"},
 	{"Dropdown", "BackgroundTransparency", 0.5, "Deselected"},

@@ -273,9 +273,9 @@ function Icon.new()
 			return
 		end
 		if self.isSelected then
-			self:deselect(self)
+			self:deselect("User", self)
 		else
-			self:select(self)
+			self:select("User", self)
 		end
 	end
 	local isTouchTapping = false
@@ -323,7 +323,7 @@ function Icon.new()
 		self.isViewing = true
 		self.viewingStarted:Fire(true)
 		if not dontSetState then
-			self:setState("Viewing", self)
+			self:setState("Viewing", "User", self)
 		end
 	end
 	local function viewingEnded()
@@ -332,7 +332,7 @@ function Icon.new()
 		end
 		self.isViewing = false
 		self.viewingEnded:Fire(true)
-		self:setState(nil, self)
+		self:setState(nil, "User", self)
 	end
 	self.joinedParent:Connect(function()
 		if self.isViewing then
@@ -375,7 +375,7 @@ function Icon.new()
 	-- Deselect when another icon is selected
 	janitor:add(anyIconSelected:Connect(function(incomingIcon)
 		if incomingIcon ~= self and self.deselectWhenOtherIconSelected and incomingIcon.deselectWhenOtherIconSelected then
-			self:deselect()
+			self:deselect("AutoDeselect", incomingIcon)
 		end
 	end))
 
@@ -414,7 +414,7 @@ function Icon.new()
 				-- If an icon within a menu or dropdown is also
 				-- a dropdown or menu, then close it
 				for _, _ in pairs(childIcon.childIconsDict) do
-					childIcon:deselect()
+					childIcon:deselect("HideParentFeature", self)
 				end
 			end
 		end
@@ -478,7 +478,7 @@ function Icon:setName(name)
 	return self
 end
 
-function Icon:setState(incomingStateName, fromInput)
+function Icon:setState(incomingStateName, fromSource, sourceIcon)
 	-- This is responsible for acknowleding a change in stage (such as from "Deselected" to "Viewing" when
 	-- a users mouse enters the widget), then informing other systems of this state change to then act upon
 	-- (such as the theme handler applying the theme which corresponds to that state).
@@ -495,20 +495,20 @@ function Icon:setState(incomingStateName, fromInput)
 	if stateName == "Deselected" then
 		self.isSelected = false
 		if currentIsSelected then
-			self.toggled:Fire(false, fromInput)
-			self.deselected:Fire(fromInput)
+			self.toggled:Fire(false, fromSource, sourceIcon)
+			self.deselected:Fire(fromSource, sourceIcon)
 		end
-		self:_setToggleItemsVisible(false, fromInput)
+		self:_setToggleItemsVisible(false, fromSource, sourceIcon)
 	elseif stateName == "Selected" then
 		self.isSelected = true
 		if not currentIsSelected then
-			self.toggled:Fire(true, fromInput)
-			self.selected:Fire(fromInput)
-			anyIconSelected:Fire(self)
+			self.toggled:Fire(true, fromSource, sourceIcon)
+			self.selected:Fire(fromSource, sourceIcon)
+			anyIconSelected:Fire(self, fromSource, sourceIcon)
 		end
-		self:_setToggleItemsVisible(true, fromInput)
+		self:_setToggleItemsVisible(true, fromSource, sourceIcon)
 	end
-	self.stateChanged:Fire(stateName, fromInput)
+	self.stateChanged:Fire(stateName, fromSource, sourceIcon)
 end
 
 function Icon:getInstance(name)
@@ -688,13 +688,13 @@ function Icon:setEnabled(bool)
 	return self
 end
 
-function Icon:select(fromInput)
-	self:setState("Selected", fromInput)
+function Icon:select(fromSource, sourceIcon)
+	self:setState("Selected", fromSource, sourceIcon)
 	return self
 end
 
-function Icon:deselect(fromInput)
-	self:setState("Deselected", fromInput)
+function Icon:deselect(fromSource, sourceIcon)
+	self:setState("Deselected", fromSource, sourceIcon)
 	return self
 end
 
@@ -860,9 +860,9 @@ function Icon:_updateSelectionInstances()
 	end
 end
 
-function Icon:_setToggleItemsVisible(bool, fromInput)
+function Icon:_setToggleItemsVisible(bool, fromSource, sourceIcon)
 	for toggleItem, _ in pairs(self.toggleItems) do
-		if not fromInput or fromInput == self or fromInput.toggleItems[toggleItem] == nil then
+		if not sourceIcon or sourceIcon == self or sourceIcon.toggleItems[toggleItem] == nil then
 			local property = "Visible"
 			if toggleItem:IsA("LayerCollector") then
 				property = "Enabled"
@@ -957,7 +957,7 @@ function Icon:oneClick(bool)
 	singleClickJanitor:clean()
 	if bool or bool == nil then
 		singleClickJanitor:add(self.selected:Connect(function()
-			self:deselect()
+			self:deselect("OneClick", self)
 		end))
 	end
 	self.oneClickEnabled = true
@@ -1015,9 +1015,9 @@ end
 function Icon:freezeMenu()
 	-- A frozen menu is a menu which is permanently locked in the
 	-- the selected state (with its toggle hidden)
-	self:select()
+	self:select("FrozenMenu", self)
 	self:bindEvent("deselected", function(icon)
-		icon:select()
+		icon:select("FrozenMenu", self)
 	end)
 	self:modifyTheme({"IconSpot", "Visible", false})
 end

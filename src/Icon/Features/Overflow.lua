@@ -196,7 +196,7 @@ function Overflow.updateBoundary(alignment)
 		overflowIcon:autoDeselect(false)
 		overflowIcon.isAnOverflow = true
 		--overflowIcon:freezeMenu()
-		overflowIcon:select()
+		overflowIcon:select("OverflowStart", overflowIcon)
 		overflowIcon:setEnabled(false)
 		overflowIcons[alignment] = overflowIcon
 		overflowIconUIDs[overflowIcon.UID] = true

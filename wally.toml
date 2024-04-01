@@ -2,24 +2,16 @@
 name = "1foreverhd/topbarplus"
 description = "Construct dynamic and intuitive topbar icons. Enhance the appearance and behaviour of these icons with features such as themes, dropdowns and menus."
 license = "MPL2"
-version = "3.0.0"
+version = "3.0.1"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
-exclude = [
-    ".github",
-    ".vscode",
-    "assets",
-    "docs",
-    "site",
-    ".gitattributes",
-    ".gitignore",
-    "aftman.toml",
-    "Icon.rbxm",
-    "mkdocs.yml",
-    "selene.toml",
-    "sourcemap.json",
-    "withLink.project.json",
-    "src/PackageLink.model.json",
+exclude = ["**"]
+include = [
+    "default.project.json",
+    "src",
+    "src/**",
+    "LICENSE",
+    "wally.toml",
 ]
 
 [dependencies]

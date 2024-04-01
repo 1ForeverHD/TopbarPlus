@@ -24,7 +24,7 @@ return function(Icon)
 	end)
 
 	local holders = Instance.new("Frame")
-	local yDownOffset = if isOldTopbar then 1 else 0
+	local yDownOffset = if isOldTopbar then 2 else 0
 	local ySizeOffset = -2
 	if isConsoleScreen then
 		yDownOffset += 13
