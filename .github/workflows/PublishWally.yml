@@ -1,9 +1,8 @@
 name: Publish package to Wally
 
 on:
-  push:
-    branches: #  Act on main branch commit
-      - main
+  release:
+    types: [published]
   
 jobs:
   publish:

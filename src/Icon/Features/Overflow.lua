@@ -257,7 +257,7 @@ function Overflow.updateBoundary(alignment)
 		local menu = overflowIcon:getInstance("Menu")
 		local holderXEndPos = holderXPos + holderXSize
 		local menuWidth = holderXSize
-		if oppositeOverflowIcon then
+		if menu and oppositeOverflowIcon then
 			local oppositeWidget = oppositeOverflowIcon.widget
 			local oppositeXPos = oppositeWidget.AbsolutePosition.X
 			local oppositeXSize = Overflow.getWidth(oppositeOverflowIcon)

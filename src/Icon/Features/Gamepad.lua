@@ -179,9 +179,14 @@ function Gamepad.registerButton(buttonInstance)
 		end
 		local isSelected = GuiService.SelectedObject == buttonInstance
 		local unselectKeyCodes = {"ButtonB", "ButtonSelect"}
-		if table.find(unselectKeyCodes, input.KeyCode.Name) and isSelected then
-			-- We unfocus when back button is pressed
-			GuiService.SelectedObject = nil
+		local keyName = input.KeyCode.Name
+		if table.find(unselectKeyCodes, keyName) and isSelected then
+			-- We unfocus when back button is pressed, but ignore
+			-- if the virtual cursor is disabled otherwise it will be
+			-- impossible to select the topbar
+			if not(keyName == "ButtonSelect" and not GamepadService.GamepadCursorEnabled) then
+				GuiService.SelectedObject = nil
+			end
 		end
 	end)
 	buttonInstance.Destroying:Once(function()

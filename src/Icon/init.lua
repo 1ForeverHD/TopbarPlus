@@ -762,7 +762,9 @@ function Icon:align(leftCenterOrRight, isFromParentIcon)
 	local alignmentHolder = holders[finalDirection]
 	self.screenGui = screenGui
 	self.alignmentHolder = alignmentHolder
-	self.widget.Parent = joinedFrame or alignmentHolder
+	if not self.isDestroyed then
+		self.widget.Parent = joinedFrame or alignmentHolder
+	end
 	self.alignment = finalDirection
 	self.alignmentChanged:Fire(finalDirection)
 	Icon.iconChanged:Fire(self)
