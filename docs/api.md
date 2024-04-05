@@ -388,23 +388,27 @@ Clears all connections and destroys all instances associated with the icon.
 ## Events
 #### selected 
 ```lua
-icon.selected:Connect(function()
-    print("The icon was selected")
+icon.selected:Connect(function(fromSource)
+    -- fromSource can be useful for checking if the behaviour was triggered by a user (such as clicking)
+    -- fromSource values include "User", "OneClick", "AutoDeselect", "HideParentFeature", "Overflow"
+    local sourceName = fromSource or "Unknown"
+    print("The icon was selected by the "..sourceName)
 end)
 ```
 
 ----
 #### deselected 
 ```lua
-icon.deselected:Connect(function()
-    print("The icon was deselected")
+icon.deselected:Connect(function(fromSource)
+    local sourceName = fromSource or "Unknown"
+    print("The icon was deselected by the "..sourceName)
 end)
 ```
 
 ----
 #### toggled 
 ```lua
-icon.toggled:Connect(function(isSelected)
+icon.toggled:Connect(function(isSelected, fromSource)
     local stateName = (isSelected and "selected") or "deselected"
     print(`The icon was {stateName}!`)
 end)
