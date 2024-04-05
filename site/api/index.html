@@ -1678,19 +1678,23 @@ Clears all connections and destroys all instances associated with the icon.</p>
 <hr />
 <h2 id="events">Events<a class="headerlink" href="#events" title="Permanent link">&para;</a></h2>
 <h4 id="selected">selected<a class="headerlink" href="#selected" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><span class="n">icon</span><span class="p">.</span><span class="n">selected</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="kr">function</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The icon was selected&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">icon</span><span class="p">.</span><span class="n">selected</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="kr">function</span><span class="p">(</span><span class="n">fromSource</span><span class="p">)</span>
+    <span class="c1">-- fromSource can be useful for checking if the behaviour was triggered by a user (such as clicking)</span>
+    <span class="c1">-- fromSource values include &quot;User&quot;, &quot;OneClick&quot;, &quot;AutoDeselect&quot;, &quot;HideParentFeature&quot;, &quot;Overflow&quot;</span>
+    <span class="kd">local</span> <span class="n">sourceName</span> <span class="o">=</span> <span class="n">fromSource</span> <span class="ow">or</span> <span class="s2">&quot;Unknown&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The icon was selected by the &quot;</span><span class="o">..</span><span class="n">sourceName</span><span class="p">)</span>
 <span class="kr">end</span><span class="p">)</span>
 </code></pre></div>
 <hr />
 <h4 id="deselected">deselected<a class="headerlink" href="#deselected" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><span class="n">icon</span><span class="p">.</span><span class="n">deselected</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="kr">function</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The icon was deselected&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">icon</span><span class="p">.</span><span class="n">deselected</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="kr">function</span><span class="p">(</span><span class="n">fromSource</span><span class="p">)</span>
+    <span class="kd">local</span> <span class="n">sourceName</span> <span class="o">=</span> <span class="n">fromSource</span> <span class="ow">or</span> <span class="s2">&quot;Unknown&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The icon was deselected by the &quot;</span><span class="o">..</span><span class="n">sourceName</span><span class="p">)</span>
 <span class="kr">end</span><span class="p">)</span>
 </code></pre></div>
 <hr />
 <h4 id="toggled">toggled<a class="headerlink" href="#toggled" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><span class="n">icon</span><span class="p">.</span><span class="n">toggled</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="kr">function</span><span class="p">(</span><span class="n">isSelected</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">icon</span><span class="p">.</span><span class="n">toggled</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="kr">function</span><span class="p">(</span><span class="n">isSelected</span><span class="p">,</span> <span class="n">fromSource</span><span class="p">)</span>
     <span class="kd">local</span> <span class="n">stateName</span> <span class="o">=</span> <span class="p">(</span><span class="n">isSelected</span> <span class="ow">and</span> <span class="s2">&quot;selected&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;deselected&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="err">`</span><span class="n">The</span> <span class="n">icon</span> <span class="n">was</span> <span class="p">{</span><span class="n">stateName</span><span class="p">}</span><span class="err">!`</span><span class="p">)</span>
 <span class="kr">end</span><span class="p">)</span>
