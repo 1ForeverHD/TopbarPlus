@@ -4,6 +4,8 @@
 [toggle keys]: https://1foreverhd.github.io/TopbarPlus/features/#toggle-keys
 [captions]: https://1foreverhd.github.io/TopbarPlus/features/#captions
 [icon event]: https://1foreverhd.github.io/TopbarPlus/api/#events
+[menus]: https://1foreverhd.github.io/TopbarPlus/features/#menus
+[dropdowns]: https://1foreverhd.github.io/TopbarPlus/features/#dropdowns
 
 ## Functions
 
