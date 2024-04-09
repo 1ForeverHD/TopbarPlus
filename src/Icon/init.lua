@@ -915,8 +915,8 @@ function Icon:call(callback, ...)
 	return self
 end
 
-function Icon:addToJanitor(callback)
-	self.janitor:add(callback)
+function Icon:addToJanitor(object, methodName, index)
+	self.janitor:add(object, methodName, index)
 	return self
 end
 
