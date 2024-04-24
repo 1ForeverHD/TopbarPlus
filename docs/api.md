@@ -4,6 +4,8 @@
 [toggle keys]: https://1foreverhd.github.io/TopbarPlus/features/#toggle-keys
 [captions]: https://1foreverhd.github.io/TopbarPlus/features/#captions
 [icon event]: https://1foreverhd.github.io/TopbarPlus/api/#events
+[menus]: https://1foreverhd.github.io/TopbarPlus/features/#menus
+[dropdowns]: https://1foreverhd.github.io/TopbarPlus/features/#dropdowns
 
 ## Functions
 
@@ -142,7 +144,7 @@ When set to ``true``, disables the shade effect which appears when the icon is p
 ```lua
 icon:setImage(imageId, iconState)
 ```
-Applies an image to the icon based on the given ``imaageId``. ``imageId`` can be an assetId or a complete asset string.
+Applies an image to the icon based on the given ``imageId``. ``imageId`` can be an assetId or a complete asset string.
 
 ----
 #### setLabel
