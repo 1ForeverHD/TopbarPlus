@@ -63,4 +63,5 @@ nav:
     - Installation: installation.md
     - Third Parties: third_parties.md
     - API: api.md
+    - Resources: resources.md
   - Contributing: contributing.md
