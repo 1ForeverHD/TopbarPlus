@@ -289,7 +289,7 @@ end
 
 Janitor.__call = Janitor.__index.Cleanup
 
---- Makes the Janitor clean up when the instance is destroyed
+-- Makes the Janitor clean up when the instance is destroyed
 -- @param Instance Instance The Instance the Janitor will wait for to be Destroyed
 -- @returns Disconnectable table to stop Janitor from being cleaned up upon Instance Destroy (automatically cleaned up by Janitor, btw)
 -- @author Corecii
