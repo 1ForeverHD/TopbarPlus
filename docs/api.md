@@ -64,7 +64,7 @@ Constructs an empty ``32x32`` icon on the topbar.
 #### setName
 {chainable}
 ```lua
-icon:set(name)
+icon:setName(name)
 ```
 Sets the name of the Widget instance. This can be used in conjunction with ``Icon.getIcon(name)``.
 
@@ -459,10 +459,10 @@ local bool = icon.isSelected
 ```
 
 ----
-#### enabled
+#### isEnabled
 {read-only}
 ```lua
-local bool = icon.enabled
+local bool = icon.isEnabled
 ```
 
 ----
