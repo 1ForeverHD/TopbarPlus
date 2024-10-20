@@ -34,10 +34,7 @@
 
 
 -- SERVICES
-local LocalizationService = game:GetService("LocalizationService")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local TextService = game:GetService("TextService")
 local StarterGui = game:GetService("StarterGui")
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
@@ -64,7 +61,7 @@ end
 local Signal = require(iconModule.Packages.GoodSignal)
 local Janitor = require(iconModule.Packages.Janitor)
 local Utility = require(iconModule.Utility)
-local Attribute = require(iconModule.Attribute)
+local _Attribute = require(iconModule.Attribute)
 local Themes = require(iconModule.Features.Themes)
 local Gamepad = require(iconModule.Features.Gamepad)
 local Overflow = require(iconModule.Features.Overflow)
@@ -173,10 +170,73 @@ if Icon.isOldTopbar then
 	Icon.modifyBaseTheme(require(themes.Classic))
 end
 
+export type Icon = {
+	janitor: typeof(Janitor.new()),
+	themesJanitor: typeof(Janitor.new()),
+	singleClickJanitor: typeof(Janitor.new()),
+	captionJanitor: typeof(Janitor.new()),
+	joinJanitor: typeof(Janitor.new()),
+	menuJanitor: typeof(Janitor.new()),
+	dropdownJanitor: typeof(Janitor.new()),
+
+	selected: typeof(Signal.new()),
+	deselected: typeof(Signal.new()),
+	toggled: typeof(Signal.new()),
+	viewingStarted: typeof(Signal.new()),
+	viewingEnded: typeof(Signal.new()),
+	stateChanged: typeof(Signal.new()),
+	notified: typeof(Signal.new()),
+	noticeStarted: typeof(Signal.new()),
+	noticeChanged: typeof(Signal.new()),
+	endNotices: typeof(Signal.new()),
+	toggleKeyAdded: typeof(Signal.new()),
+	fakeToggleKeyChanged: typeof(Signal.new()),
+	alignmentChanged: typeof(Signal.new()),
+	updateSize: typeof(Signal.new()),
+	resizingComplete: typeof(Signal.new()),
+	joinedParent: typeof(Signal.new()),
+	menuSet: typeof(Signal.new()),
+	dropdownSet: typeof(Signal.new()),
+	updateMenu: typeof(Signal.new()),
+	startMenuUpdate: typeof(Signal.new()),
+	childThemeModified: typeof(Signal.new()),
+	indicatorSet: typeof(Signal.new()),
+	dropdownChildAdded: typeof(Signal.new()),
+	menuChildAdded: typeof(Signal.new()),
+
+	iconModule: typeof(Icon),
+	UID: string,
+	isEnabled: boolean,
+	isSelected: boolean,
+	isViewing: boolean,
+	joinedFrame: boolean,
+	parentIconUID: boolean,
+	deselectWhenOtherIconSelected: boolean,
+	totalNotices: number,
+	activeState: string,
+	alignment: string,
+	originalAlignment: string,
+	appliedTheme: {},
+	appearance: {},
+	cachedInstances: {},
+	cachedNamesToInstances: {},
+	cachedCollectives: {},
+	bindedToggleKeys: {},
+	customBehaviours: {},
+	toggleItems: {},
+	bindedEvents: {},
+	notices: {},
+	menuIcons: {},
+	dropdownIcons: {},
+	childIconsDict: {},
+	isOldTopbar: boolean,
+	creationTime: number,
+	widget: typeof(require(elements.Widget)),
+} & typeof(Icon)
 
 
 -- CONSTRUCTOR
-function Icon.new()
+function Icon.new() : Icon
 	local self = {}
 	setmetatable(self, Icon)
 
@@ -472,13 +532,13 @@ end
 
 
 -- METHODS
-function Icon:setName(name)
+function Icon:setName(name: string) : Icon
 	self.widget.Name = name
 	self.name = name
 	return self
 end
 
-function Icon:setState(incomingStateName, fromSource, sourceIcon)
+function Icon:setState(incomingStateName: string, fromSource: string, sourceIcon: Icon) : ()
 	-- This is responsible for acknowleding a change in stage (such as from "Deselected" to "Viewing" when
 	-- a users mouse enters the widget), then informing other systems of this state change to then act upon
 	-- (such as the theme handler applying the theme which corresponds to that state).
@@ -511,7 +571,7 @@ function Icon:setState(incomingStateName, fromSource, sourceIcon)
 	self.stateChanged:Fire(stateName, fromSource, sourceIcon)
 end
 
-function Icon:getInstance(name)
+function Icon:getInstance(name: string) : Instance
 	-- This enables us to easily retrieve instances located within the icon simply by passing its name.
 	-- Every important/significant instance is named uniquely therefore this is no worry of overlap.
 	-- We cache the result for more performant retrieval in the future.
@@ -572,7 +632,7 @@ function Icon:getInstance(name)
 	return returnChild
 end
 
-function Icon:getCollective(name)
+function Icon:getCollective(name: string) : {Instance}
 	-- A collective is an array of instances within the Widget that have been
 	-- grouped together based on a given name. This just makes it easy
 	-- to act on multiple instances at once which share similar behaviours.
@@ -593,7 +653,7 @@ function Icon:getCollective(name)
 	return collective
 end
 
-function Icon:getInstanceOrCollective(collectiveOrInstanceName)
+function Icon:getInstanceOrCollective(collectiveOrInstanceName: string) : {Instance}
 	-- Similar to :getInstance but also accounts for 'Collectives', such as UICorners and returns
 	-- an array of instances instead of a single instance
 	local instances = {}
@@ -607,7 +667,7 @@ function Icon:getInstanceOrCollective(collectiveOrInstanceName)
 	return instances
 end
 
-function Icon:getStateGroup(iconState)
+function Icon:getStateGroup(iconState: string) : {}
 	local chosenState = iconState or self.activeState
 	local stateGroup = self.appearance[chosenState]
 	if not stateGroup then
@@ -617,25 +677,25 @@ function Icon:getStateGroup(iconState)
 	return stateGroup
 end
 
-function Icon:refreshAppearance(instance, specificProperty)
+function Icon:refreshAppearance(instance, specificProperty) : Icon
 	Themes.refresh(self, instance, specificProperty)
 	return self
 end
 
-function Icon:refresh()
+function Icon:refresh() : Icon
 	self:refreshAppearance(self.widget)
 	self.updateSize:Fire()
 	return self
 end
 
-function Icon:updateParent()
+function Icon:updateParent() : ()
 	local parentIcon = Icon.getIconByUID(self.parentIconUID)
 	if parentIcon then
 		parentIcon.updateSize:Fire()
 	end
 end
 
-function Icon:setBehaviour(collectiveOrInstanceName, property, callback, refreshAppearance)
+function Icon:setBehaviour(collectiveOrInstanceName: string, property: string, callback: () -> (), refreshAppearance: boolean) : ()
 	-- You can specify your own custom callback to handle custom logic just before
 	-- an instances property is changed by using :setBehaviour()
 	local key = collectiveOrInstanceName.."-"..property
@@ -648,12 +708,12 @@ function Icon:setBehaviour(collectiveOrInstanceName, property, callback, refresh
 	end
 end
 
-function Icon:modifyTheme(modifications, modificationUID)
-	local modificationUID = Themes.modify(self, modifications, modificationUID)
+function Icon:modifyTheme(modifications: {{any}}, modificationUID: string) : (Icon, string)
+	modificationUID = Themes.modify(self, modifications, modificationUID)
 	return self, modificationUID
 end
 
-function Icon:modifyChildTheme(modifications, modificationUID)
+function Icon:modifyChildTheme(modifications: {{any}}, modificationUID: string) : Icon
 	-- Same as modifyTheme except for its children (i.e. icons
 	-- within its dropdown or menu)
 	self.childModifications = modifications
@@ -666,39 +726,39 @@ function Icon:modifyChildTheme(modifications, modificationUID)
 	return self
 end
 
-function Icon:removeModification(modificationUID)
+function Icon:removeModification(modificationUID: string) : Icon
 	Themes.remove(self, modificationUID)
 	return self
 end
 
-function Icon:removeModificationWith(instanceName, property, state)
+function Icon:removeModificationWith(instanceName: string, property: string, state: string) : Icon
 	Themes.removeWith(self, instanceName, property, state)
 	return self
 end
 
-function Icon:setTheme(theme)
+function Icon:setTheme(theme) : Icon
 	Themes.set(self, theme)
 	return self
 end
 
-function Icon:setEnabled(bool)
+function Icon:setEnabled(bool: boolean) : Icon
 	self.isEnabled = bool
 	self.widget.Visible = bool
 	self:updateParent()
 	return self
 end
 
-function Icon:select(fromSource, sourceIcon)
+function Icon:select(fromSource: string, sourceIcon: Icon) : Icon
 	self:setState("Selected", fromSource, sourceIcon)
 	return self
 end
 
-function Icon:deselect(fromSource, sourceIcon)
+function Icon:deselect(fromSource: string, sourceIcon: Icon) : Icon
 	self:setState("Deselected", fromSource, sourceIcon)
 	return self
 end
 
-function Icon:notify(customClearSignal, noticeId)
+function Icon:notify(customClearSignal: string | Instance, noticeId: string) : Icon
 	-- Generates a notification which appears in the top right of the icon. Useful for example for prompting
 	-- users of changes/updates within your UI such as a Catalog
 	-- 'customClearSignal' is a signal object (e.g. icon.deselected) or
@@ -712,38 +772,38 @@ function Icon:notify(customClearSignal, noticeId)
 	return self
 end
 
-function Icon:clearNotices()
+function Icon:clearNotices() : Icon
 	self.endNotices:Fire()
 	return self
 end
 
-function Icon:disableOverlay(bool)
+function Icon:disableOverlay(bool: boolean) : Icon
 	self.overlayDisabled = bool
 	return self
 end
 Icon.disableStateOverlay = Icon.disableOverlay
 
-function Icon:setImage(imageId, iconState)
+function Icon:setImage(imageId: string, iconState: string) : Icon
 	self:modifyTheme({"IconImage", "Image", imageId, iconState})
 	return self
 end
 
-function Icon:setLabel(text, iconState)
+function Icon:setLabel(text: string, iconState: string) : Icon
 	self:modifyTheme({"IconLabel", "Text", text, iconState})
 	return self
 end
 
-function Icon:setOrder(int, iconState)
+function Icon:setOrder(int: number, iconState: string) : Icon
 	self:modifyTheme({"Widget", "LayoutOrder", int, iconState})
 	return self
 end
 
-function Icon:setCornerRadius(udim, iconState)
+function Icon:setCornerRadius(udim: UDim, iconState: string) : Icon
 	self:modifyTheme({"IconCorners", "CornerRadius", udim, iconState})
 	return self
 end
 
-function Icon:align(leftCenterOrRight, isFromParentIcon)
+function Icon:align(leftCenterOrRight: string, isFromParentIcon: boolean) : Icon
 	-- Determines the side of the screen the icon will be ordered
 	local direction = tostring(leftCenterOrRight):lower()
 	if direction == "mid" or direction == "centre" then
@@ -772,22 +832,22 @@ function Icon:align(leftCenterOrRight, isFromParentIcon)
 end
 Icon.setAlignment = Icon.align
 
-function Icon:setLeft()
+function Icon:setLeft() : Icon
 	self:setAlignment("Left")
 	return self
 end
 
-function Icon:setMid()
+function Icon:setMid() : Icon
 	self:setAlignment("Center")
 	return self
 end
 
-function Icon:setRight()
+function Icon:setRight() : Icon
 	self:setAlignment("Right")
 	return self
 end
 
-function Icon:setWidth(offsetMinimum, iconState)
+function Icon:setWidth(offsetMinimum: number, iconState: string) : Icon
 	-- This sets a minimum X offset size for the widget, useful
 	-- for example if you're constantly changing the label
 	-- but don't want the icon to resize every time
@@ -797,43 +857,43 @@ function Icon:setWidth(offsetMinimum, iconState)
 	return self
 end
 
-function Icon:setImageScale(number, iconState)
+function Icon:setImageScale(number: number, iconState: string) : Icon
 	self:modifyTheme({"IconImageScale", "Value", number, iconState})
 	return self
 end
 
-function Icon:setImageRatio(number, iconState)
+function Icon:setImageRatio(number: number, iconState: string) : Icon
 	self:modifyTheme({"IconImageRatio", "AspectRatio", number, iconState})
 	return self
 end
 
-function Icon:setTextSize(number, iconState)
+function Icon:setTextSize(number: number, iconState: string) : Icon
 	self:modifyTheme({"IconLabel", "TextSize", number, iconState})
 	return self
 end
 
-function Icon:setTextFont(font, fontWeight, fontStyle, iconState)
+function Icon:setTextFont(font: (number | Enum.Font | string), fontWeight: Enum.FontWeight, fontStyle: Enum.FontStyle, iconState: string) : Icon
 	fontWeight = fontWeight or Enum.FontWeight.Regular
 	fontStyle = fontStyle or Enum.FontStyle.Normal
 	local fontFace
 	local fontType = typeof(font)
 	if fontType == "number" then
-		fontFace = Font.fromId(font, fontWeight, fontStyle)
+		fontFace = Font.fromId(font :: number, fontWeight, fontStyle)
 	elseif fontType == "EnumItem" then
-		fontFace = Font.fromEnum(font)
+		fontFace = Font.fromEnum(font :: Enum.Font)
 	elseif fontType == "string" then
-		if not font:match("rbxasset") then
-			fontFace = Font.fromName(font, fontWeight, fontStyle)
+		if not (font :: string):match("rbxasset") then
+			fontFace = Font.fromName(font :: string, fontWeight, fontStyle)
 		end
 	end
 	if not fontFace then
-		fontFace = Font.new(font, fontWeight, fontStyle)
+		fontFace = Font.new(font :: string, fontWeight, fontStyle)
 	end
 	self:modifyTheme({"IconLabel", "FontFace", fontFace, iconState})
 	return self
 end
 
-function Icon:bindToggleItem(guiObjectOrLayerCollector)
+function Icon:bindToggleItem(guiObjectOrLayerCollector: Instance) : Icon
 	if not guiObjectOrLayerCollector:IsA("GuiObject") and not guiObjectOrLayerCollector:IsA("LayerCollector") then
 		error("Toggle item must be a GuiObject or LayerCollector!")
 	end
@@ -842,13 +902,13 @@ function Icon:bindToggleItem(guiObjectOrLayerCollector)
 	return self
 end
 
-function Icon:unbindToggleItem(guiObjectOrLayerCollector)
+function Icon:unbindToggleItem(guiObjectOrLayerCollector: Instance) : Icon
 	self.toggleItems[guiObjectOrLayerCollector] = nil
 	self:_updateSelectionInstances()
 	return self
 end
 
-function Icon:_updateSelectionInstances()
+function Icon:_updateSelectionInstances() : ()
 	-- This is to assist with controller navigation and selection
 	-- It converts the value true to an array
 	for guiObjectOrLayerCollector, _ in pairs(self.toggleItems) do
@@ -862,7 +922,7 @@ function Icon:_updateSelectionInstances()
 	end
 end
 
-function Icon:_setToggleItemsVisible(bool, fromSource, sourceIcon)
+function Icon:_setToggleItemsVisible(bool, fromSource, sourceIcon) : ()
 	for toggleItem, _ in pairs(self.toggleItems) do
 		if not sourceIcon or sourceIcon == self or sourceIcon.toggleItems[toggleItem] == nil then
 			local property = "Visible"
@@ -874,7 +934,7 @@ function Icon:_setToggleItemsVisible(bool, fromSource, sourceIcon)
 	end
 end
 
-function Icon:bindEvent(iconEventName, eventFunction)
+function Icon:bindEvent(iconEventName: string, eventFunction: (Icon, ...any)->()) : Icon
 	local event = self[iconEventName]
 	assert(event and typeof(event) == "table" and event.Connect, "argument[1] must be a valid topbarplus icon event name!")
 	assert(typeof(eventFunction) == "function", "argument[2] must be a function!")
@@ -884,7 +944,7 @@ function Icon:bindEvent(iconEventName, eventFunction)
 	return self
 end
 
-function Icon:unbindEvent(iconEventName)
+function Icon:unbindEvent(iconEventName: string) : Icon
 	local eventConnection = self.bindedEvents[iconEventName]
 	if eventConnection then
 		eventConnection:Disconnect()
@@ -893,7 +953,7 @@ function Icon:unbindEvent(iconEventName)
 	return self
 end
 
-function Icon:bindToggleKey(keyCodeEnum)
+function Icon:bindToggleKey(keyCodeEnum: Enum.KeyCode) : Icon
 	assert(typeof(keyCodeEnum) == "EnumItem", "argument[1] must be a KeyCode EnumItem!")
 	self.bindedToggleKeys[keyCodeEnum] = true
 	self.toggleKeyAdded:Fire(keyCodeEnum)
@@ -901,13 +961,13 @@ function Icon:bindToggleKey(keyCodeEnum)
 	return self
 end
 
-function Icon:unbindToggleKey(keyCodeEnum)
+function Icon:unbindToggleKey(keyCodeEnum: Enum.KeyCode) : Icon
 	assert(typeof(keyCodeEnum) == "EnumItem", "argument[1] must be a KeyCode EnumItem!")
 	self.bindedToggleKeys[keyCodeEnum] = nil
 	return self
 end
 
-function Icon:call(callback, ...)
+function Icon:call(callback: (Icon, ...any)->(), ...: any) : Icon
 	local packedArgs = table.pack(...)
 	task.spawn(function()
 		callback(self, table.unpack(packedArgs))
@@ -915,12 +975,12 @@ function Icon:call(callback, ...)
 	return self
 end
 
-function Icon:addToJanitor(object, methodName, index)
+function Icon:addToJanitor(object: Instance, methodName: string, index: number) : Icon
 	self.janitor:add(object, methodName, index)
 	return self
 end
 
-function Icon:lock()
+function Icon:lock() : Icon
 	-- This disables all user inputs related to the icon (such as clicking buttons, pressing keys, etc)
 	local clickRegion = self:getInstance("ClickRegion")
 	clickRegion.Visible = false
@@ -928,21 +988,21 @@ function Icon:lock()
 	return self
 end
 
-function Icon:unlock()
+function Icon:unlock() : Icon
 	local clickRegion = self:getInstance("ClickRegion")
 	clickRegion.Visible = true
 	self.locked = false
 	return self
 end
 
-function Icon:debounce(seconds)
+function Icon:debounce(seconds: number) : Icon
 	self:lock()
 	task.wait(seconds)
 	self:unlock()
 	return self
 end
 
-function Icon:autoDeselect(bool)
+function Icon:autoDeselect(bool: boolean) : Icon
 	-- When set to true the icon will deselect itself automatically whenever
 	-- another icon is selected
 	if bool == nil then
@@ -952,7 +1012,7 @@ function Icon:autoDeselect(bool)
 	return self
 end
 
-function Icon:oneClick(bool)
+function Icon:oneClick(bool: boolean) : Icon
 	-- When set to true the icon will automatically deselect when selected, this creates
 	-- the effect of a single click button
 	local singleClickJanitor = self.singleClickJanitor
@@ -966,7 +1026,7 @@ function Icon:oneClick(bool)
 	return self
 end
 
-function Icon:setCaption(text)
+function Icon:setCaption(text: string) : Icon
 	if text == "_hotkey_" and (self.captionText) then
 		return self
 	end
@@ -984,7 +1044,7 @@ function Icon:setCaption(text)
 	return self
 end
 
-function Icon:setCaptionHint(keyCodeEnum)
+function Icon:setCaptionHint(keyCodeEnum: Enum.KeyCode) : Icon
 	assert(typeof(keyCodeEnum) == "EnumItem", "argument[1] must be a KeyCode EnumItem!")
 	self.fakeToggleKey = keyCodeEnum
 	self.fakeToggleKeyChanged:Fire(keyCodeEnum)
@@ -992,29 +1052,29 @@ function Icon:setCaptionHint(keyCodeEnum)
 	return self
 end
 
-function Icon:leave()
+function Icon:leave() : Icon
 	local joinJanitor = self.joinJanitor
 	joinJanitor:clean()
 	return self
 end
 
-function Icon:joinMenu(parentIcon)
+function Icon:joinMenu(parentIcon: Icon) : Icon
 	Utility.joinFeature(self, parentIcon, parentIcon.menuIcons, parentIcon:getInstance("Menu"))
 	parentIcon.menuChildAdded:Fire(self)
 	return self
 end
 
-function Icon:setMenu(arrayOfIcons)
+function Icon:setMenu(arrayOfIcons: {Icon}) : Icon
 	self.menuSet:Fire(arrayOfIcons)
 	return self
 end
 
-function Icon:setFrozenMenu(arrayOfIcons)
+function Icon:setFrozenMenu(arrayOfIcons: {Icon}) : ()
 	self:freezeMenu(arrayOfIcons)
 	self:setMenu(arrayOfIcons)
 end
 
-function Icon:freezeMenu()
+function Icon:freezeMenu() : ()
 	-- A frozen menu is a menu which is permanently locked in the
 	-- the selected state (with its toggle hidden)
 	self:select("FrozenMenu", self)
@@ -1024,14 +1084,14 @@ function Icon:freezeMenu()
 	self:modifyTheme({"IconSpot", "Visible", false})
 end
 
-function Icon:joinDropdown(parentIcon)
+function Icon:joinDropdown(parentIcon: Icon) : Icon
 	parentIcon:getDropdown()
 	Utility.joinFeature(self, parentIcon, parentIcon.dropdownIcons, parentIcon:getInstance("DropdownScroller"))
 	parentIcon.dropdownChildAdded:Fire(self)
 	return self
 end
 
-function Icon:getDropdown()
+function Icon:getDropdown() : Instance
 	local dropdown = self.dropdown
 	if not dropdown then
 		dropdown = require(elements.Dropdown)(self)
@@ -1041,13 +1101,13 @@ function Icon:getDropdown()
 	return dropdown
 end
 
-function Icon:setDropdown(arrayOfIcons)
+function Icon:setDropdown(arrayOfIcons: {Icon}) : Icon
 	self:getDropdown()
 	self.dropdownSet:Fire(arrayOfIcons)
 	return self
 end
 
-function Icon:clipOutside(instance)
+function Icon:clipOutside(instance: Instance) : (Icon, Instance)
 	-- This is essential for items such as notices and dropdowns which will exceed the bounds of the widget. This is an issue
 	-- because the widget must have ClipsDescendents enabled to hide items for instance when the menu is closing or opening.
 	-- This creates an invisible frame which matches the size and position of the instance, then the instance is parented outside of
@@ -1058,7 +1118,7 @@ function Icon:clipOutside(instance)
 	return self, instanceClone
 end
 
-function Icon:setIndicator(keyCode)
+function Icon:setIndicator(keyCode: Enum.KeyCode) : ()
 	-- An indicator is a direction button prompt with an image of the given keycode. This is useful for instance
 	-- with controllers to show the user what button to press to highlight the topbar. You don't need
 	-- to set an indicator for controllers as this is handled internally within the Gamepad module
@@ -1073,7 +1133,7 @@ end
 
 
 -- DESTROY/CLEANUP
-function Icon:destroy()
+function Icon:destroy() : ()
 	if self.isDestroyed then
 		return
 	end
