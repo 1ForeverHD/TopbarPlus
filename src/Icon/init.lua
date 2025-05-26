@@ -142,6 +142,9 @@ task.defer(Gamepad.start, Icon)
 task.defer(Overflow.start, Icon)
 task.defer(function()
 	local playerGui = localPlayer:WaitForChild("PlayerGui")
+	if GuiService.TopbarInset.Height == 0 then
+		GuiService:GetPropertyChangedSignal("TopbarInset"):Wait()
+	end
 	for _, screenGui in pairs(Icon.container) do
 		screenGui.Parent = playerGui
 	end
