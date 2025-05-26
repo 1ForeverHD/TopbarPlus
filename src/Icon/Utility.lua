@@ -180,9 +180,17 @@ function Utility.clipOutside(icon, instance)
 	local screenGui
 	local function updateScreenGui()
 		local originalScreenGui = originalParent:FindFirstAncestorWhichIsA("ScreenGui")
-		screenGui = if string.match(originalScreenGui.Name, "Clipped") then originalScreenGui else originalScreenGui.Parent[originalScreenGui.Name.."Clipped"]
-		instance.AnchorPoint = Vector2.new(0, 0)
-		instance.Parent = Utility.getClippedContainer(screenGui)
+		local clipped = string.match(originalScreenGui.Name, "Clipped$")
+		if not clipped and not originalScreenGui.Parent then
+			return
+		end
+		screenGui = if clipped
+			then originalScreenGui
+			else originalScreenGui.Parent:FindFirstChild(originalScreenGui.Name .. "Clipped")
+		if screenGui then
+			instance.AnchorPoint = Vector2.new(0, 0)
+			instance.Parent = Utility.getClippedContainer(screenGui)
+		end
 	end
 	cloneJanitor:add(icon.alignmentChanged:Connect(updateScreenGui))
 	updateScreenGui()
@@ -272,6 +280,9 @@ function Utility.clipOutside(icon, instance)
 	local function trackProperty(property)
 		local absoluteProperty = "Absolute"..property
 		local function updateProperty()
+			if not screenGui then
+				return
+			end
 			local cloneValue = clone[absoluteProperty]
 			local absoluteValue = UDim2.fromOffset(cloneValue.X, cloneValue.Y)
 			if property == "Position" then
