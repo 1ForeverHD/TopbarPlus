@@ -178,7 +178,7 @@ return function(icon)
 		captionHeader.Text = text
 		captionHeader.Visible = not hideHeader
 		if keyCodeEnum then
-			labelContent.Text = UserInputService:GetStringForKeyCode(keyCodeEnum)
+			labelContent.Text = keyCodeEnum.Name
 			hotkeys.Visible = true
 		end
 		if not hasKeyboard then

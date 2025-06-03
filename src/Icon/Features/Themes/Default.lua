@@ -30,6 +30,7 @@ return {
 	{"IconImage", "Image", "", "Deselected"},
 	{"IconLabel", "Text", "", "Deselected"},
 	{"IconLabel", "Position", UDim2.fromOffset(0, 0), "Deselected"}, -- 0, -1
+	{"Widget", "DesiredWidth", 44, "Deselected"},
 	{"Widget", "MinimumWidth", 44, "Deselected"},
 	{"Widget", "MinimumHeight", 44, "Deselected"},
 	{"Widget", "BorderSize", 4, "Deselected"},
@@ -39,7 +40,8 @@ return {
 	{"IconImageCorner", "CornerRadius", UDim.new(0, 0), "Deselected"},
 	{"IconImage", "ImageColor3", Color3.fromRGB(255, 255, 255), "Deselected"},
 	{"IconImage", "ImageTransparency", 0, "Deselected"},
-	{"IconLabel", "FontFace", Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal), "Deselected"},
+	{"IconImageRatio", "AspectRatio", 1, "Deselected"},
+	{"IconLabel", "FontFace", Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal), "Deselected"},
 	{"IconLabel", "TextSize", 16, "Deselected"},
 	{"IconSpot", "BackgroundTransparency", 1, "Deselected"},
 	{"IconOverlay", "BackgroundTransparency", 0.925, "Deselected"},
