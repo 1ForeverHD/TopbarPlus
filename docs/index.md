@@ -22,7 +22,7 @@ local icon = Icon.new()
 This constructs an empty ``32x32`` icon on the topbar.
 
 !!! info
-    The order icons appear are determined by their construction sequence. Icons constructed first will have a smaller order therefore will appear left of icons with a higher order. You can modify this behaviour using [icon:setOrder].
+    The order icons appear are determined by their construction sequence. Icons constructed first will have a smaller order therefore will appear left of icons with a higher order. You can modify this behaviour using [icon:setOrder]. Icon orders by default are ``1+(totalCreatedIcons*0.01)``, so 1.01, 1.02, 1.03, etc.
 
 To add an image and label, do:
 ```lua

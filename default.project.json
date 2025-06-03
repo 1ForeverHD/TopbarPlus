@@ -1,19 +1,11 @@
-{
-  "name": "topbarplus",
-  "tree": {
-    "$className": "DataModel",
+Compressor
 
-    "ReplicatedStorage": {
-      "$className": "ReplicatedStorage",
+DataUtil
 
-      "TopbarPlus": {
-        "$className": "Folder",
+Demojify
 
-        "Icon": {
-          "$path": "src/Icon"
-        }
+Promise
 
-      }
-    }
-  }
-}
+Queue
+
+Serializer
