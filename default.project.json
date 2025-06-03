@@ -1,11 +1,6 @@
-Compressor
-
-DataUtil
-
-Demojify
-
-Promise
-
-Queue
-
-Serializer
+{
+    "name": "topbarplus",
+    "tree": {
+        "$path": "src/Icon"
+    }
+}
