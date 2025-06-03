@@ -5,7 +5,7 @@ return function(Icon)
 	local container = {}
 	local guiInset = GuiService:GetGuiInset()
 	local isConsoleScreen = GuiService:IsTenFootInterface()
-	local startInset = if isOldTopbar then 12 else guiInset.Y - (44 + 2)
+	local startInset = if isOldTopbar then 12 else guiInset.Y - 50
 	if isConsoleScreen then
 		startInset = 10
 	end
