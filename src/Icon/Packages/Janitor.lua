@@ -23,10 +23,7 @@ PACKAGE MODIFICATIONS:
 local RunService = game:GetService("RunService")
 local Heartbeat = RunService.Heartbeat
 local function getPromiseReference()
-	if RunService:IsRunning() then
-		local main = require(game:GetService("ReplicatedStorage").Framework)
-		return main.modules.Promise
-	end
+	return false
 end
 
 local IndicesReference = newproxy(true)
