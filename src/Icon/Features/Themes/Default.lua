@@ -34,7 +34,7 @@ return {
 	{"Widget", "MinimumWidth", 44, "Deselected"},
 	{"Widget", "MinimumHeight", 44, "Deselected"},
 	{"Widget", "BorderSize", 4, "Deselected"},
-	{"IconButton", "BackgroundColor3", Color3.fromRGB(18, 18, 21), "Deselected"},
+  {"IconButton", "BackgroundColor3", Color3.fromRGB(18, 18, 20), "Deselected"},
 	{"IconButton", "BackgroundTransparency", 0.08, "Deselected"},
 	{"IconImageScale", "Value", 0.5, "Deselected"},
 	{"IconImageCorner", "CornerRadius", UDim.new(0, 0), "Deselected"},
@@ -50,7 +50,7 @@ return {
 	{"ClickRegion", "Active", true, "Deselected"},  -- This is set to false within scrollers to ensure scroller can be dragged on mobile
 	{"Menu", "Active", false, "Deselected"},
 	{"ContentsList", "HorizontalAlignment", Enum.HorizontalAlignment.Center, "Deselected"},
-	{"Dropdown", "BackgroundColor3", Color3.fromRGB(18, 18, 21), "Deselected"},
+  {"Dropdown", "BackgroundColor3", Color3.fromRGB(18, 18, 20), "Deselected"},
 	{"Dropdown", "BackgroundTransparency", 0.08, "Deselected"},
 	{"Dropdown", "MaxIcons", 4.5, "Deselected"},
 	{"Menu", "MaxIcons", 4, "Deselected"},
