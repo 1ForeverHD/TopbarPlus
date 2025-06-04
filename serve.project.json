@@ -10,7 +10,7 @@
                 "$className": "Folder",
 
                 "Icon": {
-                    "$path": "src/Icon"
+                    "$path": "src"
                 }
             }
         }
