@@ -1,3 +1,5 @@
+local CAPTION_COLOR = Color3.fromRGB(39, 41, 48)
+local TEXT_SIZE = 15
 return function(icon)
 
 	-- Credit to lolmansReturn and Canary Software for
@@ -17,7 +19,7 @@ return function(icon)
 	local box = Instance.new("Frame")
 	box.Name = "Box"
 	box.AutomaticSize = Enum.AutomaticSize.XY
-	box.BackgroundColor3 = Color3.fromRGB(101, 102, 104)
+	box.BackgroundColor3 = CAPTION_COLOR
 	box.Position = UDim2.fromOffset(4, 7)
 	box.ZIndex = 12
 	box.Parent = caption
@@ -25,13 +27,13 @@ return function(icon)
 	local header = Instance.new("TextLabel")
 	header.Name = "Header"
 	header.FontFace = Font.new(
-		"rbxasset://fonts/families/GothamSSm.json",
+		"rbxasset://fonts/families/BuilderSans.json",
 		Enum.FontWeight.Medium,
 		Enum.FontStyle.Normal
 	)
 	header.Text = "Caption"
 	header.TextColor3 = Color3.fromRGB(255, 255, 255)
-	header.TextSize = 14
+	header.TextSize = TEXT_SIZE
 	header.TextTruncate = Enum.TextTruncate.None
 	header.TextWrapped = false
 	header.TextXAlignment = Enum.TextXAlignment.Left
@@ -109,7 +111,7 @@ return function(icon)
 	)
 	labelContent.Text = ""
 	labelContent.TextColor3 = Color3.fromRGB(189, 190, 190)
-	labelContent.TextSize = 14
+	labelContent.TextSize = TEXT_SIZE
 	labelContent.AutomaticSize = Enum.AutomaticSize.X
 	labelContent.BackgroundTransparency = 1
 	labelContent.Position = UDim2.fromOffset(0, -1)
@@ -120,7 +122,7 @@ return function(icon)
 	local caret = Instance.new("ImageLabel")
 	caret.Name = "Caret"
 	caret.Image = "rbxasset://LuaPackages/Packages/_Index/UIBlox/UIBlox/AppImageAtlas/img_set_1x_1.png"
-	caret.ImageColor3 = Color3.fromRGB(101, 102, 104)
+	caret.ImageColor3 = CAPTION_COLOR
 	caret.ImageRectOffset = Vector2.new(260, 440)
 	caret.ImageRectSize = Vector2.new(16, 8)
 	caret.AnchorPoint = Vector2.new(0, 0.5)

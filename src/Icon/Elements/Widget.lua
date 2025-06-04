@@ -37,6 +37,7 @@ return function(icon, Icon)
 
 	local iconCorner = Instance.new("UICorner")
 	iconCorner:SetAttribute("Collective", "IconCorners")
+	iconCorner.Name = "UICorner"
 	iconCorner.Parent = button
 
 	local menu = require(script.Parent.Menu)(icon)
@@ -57,6 +58,7 @@ return function(icon, Icon)
 	iconSpotCorner.Parent = iconSpot
 
 	local overlay = iconSpot:Clone()
+	overlay.UICorner.Name = "OverlayUICorner"
 	overlay.Name = "IconOverlay"
 	overlay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	overlay.ZIndex = iconSpot.ZIndex + 1

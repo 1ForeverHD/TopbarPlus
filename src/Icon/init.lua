@@ -260,8 +260,9 @@ function Icon.new()
 	-- It's important we set an order otherwise icons will not align
 	-- correctly within menus
 	totalCreatedIcons += 1
-	local ourOrder = totalCreatedIcons
-	self:setOrder(ourOrder)
+	local ourOrder = 1+(totalCreatedIcons*0.01)
+	self:setOrder(ourOrder, "deselected")
+	self:setOrder(ourOrder, "selected")
 
 	-- This applies the default them
 	self:setTheme(Icon.baseTheme)
@@ -734,7 +735,11 @@ function Icon:setLabel(text, iconState)
 end
 
 function Icon:setOrder(int, iconState)
-	self:modifyTheme({"Widget", "LayoutOrder", int, iconState})
+	-- We multiply by 100 to allow for custom increments inbetween
+	-- (.01, .02, etc) as LayoutOrders only support integers
+	local newInt = int*100
+	self:modifyTheme({"IconSpot", "LayoutOrder", newInt, iconState})
+	self:modifyTheme({"Widget", "LayoutOrder", newInt, iconState})
 	return self
 end
 
@@ -791,8 +796,6 @@ function Icon:setWidth(offsetMinimum, iconState)
 	-- This sets a minimum X offset size for the widget, useful
 	-- for example if you're constantly changing the label
 	-- but don't want the icon to resize every time
-	local newSize = UDim2.fromOffset(offsetMinimum, self.widget.Size.Y.Offset)
-	self:modifyTheme({"Widget", "Size", newSize, iconState})
 	self:modifyTheme({"Widget", "DesiredWidth", offsetMinimum, iconState})
 	return self
 end
@@ -915,8 +918,8 @@ function Icon:call(callback, ...)
 	return self
 end
 
-function Icon:addToJanitor(object, methodName, index)
-	self.janitor:add(object, methodName, index)
+function Icon:addToJanitor(callback, methodName, index)
+	self.janitor:add(callback, methodName, index)
 	return self
 end
 

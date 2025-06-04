@@ -93,6 +93,9 @@ Icon.new()
 
 <a><img src="https://i.imgur.com/ZMt6bhr.gif" width="50%"/></a>
 
+!!! warning
+	Icons containing a dropdown can join other menus but not dropdowns.
+
 ------------------------------
 
 ### Menus

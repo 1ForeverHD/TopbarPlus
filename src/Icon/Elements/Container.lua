@@ -5,7 +5,7 @@ return function(Icon)
 	local container = {}
 	local guiInset = GuiService:GetGuiInset()
 	local isConsoleScreen = GuiService:IsTenFootInterface()
-	local startInset = if isOldTopbar then 12 else guiInset.Y - (44 + 2)
+	local startInset = if isOldTopbar then 12 else guiInset.Y - 50
 	if isConsoleScreen then
 		startInset = 10
 	end
@@ -26,7 +26,7 @@ return function(Icon)
 	local holders = Instance.new("Frame")
 	local yDownOffset = if isOldTopbar then 2 else 0
 	local ySizeOffset = -2
-	if isConsoleScreen then
+	if GuiService.TopbarInset.Height == 0 then
 		yDownOffset += 13
 		ySizeOffset = 50
 	end
