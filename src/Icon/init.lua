@@ -666,6 +666,55 @@ function Icon:modifyChildTheme(modifications, modificationUID)
 	return self
 end
 
+function Icon:convertLabelToNumberSpinner(numberSpinner)
+	local label = self:getInstance("IconLabel")
+	label.Transparency = 1
+	numberSpinner.Parent = label.Parent
+	numberSpinner.Size = label.Parent.Size
+	numberSpinner["TextXAlignment"] = Enum.TextXAlignment.Center
+
+	local propertiesToChangeLabel = {
+		"FontFace",
+		"BorderSizePixel",
+		"BorderColor3",
+		"Rotation",
+		"TextScaled",
+		"TextStrokeTransparency",
+		"TextStrokeColor3",
+		"TextStrokeTransparency",
+		"TextYAlignment",
+		"TextSize",
+		"TextColor3",
+		"AnchorPoint",
+	}
+	for i, property in propertiesToChangeLabel do
+		numberSpinner[property] = label[property]
+	end
+
+	local invalidProperties = {
+		"TextBounds",
+		"TextFits",
+		"AbsolutePosition",
+		"AbsoluteSize",
+		"OpenTypeFeaturesError",
+		"GuiState",
+	}
+
+	self:addToJanitor(label.Parent:GetPropertyChangedSignal("Size"):Connect(function()
+		numberSpinner.Size = label.Parent.Size
+	end))
+
+	self:addToJanitor(label.Changed:Connect(function(property)
+		if table.find(invalidProperties, property) then
+			return
+		end
+		numberSpinner[property] = label[property]
+	end))
+
+	self:updateParent()
+	return self
+end
+
 function Icon:removeModification(modificationUID)
 	Themes.remove(self, modificationUID)
 	return self
