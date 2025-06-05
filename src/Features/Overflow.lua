@@ -222,11 +222,11 @@ function Overflow.updateBoundary(alignment)
 	-- the boundary (if the central icon boundary is smaller than the alignment
 	-- boundary then we use the central)
 	local totalChecks = 0
+	local usingNearestCenter = false
 	local function checkToShiftCentralIcon()
 		local centerOrderedIcons = Overflow.getAvailableIcons("Center")
 		local centerPos = (isLeft and 1) or #centerOrderedIcons
 		local nearestCenterIcon = centerOrderedIcons[centerPos]
-		local usingNearestCenter = false
 		if nearestCenterIcon and not nearestCenterIcon.hasRelocatedInOverflow then
 			local ourNearestIcon = (isLeft and ourOrderedIcons[#ourOrderedIcons]) or (isRight and ourOrderedIcons[1])
 			local centralNearestXPos = nearestCenterIcon.widget.AbsolutePosition.X

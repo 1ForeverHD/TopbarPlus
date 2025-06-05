@@ -461,7 +461,7 @@ function Icon.new()
 	-- Call icon added
 	Icon.iconAdded:Fire(self)
 
-	return self :: Types.Icon
+	return self
 end
 
 
