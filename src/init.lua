@@ -65,7 +65,7 @@ local Attribute = require(iconModule.Attribute)
 local Themes = require(iconModule.Features.Themes)
 local Gamepad = require(iconModule.Features.Gamepad)
 local Overflow = require(iconModule.Features.Overflow)
-local Types = require(iconModule.Types)
+local Types = require(script.Types)
 local Icon = {}
 Icon.__index = Icon
 
@@ -1086,4 +1086,4 @@ Icon.Destroy = Icon.destroy
 
 
 
-return Icon
+return (Icon :: any) :: Types.StaticIcon
