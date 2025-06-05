@@ -14,6 +14,7 @@ local GuiService = game:GetService("GuiService")
 
 
 -- LOCAL
+local DEFAULT_HIGHLIGHT_KEY = Enum.KeyCode.DPadUp -- The default key to highlight the topbar icon
 local Gamepad = {}
 local Icon
 
@@ -25,7 +26,7 @@ function Gamepad.start(incomingIcon)
 	
 	-- Public variables
 	Icon = incomingIcon
-	Icon.highlightKey = Enum.KeyCode.DPadUp -- What controller key to highlight the topbar (or set to false to disable)
+	Icon.highlightKey = if Icon.highlightKey ~= nil then Icon.highlightKey else DEFAULT_HIGHLIGHT_KEY -- What controller key to highlight the topbar (or set to false to disable)
 	Icon.highlightIcon = false -- Change to a specific icon if you'd like to highlight a specific icon instead of the left-most
 	
 	-- We defer so the developer can make changes before the
@@ -43,8 +44,8 @@ function Gamepad.start(incomingIcon)
 		-- This enables users to instantly open up their last selected icon
 		local previousHighlightedIcon
 		local iconDisplayingHighlightKey
-		local usedIndicatorOnce = false
-		local usedBOnce = false
+		local usedIndicatorOnce = DEFAULT_HIGHLIGHT_KEY ~= Icon.highlightKey
+		local usedBOnce = DEFAULT_HIGHLIGHT_KEY ~= Icon.highlightKey
 		local Utility = require(script.Parent.Parent.Utility)
 		local Selection = require(script.Parent.Parent.Elements.Selection)
 		local function updateSelectedObject()

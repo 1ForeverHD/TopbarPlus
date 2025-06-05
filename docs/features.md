@@ -238,10 +238,10 @@ Icon.new()
 
 ### Gamepad & Console Support
 
-TopbarPlus comes with inbuilt support for gamepads (such as XBbox and PlayStation
+TopbarPlus comes with inbuilt support for gamepads (such as Xbox and PlayStation
 controllers) and console screens:
 
-<a><img src="https://i.vgy.me/rubQ84.gif" width="100%"/></a>
+<a><img src="https://i.imgur.com/N0n2Zau.gif" width="100%"/></a>
 
 To highlight the last-selected icon (or left-most if none have been selected yet) users simply press DPadUp or navigate to the topbar via the virtual cursor.
 To change the default trigger keycode (from DPadUp) do:
@@ -254,7 +254,7 @@ Icon.highlightKey = Enum.KeyCode.NEW_KEYCODE
 ### Overflows
 When accounting for device types and screen sizes, icons may occasionally overlap. This is especially common for phones when they enter portrait mode. TopbarPlus solves this with overflows:
 
-<a><img src="https://i.vgy.me/Bd4qi2.gif" width="100%"/></a>
+<a><img src="https://i.imgur.com/9jrHBaJ.gif" width="100%"/></a>
 
 Overflows will appear when left-set or right-set icons exceed the boundary of the closest opposite-aligned icon or viewport.
 

@@ -12,6 +12,20 @@ return function(icon)
 	dropdown.ClipsDescendants = true
 	dropdown.Parent = icon.widget
 
+	-- Account for PreferredTransparency which can be set by every player
+	local GuiService = game:GetService("GuiService")
+	icon:setBehaviour("Dropdown", "BackgroundTransparency", function(value)
+		local preference = GuiService.PreferredTransparency
+		local newValue = value * preference
+		if value == 1 then
+			return value
+		end
+		return newValue
+	end)
+	icon.janitor:add(GuiService:GetPropertyChangedSignal("PreferredTransparency"):Connect(function()
+		icon:refreshAppearance(dropdown, "BackgroundTransparency")
+	end))
+
 	local UICorner = Instance.new("UICorner")
 	UICorner.Name = "DropdownCorner"
 	UICorner.CornerRadius = UDim.new(0, 10)

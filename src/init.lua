@@ -34,10 +34,7 @@
 
 
 -- SERVICES
-local LocalizationService = game:GetService("LocalizationService")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local TextService = game:GetService("TextService")
 local StarterGui = game:GetService("StarterGui")
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
@@ -68,6 +65,7 @@ local Attribute = require(iconModule.Attribute)
 local Themes = require(iconModule.Features.Themes)
 local Gamepad = require(iconModule.Features.Gamepad)
 local Overflow = require(iconModule.Features.Overflow)
+local Types = require(iconModule.Types)
 local Icon = {}
 Icon.__index = Icon
 
@@ -76,7 +74,6 @@ Icon.__index = Icon
 --- LOCAL
 local localPlayer = Players.LocalPlayer
 local themes = iconModule.Features.Themes
-local playerGui = localPlayer:WaitForChild("PlayerGui")
 local iconsDict = {}
 local anyIconSelected = Signal.new()
 local elements = iconModule.Elements
@@ -84,21 +81,11 @@ local totalCreatedIcons = 0
 
 
 
--- PRESETUP
--- This is only used to determine if we need to apply the old topbar theme
--- I'll be removing this and associated functions once all games have
--- fully transitioned over to the new topbar
-if GuiService.TopbarInset.Height == 0 then
-	GuiService:GetPropertyChangedSignal("TopbarInset"):Wait()
-end
-
-
-
 -- PUBLIC VARIABLES
 Icon.baseDisplayOrderChanged = Signal.new()
 Icon.baseDisplayOrder = 10
 Icon.baseTheme = require(themes.Default)
-Icon.isOldTopbar = GuiService.TopbarInset.Height == 36
+Icon.isOldTopbar = false --Old topbar is now gone, GuiService.TopbarInset.Height == 36
 Icon.iconsDictionary = iconsDict
 Icon.container = require(elements.Container)(Icon)
 Icon.topbarEnabled = true
@@ -166,12 +153,19 @@ end
 -- SETUP
 task.defer(Gamepad.start, Icon)
 task.defer(Overflow.start, Icon)
-for _, screenGui in pairs(Icon.container) do
-	screenGui.Parent = playerGui
-end
-if Icon.isOldTopbar then
-	Icon.modifyBaseTheme(require(themes.Classic))
-end
+task.defer(function()
+	local playerGui = localPlayer:WaitForChild("PlayerGui")
+	for _, screenGui in pairs(Icon.container) do
+		screenGui.Parent = playerGui
+	end
+	if GuiService.TopbarInset.Height == 0 then
+		GuiService:GetPropertyChangedSignal("TopbarInset"):Wait()
+	end
+	Icon.isOldTopbar = false --GuiService.TopbarInset.Height == 36
+	if Icon.isOldTopbar then
+		Icon.modifyBaseTheme(require(themes.Classic))
+	end
+end)
 
 
 
@@ -467,7 +461,7 @@ function Icon.new()
 	-- Call icon added
 	Icon.iconAdded:Fire(self)
 
-	return self
+	return self :: Types.Icon
 end
 
 

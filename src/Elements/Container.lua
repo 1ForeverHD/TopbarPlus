@@ -1,16 +1,39 @@
 return function(Icon)
 	
 	local GuiService = game:GetService("GuiService")
+	local isConsoleScreen = GuiService:IsTenFootInterface()
 	local isOldTopbar = Icon.isOldTopbar
 	local container = {}
+
+	-- Has to be included for the time being due to this bug mentioned here:
+	-- https://devforum.roblox.com/t/bug/2973508/7
+	local Signal = require(script.Parent.Parent.Packages.GoodSignal)
+	local insetChanged = Signal.new()
 	local guiInset = GuiService:GetGuiInset()
-	local isConsoleScreen = GuiService:IsTenFootInterface()
-	local startInset = if isOldTopbar then 12 else guiInset.Y - 50
-	if isConsoleScreen then
-		startInset = 10
+	local startInset = 0
+	local yDownOffset = 0
+	local ySizeOffset = 0
+	local function checkInset()
+		guiInset = GuiService:GetGuiInset()
+		startInset = if isOldTopbar then 12 else guiInset.Y - 50
+		yDownOffset = if isOldTopbar then 2 else 0
+		ySizeOffset = -2
+		if isConsoleScreen then
+			startInset = 10
+		end
+		if GuiService.TopbarInset.Height == 0 then
+			yDownOffset += 13
+			ySizeOffset = 50
+		end
+		insetChanged:Fire(guiInset)
 	end
+	GuiService:GetPropertyChangedSignal("TopbarInset"):Connect(checkInset)
+	checkInset()
+
 	local screenGui = Instance.new("ScreenGui")
-	screenGui:SetAttribute("StartInset", startInset)
+	insetChanged:Connect(function()
+		screenGui:SetAttribute("StartInset", startInset)
+	end)
 	screenGui.Name = "TopbarStandard"
 	screenGui.Enabled = true
 	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -24,23 +47,18 @@ return function(Icon)
 	end)
 
 	local holders = Instance.new("Frame")
-	local yDownOffset = if isOldTopbar then 2 else 0
-	local ySizeOffset = -2
-	if GuiService.TopbarInset.Height == 0 then
-		yDownOffset += 13
-		ySizeOffset = 50
-	end
 	holders.Name = "Holders"
 	holders.BackgroundTransparency = 1
-	holders.Position = UDim2.new(0, 0, 0, yDownOffset)
-	holders.Size = UDim2.new(1, 0, 1, ySizeOffset)
+	insetChanged:Connect(function()
+		holders.Position = UDim2.new(0, 0, 0, yDownOffset)
+		holders.Size = UDim2.new(1, 0, 1, ySizeOffset)
+	end)
 	holders.Visible = true
 	holders.ZIndex = 1
 	holders.Parent = screenGui
 	
 	local screenGuiCenter = screenGui:Clone()
 	local holdersCenter = screenGuiCenter.Holders
-	local GuiService = game:GetService("GuiService")
 	local function updateCenteredHoldersHeight()
 		holdersCenter.Size = UDim2.new(1, 0, 0, GuiService.TopbarInset.Height+ySizeOffset)
 	end
@@ -50,7 +68,8 @@ return function(Icon)
 		screenGuiCenter.DisplayOrder = Icon.baseDisplayOrder
 	end)
 	container[screenGuiCenter.Name] = screenGuiCenter
-	GuiService:GetPropertyChangedSignal("TopbarInset"):Connect(updateCenteredHoldersHeight)
+	
+	insetChanged:Connect(updateCenteredHoldersHeight)
 	updateCenteredHoldersHeight()
 	
 	local screenGuiClipped = screenGui:Clone()
@@ -87,7 +106,9 @@ return function(Icon)
 	local left = Instance.new("ScrollingFrame")
 	left:SetAttribute("IsAHolder", true)
 	left.Name = "Left"
-	left.Position = UDim2.fromOffset(startInset, 0)
+	insetChanged:Connect(function()
+		left.Position = UDim2.fromOffset(startInset, 0)
+	end)
 	left.Size = UDim2.new(1, holderReduction, 1, 0)
 	left.BackgroundTransparency = 1
 	left.Visible = true
@@ -106,7 +127,9 @@ return function(Icon)
 	left.Parent = holders
 	
 	local UIListLayout = Instance.new("UIListLayout")
-	UIListLayout.Padding = UDim.new(0, startInset)
+	insetChanged:Connect(function()
+		UIListLayout.Padding = UDim.new(0, startInset)
+	end)
 	UIListLayout.FillDirection = Enum.FillDirection.Horizontal
 	UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
@@ -114,17 +137,26 @@ return function(Icon)
 	UIListLayout.Parent = left
 	
 	local center = left:Clone()
+	insetChanged:Connect(function()
+		center.UIListLayout.Padding = UDim.new(0, startInset)
+	end)
 	center.ScrollingEnabled = false
 	center.UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	center.Name = "Center"
 	center.Parent = holdersCenter
 	
 	local right = left:Clone()
+	insetChanged:Connect(function()
+		right.UIListLayout.Padding = UDim.new(0, startInset)
+	end)
 	right.UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
 	right.Name = "Right"
 	right.AnchorPoint = Vector2.new(1, 0)
 	right.Position = UDim2.new(1, -12, 0, 0)
 	right.Parent = holders
+
+	-- This is important so that all elements update instantly
+	insetChanged:Fire(guiInset)
 
 	return container
 end

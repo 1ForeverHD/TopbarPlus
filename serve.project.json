@@ -10,7 +10,10 @@
                 "$className": "Folder",
 
                 "Icon": {
-                    "$path": "src"
+                    "$path": "src",
+					"PackageLink": {
+                        "$path": "PackageLink.model.json"
+                    }
                 }
             }
         }

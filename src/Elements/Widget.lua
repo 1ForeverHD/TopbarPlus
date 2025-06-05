@@ -35,6 +35,20 @@ return function(icon, Icon)
 		end)
 	end)
 
+	-- Account for PreferredTransparency which can be set by every player
+	local GuiService = game:GetService("GuiService")
+	icon:setBehaviour("IconButton", "BackgroundTransparency", function(value)
+		local preference = GuiService.PreferredTransparency
+		local newValue = value * preference
+		if value == 1 then
+			return value
+		end
+		return newValue
+	end)
+	icon.janitor:add(GuiService:GetPropertyChangedSignal("PreferredTransparency"):Connect(function()
+		icon:refreshAppearance(button, "BackgroundTransparency")
+	end))
+
 	local iconCorner = Instance.new("UICorner")
 	iconCorner:SetAttribute("Collective", "IconCorners")
 	iconCorner.Name = "UICorner"
@@ -333,7 +347,6 @@ return function(icon, Icon)
 				local ContentProvider = game:GetService("ContentProvider")
 				local assets = {fontLink}
 				ContentProvider:PreloadAsync(assets)
-				print("FONT LOADED!!!")
 			end--]]
 
 			-- Afaik there's no way to determine when a Font Family has
@@ -386,6 +399,22 @@ return function(icon, Icon)
 		updateBorderSize()
 	end)
 
+	-- Localization support (refresh icon size whenever player changes language changes in-game)
+	local Players = game:GetService("Players")
+	local localPlayer = Players.LocalPlayer
+	local lastLocaleId = localPlayer.LocaleId
+	icon.janitor:add(localPlayer:GetPropertyChangedSignal("LocaleId"):Connect(function()
+		task.delay(0.2, function()
+			local newLocaleId = localPlayer.LocaleId
+			if newLocaleId ~= lastLocaleId then
+				lastLocaleId = newLocaleId
+				icon:refresh()
+				task.wait(0.5)
+				icon:refresh()
+			end
+		end)
+	end))
+	
 	local iconImageScale = Instance.new("NumberValue")
 	iconImageScale.Name = "IconImageScale"
 	iconImageScale.Parent = iconImage
