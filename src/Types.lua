@@ -1,54 +1,20 @@
 --!strict
 
--- GoodEvent Types
+-- GoodSignal Types (...but simpler!)
 
 --- Connection
 
-type ConnectionImpl<Variant... = ...any> = {
-	__index: ConnectionImpl<Variant...>,
-
-	new: (signal: Signal<Variant...>, fn: (Variant...) -> ()) -> Connection<Variant...>,
-
+type Connection<Variant... = ...any> = {
 	Disconnect: (self: Connection<Variant...>) -> (),
 }
 
-type ConnectionProto<Variant... = ...any> = {
-	_connected: boolean,
-	_signal: Signal<Variant...>,
-	_fn: (Variant...) -> (),
-	_next: false | Connection<Variant...>,
-}
-
-export type Connection<Variant... = ...any> = typeof(setmetatable(
-	{} :: ConnectionProto<Variant...>,
-	{} :: ConnectionImpl<Variant...>
-	))
-
 --- Signal
 
-type SignalImpl<Variant... = ...any> = {
-	__index: SignalImpl<Variant...>,
-
-	-- TODO: Implement below when luau supports this kind of recursive type
-	-- TODO: <T...>() -> Signal<T...>
-	new: () -> Signal<Variant...>,
-
+type Signal<Variant... = ...any> = {
 	Connect: (self: Signal<Variant...>, func: (Variant...) -> ()) -> Connection<Variant...>,
-	DisconnectAll: (self: Signal<Variant...>) -> (),
-
-	Fire: (self: Signal<Variant...>, Variant...) -> (),
+    Once: (self: Signal<Variant...>, func: (Variant...) -> ()) -> Connection<Variant...>,
 	Wait: (self: Signal<Variant...>) -> Variant...,
-	Once: (self: Signal<Variant...>, func: (Variant...) -> ()) -> Connection<Variant...>,
 }
-
-type SignalProto<Variant... = ...any> = {
-	_handlerListHead: false | Connection<Variant...>,
-}
-
-export type Signal<Variant... = ...any> = typeof(setmetatable(
-	{} :: SignalProto<Variant...>,
-	{} :: SignalImpl<Variant...>
-	))
 
 ----------------------
 
