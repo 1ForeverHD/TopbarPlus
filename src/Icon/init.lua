@@ -698,10 +698,14 @@ function Icon:convertLabelToNumberSpinner(numberSpinner)
 		numberSpinner.Size = label.Parent.Size
 	end))
 
+	local minDigits = 3
+	local maxDigits = 8
 	local function getTotalDigitXSize()
 		local TotalSize = 0
+		local numOfDigits = 0
 		for i, child in numberSpinner.Frame:GetChildren() do
 			local name = string.lower(child.Name)
+			numOfDigits += 1
 			if name == "digit" then
 				TotalSize += child.AbsoluteSize.X
 			elseif name == "prefix" or name == "suffix" or name == "comma" then
@@ -710,19 +714,23 @@ function Icon:convertLabelToNumberSpinner(numberSpinner)
 				end
 			end
 		end
-		return TotalSize
+		return TotalSize, numOfDigits
 	end
 	local function adjustSizeForChildAdded()
 		local function getLabelParentContainerXSize()
 			return label.Parent.Parent.Parent.Size.X.Offset
 		end
 
-		local totalDigitXSize = getTotalDigitXSize()
+		local totalDigitXSize, numOfDigits = getTotalDigitXSize()
 		local labelParentContainerXSize = getLabelParentContainerXSize()
 		while totalDigitXSize > labelParentContainerXSize do
-			task.wait(0.05)
+			task.wait()
 			numberSpinner.TextSize -= 1
-			totalDigitXSize = getTotalDigitXSize()
+			totalDigitXSize, numOfDigits = getTotalDigitXSize()
+			if numOfDigits < maxDigits then
+				numberSpinner.TextSize = label.TextSize
+				break
+			end
 			labelParentContainerXSize = getLabelParentContainerXSize()
 		end
 	end
@@ -731,13 +739,17 @@ function Icon:convertLabelToNumberSpinner(numberSpinner)
 			return numberSpinner.Frame.Size.X.Offset
 		end
 
-		local totalDigitXSize = getTotalDigitXSize()
+		local totalDigitXSize, numOfDigits = getTotalDigitXSize()
 
 		local NumberSpinnerXSize = getNumberSpinnerXSize()
 		while totalDigitXSize < NumberSpinnerXSize do
-			task.wait(0.05)
+			task.wait(0)
 			numberSpinner.TextSize += 1
-			totalDigitXSize = getTotalDigitXSize()
+			totalDigitXSize, numOfDigits = getTotalDigitXSize()
+			if numOfDigits > minDigits then
+				numberSpinner.TextSize = label.TextSize
+				break
+			end
 			NumberSpinnerXSize = getNumberSpinnerXSize()
 		end
 	end
