@@ -664,106 +664,6 @@ function Icon:modifyChildTheme(modifications, modificationUID)
 	return self
 end
 
-function Icon:convertLabelToNumberSpinner(numberSpinner)
-	local label = self:getInstance("IconLabel")
-	label.Transparency = 1
-	numberSpinner.Parent = label.Parent
-	numberSpinner.Size = label.Parent.Size
-	numberSpinner["TextXAlignment"] = Enum.TextXAlignment.Center
-	numberSpinner["ClipsDescendants"] = false
-
-	local propertiesToChangeLabel = {
-		"FontFace",
-		"BorderSizePixel",
-		"BorderColor3",
-		"Rotation",
-		"TextStrokeTransparency",
-		"TextStrokeColor3",
-		"TextStrokeTransparency",
-		"TextColor3",
-	}
-	for i, property in propertiesToChangeLabel do
-		numberSpinner[property] = label[property]
-	end
-
-	for index, property in propertiesToChangeLabel do
-		self:addToJanitor(label:GetPropertyChangedSignal(property):Connect(function()
-			numberSpinner[property] = label[property]
-		end))
-	end
-
-	self:addToJanitor(label.Parent:GetPropertyChangedSignal("Size"):Connect(function()
-		numberSpinner.Size = label.Parent.Size
-	end))
-
-	local minDigits = 3
-	local maxDigits = 8
-	local function getTotalDigitXSize()
-		local TotalSize = 0
-		local numOfDigits = 0
-		for i, child in numberSpinner.Frame:GetChildren() do
-			local name = string.lower(child.Name)
-			numOfDigits += 1
-			if name == "digit" then
-				TotalSize += child.AbsoluteSize.X
-			elseif name == "prefix" or name == "suffix" or name == "comma" then
-				if child.Text ~= "" then
-					TotalSize += child.AbsoluteSize.X
-				end
-			end
-		end
-		return TotalSize, numOfDigits
-	end
-	local function adjustSizeForChildAdded()
-		local function getLabelParentContainerXSize()
-			return label.Parent.Parent.Parent.Size.X.Offset
-		end
-
-		local totalDigitXSize, numOfDigits = getTotalDigitXSize()
-		local labelParentContainerXSize = getLabelParentContainerXSize()
-		while totalDigitXSize > labelParentContainerXSize do
-			task.wait()
-			numberSpinner.TextSize -= 1
-			totalDigitXSize, numOfDigits = getTotalDigitXSize()
-			if numOfDigits < maxDigits then
-				numberSpinner.TextSize = label.TextSize
-				break
-			end
-			labelParentContainerXSize = getLabelParentContainerXSize()
-		end
-	end
-	local function adjustSizeForChildRemoved()
-		local function getNumberSpinnerXSize()
-			return numberSpinner.Frame.Size.X.Offset
-		end
-
-		local totalDigitXSize, numOfDigits = getTotalDigitXSize()
-
-		local NumberSpinnerXSize = getNumberSpinnerXSize()
-		while totalDigitXSize < NumberSpinnerXSize do
-			task.wait(0)
-			numberSpinner.TextSize += 1
-			totalDigitXSize, numOfDigits = getTotalDigitXSize()
-			if numOfDigits > minDigits then
-				numberSpinner.TextSize = label.TextSize
-				break
-			end
-			NumberSpinnerXSize = getNumberSpinnerXSize()
-		end
-	end
-
-	self:addToJanitor(numberSpinner.Frame.ChildAdded:Connect(adjustSizeForChildAdded))
-	self:addToJanitor(numberSpinner.Frame.ChildRemoved:Connect(adjustSizeForChildRemoved))
-	self:addToJanitor(self.iconAdded:Connect(function()
-		task.wait(1)
-		adjustSizeForChildAdded()
-		adjustSizeForChildRemoved()
-	end))
-
-	self:updateParent()
-	return self
-end
-
 function Icon:removeModification(modificationUID)
 	Themes.remove(self, modificationUID)
 	return self
@@ -1168,6 +1068,116 @@ function Icon:setIndicator(keyCode)
 		self.indicator = indicator
 	end
 	self.indicatorSet:Fire(keyCode)
+end
+
+function Icon:convertLabelToNumberSpinner(numberSpinner)
+	local label = self:getInstance("IconLabel")
+	label.Transparency = 1
+	numberSpinner.Parent = label.Parent
+	numberSpinner.Size = label.Parent.Size
+	numberSpinner["TextXAlignment"] = Enum.TextXAlignment.Center
+	numberSpinner["ClipsDescendants"] = false
+
+	local propertiesToChangeLabel = {
+		"FontFace",
+		"BorderSizePixel",
+		"BorderColor3",
+		"Rotation",
+		"TextStrokeTransparency",
+		"TextStrokeColor3",
+		"TextStrokeTransparency",
+		"TextColor3",
+	}
+	for i, property in propertiesToChangeLabel do
+		numberSpinner[property] = label[property]
+	end
+
+	for index, property in propertiesToChangeLabel do
+		self:addToJanitor(label:GetPropertyChangedSignal(property):Connect(function()
+			numberSpinner[property] = label[property]
+		end))
+	end
+
+	self:addToJanitor(label.Parent:GetPropertyChangedSignal("Size"):Connect(function()
+		numberSpinner.Size = label.Parent.Size
+	end))
+
+	local minDigits = 3
+	local maxDigits = 8
+	local function getTotalDigitXSize()
+		local TotalSize = 0
+		local numOfDigits = 0
+		for i, child in numberSpinner.Frame:GetChildren() do
+			local name = string.lower(child.Name)
+			numOfDigits += 1
+			if name == "digit" then
+				TotalSize += child.AbsoluteSize.X
+			elseif name == "prefix" or name == "suffix" or name == "comma" then
+				if child.Text ~= "" then
+					TotalSize += child.AbsoluteSize.X
+				end
+			end
+		end
+		return TotalSize, numOfDigits
+	end
+	local function adjustSizeForChildAdded()
+		local function getLabelParentContainerXSize()
+			return label.Parent.Parent.Parent.Size.X.Offset
+		end
+
+		local totalDigitXSize, numOfDigits = getTotalDigitXSize()
+		local labelParentContainerXSize = getLabelParentContainerXSize()
+		while totalDigitXSize > labelParentContainerXSize do
+			task.wait()
+			numberSpinner.TextSize -= 1
+			totalDigitXSize, numOfDigits = getTotalDigitXSize()
+			if numOfDigits < maxDigits then
+				numberSpinner.TextSize = label.TextSize
+				break
+			end
+			labelParentContainerXSize = getLabelParentContainerXSize()
+		end
+	end
+	local function adjustSizeForChildRemoved()
+		local function getNumberSpinnerXSize()
+			return numberSpinner.Frame.Size.X.Offset
+		end
+
+		local totalDigitXSize, numOfDigits = getTotalDigitXSize()
+
+		local NumberSpinnerXSize = getNumberSpinnerXSize()
+		while totalDigitXSize < NumberSpinnerXSize do
+			task.wait(0)
+			numberSpinner.TextSize += 1
+			totalDigitXSize, numOfDigits = getTotalDigitXSize()
+			if numOfDigits > minDigits then
+				numberSpinner.TextSize = label.TextSize
+				break
+			end
+			NumberSpinnerXSize = getNumberSpinnerXSize()
+		end
+	end
+
+	self:addToJanitor(numberSpinner.Frame.ChildAdded:Connect(adjustSizeForChildAdded))
+	self:addToJanitor(numberSpinner.Frame.ChildRemoved:Connect(adjustSizeForChildRemoved))
+	self:addToJanitor(self.iconAdded:Connect(function()
+		task.wait(1)
+		adjustSizeForChildAdded()
+		adjustSizeForChildRemoved()
+	end))
+
+	self:updateParent()
+
+	-- This corrects text to the size of a normal label
+	numberSpinner.Name = "LabelSpinner"
+	numberSpinner.Prefix = "$"
+	numberSpinner.Commas = true
+	numberSpinner.Decimals = 0
+	numberSpinner.Duration = 0.25
+	numberSpinner.Value = 10
+	task.wait(0.2)
+
+	return self
 end
 
 

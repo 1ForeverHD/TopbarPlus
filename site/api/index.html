@@ -746,6 +746,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#convertlabeltonumberspinner" class="md-nav__link">
+    convertLabelToNumberSpinner
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#destroy" class="md-nav__link">
     destroy
   </a>
@@ -1271,6 +1278,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#convertlabeltonumberspinner" class="md-nav__link">
+    convertLabelToNumberSpinner
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#destroy" class="md-nav__link">
     destroy
   </a>
@@ -1669,6 +1683,31 @@ Joins the menu of <code>parentIcon</code>. This is what <code>icon:setMenu</code
 <div class="highlight"><pre><span></span><code><span class="n">icon</span><span class="p">:</span><span class="n">leave</span><span class="p">()</span>
 </code></pre></div>
 Unparents an icon from a parentIcon if it belongs to a dropdown or menu.</p>
+<hr />
+<h4 id="convertlabeltonumberspinner">convertLabelToNumberSpinner<a class="headerlink" href="#convertlabeltonumberspinner" title="Permanent link">&para;</a></h4>
+<p>{chainable}
+<div class="highlight"><pre><span></span><code><span class="n">icon</span><span class="p">:</span><span class="n">convertLabelToNumberSpinner</span><span class="p">(</span><span class="n">numberSpinner</span><span class="p">)</span>
+</code></pre></div>
+Accepts a <a href="https://devforum.roblox.com/t/numberspinner-module/1105961">numberSpinner</a> and converts the icon's label into that spinner. For example:
+<div class="highlight"><pre><span></span><code><span class="n">Icon</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
+    <span class="p">:</span><span class="n">align</span><span class="p">(</span><span class="s2">&quot;Right&quot;</span><span class="p">)</span>
+    <span class="p">:</span><span class="n">setLabel</span><span class="p">(</span><span class="s2">&quot;Points&quot;</span><span class="p">)</span>
+    <span class="p">:</span><span class="n">setWidth</span><span class="p">(</span><span class="mi">80</span><span class="p">)</span>
+    <span class="p">:</span><span class="n">call</span><span class="p">(</span><span class="kr">function</span><span class="p">(</span><span class="n">pointsIcon</span><span class="p">)</span>
+        <span class="kd">local</span> <span class="n">NumberSpinner</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="n">ReplicatedStorage</span><span class="p">.</span><span class="n">NumberSpinner</span><span class="p">)</span>
+        <span class="kd">local</span> <span class="n">numberSpinner</span> <span class="o">=</span> <span class="n">NumberSpinner</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
+        <span class="n">pointsIcon</span><span class="p">:</span><span class="n">convertLabelToNumberSpinner</span><span class="p">(</span><span class="n">numberSpinner</span><span class="p">)</span>
+        <span class="n">numberSpinner</span><span class="p">.</span><span class="n">Name</span> <span class="o">=</span> <span class="s2">&quot;LabelSpinner&quot;</span>
+        <span class="n">numberSpinner</span><span class="p">.</span><span class="n">Prefix</span> <span class="o">=</span> <span class="s2">&quot;$&quot;</span>
+        <span class="n">numberSpinner</span><span class="p">.</span><span class="n">Commas</span> <span class="o">=</span> <span class="kc">true</span>
+        <span class="n">numberSpinner</span><span class="p">.</span><span class="n">Decimals</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">numberSpinner</span><span class="p">.</span><span class="n">Duration</span> <span class="o">=</span> <span class="mf">0.25</span>
+        <span class="kr">while</span> <span class="kc">true</span> <span class="kr">do</span>
+            <span class="n">numberSpinner</span><span class="p">.</span><span class="n">Value</span> <span class="o">=</span> <span class="nb">math.random</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1000</span><span class="p">)</span>
+            <span class="n">task</span><span class="p">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="kr">end</span>
+    <span class="kr">end</span><span class="p">)</span>
+</code></pre></div></p>
 <hr />
 <h4 id="destroy">destroy<a class="headerlink" href="#destroy" title="Permanent link">&para;</a></h4>
 <p>{chainable}

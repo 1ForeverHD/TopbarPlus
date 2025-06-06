@@ -411,6 +411,14 @@ type Methods = {
 			return nil :: any
 		end
 	),
+	convertLabelToNumberSpinner: typeof(
+		--[[
+			Unparents an icon from a parentIcon if it belongs to a dropdown or menu.
+		]]
+		function(self: Icon, numberSpinner: any): Icon
+			return nil :: any
+		end
+	),
 	destroy: typeof(
 		--[[
 			Clears all connections and destroys all instances associated with the icon.

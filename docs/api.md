@@ -6,6 +6,7 @@
 [icon event]: https://1foreverhd.github.io/TopbarPlus/api/#events
 [menus]: https://1foreverhd.github.io/TopbarPlus/features/#menus
 [dropdowns]: https://1foreverhd.github.io/TopbarPlus/features/#dropdowns
+[numberSpinner]: https://devforum.roblox.com/t/numberspinner-module/1105961
 
 ## Functions
 
@@ -374,6 +375,34 @@ Joins the menu of `parentIcon`. This is what ``icon:setMenu`` calls internally o
 icon:leave()
 ```
 Unparents an icon from a parentIcon if it belongs to a dropdown or menu.
+
+----
+#### convertLabelToNumberSpinner
+{chainable}
+```lua
+icon:convertLabelToNumberSpinner(numberSpinner)
+```
+Accepts a [numberSpinner] and converts the icon's label into that spinner. For example:
+```lua
+Icon.new()
+	:align("Right")
+	:setLabel("Points")
+	:setWidth(80)
+	:call(function(pointsIcon)
+		local NumberSpinner = require(ReplicatedStorage.NumberSpinner)
+		local numberSpinner = NumberSpinner.new()
+		pointsIcon:convertLabelToNumberSpinner(numberSpinner)
+		numberSpinner.Name = "LabelSpinner"
+		numberSpinner.Prefix = "$"
+		numberSpinner.Commas = true
+		numberSpinner.Decimals = 0
+		numberSpinner.Duration = 0.25
+		while true do
+			numberSpinner.Value = math.random(1,1000)
+			task.wait(1)
+		end
+	end)
+```
 
 ----
 #### destroy
