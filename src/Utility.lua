@@ -323,6 +323,15 @@ function Utility.clipOutside(icon, instance)
 		local updatePropertyPatch = Utility.createStagger(0.5, updateProperty, true)
 		cloneJanitor:add(clone:GetPropertyChangedSignal(absoluteProperty):Connect(updatePropertyPatch))
 		
+		-- When the screenGui is resized (such as when chat is hidden/shown), we need
+		-- to update the position of the clone. Ths especially fixes the following:
+		-- https://devforum.roblox.com/t/bug/1017485/1732
+		if property == "Position" then
+			cloneJanitor:add(screenGui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+				updatePropertyStaggered()
+			end))
+		end
+
 	end
 	task.delay(0.1, checkIfOutsideParentXBounds)
 	checkIfOutsideParentXBounds()
@@ -423,7 +432,7 @@ function Utility.joinFeature(originalIcon, parentIcon, iconsArray, scrollingFram
 		originalIcon:setAlignment(originalIcon.originalAlignment)
 		originalIcon.parentIconUID = false
 		originalIcon.joinedFrame = false
-		originalIcon:setBehaviour("IconButton", "BackgroundTransparency", nil, true)
+		--originalIcon:setBehaviour("IconButton", "BackgroundTransparency", nil, true)
 		originalIcon:removeModification("JoinModification")
 		
 		local parentHasNoChildren = true

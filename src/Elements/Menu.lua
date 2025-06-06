@@ -100,17 +100,17 @@ return function(icon)
 		end
 
 		-- Change order of spot when alignment changes
-		local iconSpot = icon:getInstance("IconSpot")
 		local menuGap = icon:getInstance("MenuGap")
 		local function updateAlignent()
 			local alignment = icon.alignment
+			local spotIndex = -99999
+			local gapIndex = -99998
 			if alignment == "Right" then
-				iconSpot.LayoutOrder = 99999
-				menuGap.LayoutOrder = 99998
-			else
-				iconSpot.LayoutOrder = -99999
-				menuGap.LayoutOrder = -99998
+				spotIndex = 99999
+				gapIndex = 99998
 			end
+			icon:modifyTheme({"IconSpot", "LayoutOrder", spotIndex})
+			menuGap.LayoutOrder = gapIndex
 		end
 		menuJanitor:add(icon.alignmentChanged:Connect(updateAlignent))
 		updateAlignent()
@@ -154,8 +154,6 @@ return function(icon)
 				icon.startMenuUpdate:Fire()
 			end)
 		end
-		local iconButton = icon:getInstance("IconButton")
-		local previousButtonWidth = iconButton.AbsoluteSize.X
 		menuJanitor:add(menu.ChildAdded:Connect(startMenuUpdate))
 		menuJanitor:add(menu.ChildRemoved:Connect(startMenuUpdate))
 		menuJanitor:add(menu:GetAttributeChangedSignal("MaxIcons"):Connect(startMenuUpdate))
@@ -171,7 +169,6 @@ return function(icon)
 			otherIcon:destroy()
 		end
 		-- Apply new icons
-		local totalNewIcons = #arrayOfIcons
 		if type(arrayOfIcons) == "table" then
 			for i, otherIcon in pairs(arrayOfIcons) do
 				otherIcon:joinMenu(icon)

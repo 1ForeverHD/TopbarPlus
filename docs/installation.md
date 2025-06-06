@@ -1,7 +1,7 @@
 #### Take the model
 {recommended}
 
-1. Take the [TopbarPlus model](https://www.roblox.com/library/6311707237/TopbarPlus).
+1. Take the [TopbarPlus model](https://create.roblox.com/store/asset/92368439343389/TopbarPlus).
 2. Open the toolbox and navigate to Inventory -> My Models.
 3. Click TopbarPlus to insert into your game and place anywhere within ``ReplicatedStorage`` or ``Workspace``. 
 4. TopbarPlus is a package so you can update it instantly (instead of re-adding) by right-clicking the Icon module and selecting an option such as 'Get Latest Package':
@@ -19,7 +19,7 @@
     Try not to modify any code within the Icon package otherwise it will break the package link.
 
 !!! important
-    As of 27th March 2024 public packages haven't been rolled out by Roblox. Only after their full release will you be able to benefit from easily installable updates. For the time being, attempting to use 'Get Latest Package' and other package features will throw an error.
+    As of 7th June 2025 public packages haven't been rolled out by Roblox. Only after their full release will you be able to benefit from easily installable updates. For the time being, attempting to use 'Get Latest Package' and other package features will throw an error.
 
 -------------------------------------
 
@@ -35,7 +35,7 @@
 2. Visit the [TopbarPlus repository](https://github.com/1ForeverHD/TopbarPlus).
 3. Click *Fork* in the top right corner.
 4. Clone this fork into your local repository.
-5. Modify the ``default.project.json`` file to your desired location (by default TopbarPlus is built directly into ``ReplicatedStorage``).
+5. Modify the ``serve.project.json`` file to your desired location (by default TopbarPlus is built directly into ``Workspace``).
 6. Call ``rojo serve`` (terminal or VSC plugin) and connect to the rojo studio plugin.
 
 -------------------------------------

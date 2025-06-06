@@ -543,7 +543,7 @@
 <p>This constructs an empty <code>32x32</code> icon on the topbar.</p>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p>The order icons appear are determined by their construction sequence. Icons constructed first will have a smaller order therefore will appear left of icons with a higher order. You can modify this behaviour using <a href="https://1foreverhd.github.io/TopbarPlus/api/#setorder">icon:setOrder</a>.</p>
+<p>The order icons appear are determined by their construction sequence. Icons constructed first will have a smaller order therefore will appear left of icons with a higher order. You can modify this behaviour using <a href="https://1foreverhd.github.io/TopbarPlus/api/#setorder">icon:setOrder</a>. Icon orders by default are <code>1+(totalCreatedIcons*0.01)</code>, so 1.01, 1.02, 1.03, etc.</p>
 </div>
 <p>To add an image and label, do:
 <div class="highlight"><pre><span></span><code><span class="n">icon</span><span class="p">:</span><span class="n">setImage</span><span class="p">(</span><span class="n">imageId</span><span class="p">)</span>

@@ -1,0 +1,21 @@
+{
+    "name": "topbarplus",
+    "tree": {
+        "$className": "DataModel",
+
+        "Workspace": {
+            "$className": "Workspace",
+
+            "TopbarPlus": {
+                "$className": "Folder",
+
+                "Icon": {
+                    "$path": "src",
+					"PackageLink": {
+                        "$path": "PackageLink.model.json"
+                    }
+                }
+            }
+        }
+    }
+}

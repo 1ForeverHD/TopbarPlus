@@ -1,5 +1,4 @@
 [discussion thread]: https://devforum.roblox.com/t/topbarplus-v2-construct-dynamic-and-intuitive-topbar-icons/1017485
-[resources]: https://1foreverhd.github.io/TopbarPlus/resources/
 [Python]: https://www.python.org/
 [Material for MKDocs]: https://squidfunk.github.io/mkdocs-material/
 [ForeverHD on the devforum]: https://devforum.roblox.com/u/ForeverHD/summary
@@ -12,12 +11,12 @@
 - Aim to include a link to a stipped-down uncopylocked Roblox place which reproduces the bug.
 
 ## Questions and Feedback
-- Be sure to check out the documentation and [resources] first before asking a question.
+- Be sure to first check out the documentation before asking a question.
 - We recommend asking all questions and posting feedback to the [discussion thread].
 
 ## Submitting a resource (video tutorial, port, etc)
 - Fancy making a tutorial or resource for TopbarPlus? Feel free to get in touch and we can provide tips, best practices, etc.
-- We'll feature approved resources on the [resources] page and often the [discussion thread].
+- We'll feature approved resources on the [discussion thread].
 - To submit a resource, [open an issue], or reach out on the [discussion thread] or to [ForeverHD on the devforum].
 
 ## Suggestions and Code

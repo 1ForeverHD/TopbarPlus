@@ -34,10 +34,7 @@
 
 
 -- SERVICES
-local LocalizationService = game:GetService("LocalizationService")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local TextService = game:GetService("TextService")
 local StarterGui = game:GetService("StarterGui")
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
@@ -68,6 +65,7 @@ local Attribute = require(iconModule.Attribute)
 local Themes = require(iconModule.Features.Themes)
 local Gamepad = require(iconModule.Features.Gamepad)
 local Overflow = require(iconModule.Features.Overflow)
+local Types = require(script.Types)
 local Icon = {}
 Icon.__index = Icon
 
@@ -76,7 +74,6 @@ Icon.__index = Icon
 --- LOCAL
 local localPlayer = Players.LocalPlayer
 local themes = iconModule.Features.Themes
-local playerGui = localPlayer:WaitForChild("PlayerGui")
 local iconsDict = {}
 local anyIconSelected = Signal.new()
 local elements = iconModule.Elements
@@ -84,21 +81,11 @@ local totalCreatedIcons = 0
 
 
 
--- PRESETUP
--- This is only used to determine if we need to apply the old topbar theme
--- I'll be removing this and associated functions once all games have
--- fully transitioned over to the new topbar
-if GuiService.TopbarInset.Height == 0 then
-	GuiService:GetPropertyChangedSignal("TopbarInset"):Wait()
-end
-
-
-
 -- PUBLIC VARIABLES
 Icon.baseDisplayOrderChanged = Signal.new()
 Icon.baseDisplayOrder = 10
 Icon.baseTheme = require(themes.Default)
-Icon.isOldTopbar = GuiService.TopbarInset.Height == 36
+Icon.isOldTopbar = false --Old topbar is now gone, GuiService.TopbarInset.Height == 36
 Icon.iconsDictionary = iconsDict
 Icon.container = require(elements.Container)(Icon)
 Icon.topbarEnabled = true
@@ -166,12 +153,19 @@ end
 -- SETUP
 task.defer(Gamepad.start, Icon)
 task.defer(Overflow.start, Icon)
-for _, screenGui in pairs(Icon.container) do
-	screenGui.Parent = playerGui
-end
-if Icon.isOldTopbar then
-	Icon.modifyBaseTheme(require(themes.Classic))
-end
+task.defer(function()
+	local playerGui = localPlayer:WaitForChild("PlayerGui")
+	for _, screenGui in pairs(Icon.container) do
+		screenGui.Parent = playerGui
+	end
+	if GuiService.TopbarInset.Height == 0 then
+		GuiService:GetPropertyChangedSignal("TopbarInset"):Wait()
+	end
+	Icon.isOldTopbar = false --GuiService.TopbarInset.Height == 36
+	if Icon.isOldTopbar then
+		Icon.modifyBaseTheme(require(themes.Classic))
+	end
+end)
 
 
 
@@ -260,8 +254,9 @@ function Icon.new()
 	-- It's important we set an order otherwise icons will not align
 	-- correctly within menus
 	totalCreatedIcons += 1
-	local ourOrder = totalCreatedIcons
-	self:setOrder(ourOrder)
+	local ourOrder = 1+(totalCreatedIcons*0.01)
+	self:setOrder(ourOrder, "deselected")
+	self:setOrder(ourOrder, "selected")
 
 	-- This applies the default them
 	self:setTheme(Icon.baseTheme)
@@ -734,7 +729,11 @@ function Icon:setLabel(text, iconState)
 end
 
 function Icon:setOrder(int, iconState)
-	self:modifyTheme({"Widget", "LayoutOrder", int, iconState})
+	-- We multiply by 100 to allow for custom increments inbetween
+	-- (.01, .02, etc) as LayoutOrders only support integers
+	local newInt = int*100
+	self:modifyTheme({"IconSpot", "LayoutOrder", newInt, iconState})
+	self:modifyTheme({"Widget", "LayoutOrder", newInt, iconState})
 	return self
 end
 
@@ -791,8 +790,6 @@ function Icon:setWidth(offsetMinimum, iconState)
 	-- This sets a minimum X offset size for the widget, useful
 	-- for example if you're constantly changing the label
 	-- but don't want the icon to resize every time
-	local newSize = UDim2.fromOffset(offsetMinimum, self.widget.Size.Y.Offset)
-	self:modifyTheme({"Widget", "Size", newSize, iconState})
 	self:modifyTheme({"Widget", "DesiredWidth", offsetMinimum, iconState})
 	return self
 end
@@ -915,8 +912,8 @@ function Icon:call(callback, ...)
 	return self
 end
 
-function Icon:addToJanitor(object, methodName, index)
-	self.janitor:add(object, methodName, index)
+function Icon:addToJanitor(callback, methodName, index)
+	self.janitor:add(callback, methodName, index)
 	return self
 end
 
@@ -1070,6 +1067,55 @@ function Icon:setIndicator(keyCode)
 	self.indicatorSet:Fire(keyCode)
 end
 
+function Icon:convertLabelToNumberSpinner(numberSpinner)
+	local label = self:getInstance("IconLabel")
+	label.Transparency = 1
+	numberSpinner.Parent = label.Parent
+	numberSpinner.Size = label.Parent.Size
+	numberSpinner["TextXAlignment"] = Enum.TextXAlignment.Center
+
+	local propertiesToChangeLabel = {
+		"FontFace",
+		"BorderSizePixel",
+		"BorderColor3",
+		"Rotation",
+		"TextScaled",
+		"TextStrokeTransparency",
+		"TextStrokeColor3",
+		"TextStrokeTransparency",
+		"TextYAlignment",
+		"TextSize",
+		"TextColor3",
+		"AnchorPoint",
+	}
+	for i, property in propertiesToChangeLabel do
+		numberSpinner[property] = label[property]
+	end
+
+	local invalidProperties = {
+		"TextBounds",
+		"TextFits",
+		"AbsolutePosition",
+		"AbsoluteSize",
+		"OpenTypeFeaturesError",
+		"GuiState",
+	}
+
+	self:addToJanitor(label.Parent:GetPropertyChangedSignal("Size"):Connect(function()
+		numberSpinner.Size = label.Parent.Size
+	end))
+
+	self:addToJanitor(label.Changed:Connect(function(property)
+		if table.find(invalidProperties, property) then
+			return
+		end
+		numberSpinner[property] = label[property]
+	end))
+
+	self:updateParent()
+	return self
+end
+
 
 
 -- DESTROY/CLEANUP
@@ -1089,4 +1135,9 @@ Icon.Destroy = Icon.destroy
 
 
 
-return Icon
+-- TYPES
+export type Class = Types.Icon
+
+
+
+return (Icon :: any) :: Types.StaticIcon
