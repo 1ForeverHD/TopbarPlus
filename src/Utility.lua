@@ -178,9 +178,11 @@ function Utility.clipOutside(icon, instance)
 	valueInstanceCopy.Parent = instance
 
 	local screenGui
+	local Icon = require(icon.iconModule)
+	local container = Icon.container
 	local function updateScreenGui()
 		local originalScreenGui = originalParent:FindFirstAncestorWhichIsA("ScreenGui")
-		screenGui = if string.match(originalScreenGui.Name, "Clipped") then originalScreenGui else originalScreenGui.Parent[originalScreenGui.Name.."Clipped"]
+		screenGui = if string.match(originalScreenGui.Name, "Clipped") then originalScreenGui else container[originalScreenGui.Name.."Clipped"]
 		instance.AnchorPoint = Vector2.new(0, 0)
 		instance.Parent = Utility.getClippedContainer(screenGui)
 	end
