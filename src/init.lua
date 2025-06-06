@@ -1086,4 +1086,9 @@ Icon.Destroy = Icon.destroy
 
 
 
+-- TYPES
+export type Class = Types.Icon
+
+
+
 return (Icon :: any) :: Types.StaticIcon
