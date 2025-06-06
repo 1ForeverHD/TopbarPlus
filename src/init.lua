@@ -1,3 +1,4 @@
+--!nonstrict
 --[[
 	
 	The majority of this code is an interface designed to make it easy for you to
@@ -39,7 +40,10 @@ local StarterGui = game:GetService("StarterGui")
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 
+local Types = require(script.Types)
 
+-- TYPES
+export type Icon = Types.Icon
 
 -- REFERENCE HANDLER
 -- Multiple Icons packages may exist at runtime (for instance if the developer additionally uses HD Admin)
@@ -49,7 +53,7 @@ local Reference = require(iconModule.Reference)
 local referenceObject = Reference.getObject()
 local leadPackage = referenceObject and referenceObject.Value
 if leadPackage and leadPackage ~= iconModule then
-	return require(leadPackage)
+	return require(leadPackage) :: Types.StaticIcon
 end
 if not referenceObject then
 	Reference.addToReplicatedStorage()
@@ -65,7 +69,6 @@ local Attribute = require(iconModule.Attribute)
 local Themes = require(iconModule.Features.Themes)
 local Gamepad = require(iconModule.Features.Gamepad)
 local Overflow = require(iconModule.Features.Overflow)
-local Types = require(script.Types)
 local Icon = {}
 Icon.__index = Icon
 
@@ -1067,55 +1070,6 @@ function Icon:setIndicator(keyCode)
 	self.indicatorSet:Fire(keyCode)
 end
 
-function Icon:convertLabelToNumberSpinner(numberSpinner)
-	local label = self:getInstance("IconLabel")
-	label.Transparency = 1
-	numberSpinner.Parent = label.Parent
-	numberSpinner.Size = label.Parent.Size
-	numberSpinner["TextXAlignment"] = Enum.TextXAlignment.Center
-
-	local propertiesToChangeLabel = {
-		"FontFace",
-		"BorderSizePixel",
-		"BorderColor3",
-		"Rotation",
-		"TextScaled",
-		"TextStrokeTransparency",
-		"TextStrokeColor3",
-		"TextStrokeTransparency",
-		"TextYAlignment",
-		"TextSize",
-		"TextColor3",
-		"AnchorPoint",
-	}
-	for i, property in propertiesToChangeLabel do
-		numberSpinner[property] = label[property]
-	end
-
-	local invalidProperties = {
-		"TextBounds",
-		"TextFits",
-		"AbsolutePosition",
-		"AbsoluteSize",
-		"OpenTypeFeaturesError",
-		"GuiState",
-	}
-
-	self:addToJanitor(label.Parent:GetPropertyChangedSignal("Size"):Connect(function()
-		numberSpinner.Size = label.Parent.Size
-	end))
-
-	self:addToJanitor(label.Changed:Connect(function(property)
-		if table.find(invalidProperties, property) then
-			return
-		end
-		numberSpinner[property] = label[property]
-	end))
-
-	self:updateParent()
-	return self
-end
-
 
 
 -- DESTROY/CLEANUP
@@ -1133,11 +1087,4 @@ function Icon:destroy()
 end
 Icon.Destroy = Icon.destroy
 
-
-
--- TYPES
-export type Class = Types.Icon
-
-
-
-return (Icon :: any) :: Types.StaticIcon
+return Icon :: Types.StaticIcon
