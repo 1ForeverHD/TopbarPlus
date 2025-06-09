@@ -135,7 +135,7 @@ type Methods = {
 			Prompts a notice bubble which accumulates the further it is prompted.
 			If the icon belongs to a dropdown or menu, then the notice will appear on the parent icon when the parent icon is deselected.
 		]]
-		function(self: Icon, clearNoticeEvent: Signal): Icon
+		function(self: Icon, clearNoticeEvent: Signal?): Icon
 			return nil :: any
 		end
 	),
@@ -235,7 +235,7 @@ type Methods = {
 			a font ID (such as <code>12187370928</code>),
 			or font family link (such as <code>"rbxasset://fonts/families/Sarpanch.json"</code>).
 		]]
-		function(self: Icon, font: string, fontWeight: Enum.FontWeight?, fontStyle: Enum.FontSize?, iconState: IconState?): Icon
+		function(self: Icon, font: string | Enum.Font, fontWeight: Enum.FontWeight?, fontStyle: Enum.FontSize?, iconState: IconState?): Icon
 			return nil :: any
 		end
 	),
