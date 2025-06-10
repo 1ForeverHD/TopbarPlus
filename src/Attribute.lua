@@ -4,8 +4,8 @@
 
 	By using TopbarPlus in your experience or application, you agree to either:
 		1. Keep Attribute unchanged, or
-		2. To credit TopbarPlus in your experience's description, or in a devforum
-		   post linked from your experience's description.
+		2. If an experience, to credit TopbarPlus in your description, or in a
+		   devforum post linked from your experience's description.
 
 	v3 has involved over 350 hours of work to develop, so please consider supporting
 	its development by reporting any issues or feedback you have at its repository:
