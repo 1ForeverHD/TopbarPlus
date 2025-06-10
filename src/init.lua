@@ -1074,9 +1074,11 @@ function Icon:convertLabelToNumberSpinner(numberSpinner)
 	local label = self:getInstance("IconLabel")
 	label.Transparency = 1
 	numberSpinner.Parent = label.Parent
-	numberSpinner.Size = label.Parent.Size
-	numberSpinner["TextXAlignment"] = Enum.TextXAlignment.Center
-	numberSpinner["ClipsDescendants"] = false
+	numberSpinner.Size = UDim2.fromScale(1, 1)
+	numberSpinner.AnchorPoint = Vector2.new(0.5, 0.5)
+	numberSpinner.Position = UDim2.new(0.5, 0, 0.5, 0)
+	numberSpinner.TextXAlignment = Enum.TextXAlignment.Center
+	numberSpinner.ClipsDescendants = false
 
 	local propertiesToChangeLabel = {
 		"FontFace",
@@ -1088,82 +1090,85 @@ function Icon:convertLabelToNumberSpinner(numberSpinner)
 		"TextStrokeTransparency",
 		"TextColor3",
 	}
-	for i, property in propertiesToChangeLabel do
+	for _, property in ipairs(propertiesToChangeLabel) do
 		numberSpinner[property] = label[property]
-	end
-
-	for index, property in propertiesToChangeLabel do
 		self:addToJanitor(label:GetPropertyChangedSignal(property):Connect(function()
 			numberSpinner[property] = label[property]
 		end))
 	end
 
-	self:addToJanitor(label.Parent:GetPropertyChangedSignal("Size"):Connect(function()
-		numberSpinner.Size = label.Parent.Size
-	end))
-
-	local minDigits = 3
+	local minDigits = 0
 	local maxDigits = 8
-	local function getTotalDigitXSize()
+	local function getSpinnerSizeAndDigitCount()
 		local TotalSize = 0
 		local numOfDigits = 0
 		for i, child in numberSpinner.Frame:GetChildren() do
 			local name = string.lower(child.Name)
-			numOfDigits += 1
 			if name == "digit" then
 				TotalSize += child.AbsoluteSize.X
+				numOfDigits += 1
 			elseif name == "prefix" or name == "suffix" or name == "comma" then
 				if child.Text ~= "" then
 					TotalSize += child.AbsoluteSize.X
+					numOfDigits += 1
 				end
 			end
 		end
 		return TotalSize, numOfDigits
 	end
-	local function adjustSizeForChildAdded()
-		local function getLabelParentContainerXSize()
-			return label.Parent.Parent.Parent.Size.X.Offset
-		end
 
-		local totalDigitXSize, numOfDigits = getTotalDigitXSize()
-		local labelParentContainerXSize = getLabelParentContainerXSize()
-		while totalDigitXSize > labelParentContainerXSize do
-			task.wait()
-			numberSpinner.TextSize -= 1
-			totalDigitXSize, numOfDigits = getTotalDigitXSize()
-			if numOfDigits < maxDigits then
-				numberSpinner.TextSize = label.TextSize
-				break
-			end
-			labelParentContainerXSize = getLabelParentContainerXSize()
+	local function getLabelParentContainerXSize()
+		if label.Parent.Parent.IconImage.Visible == true then
+			return numberSpinner.Frame.AbsoluteSize.X + label.Parent.Parent.IconImage.AbsoluteSize.X
+		else
+			return label.Parent.Parent.AbsoluteSize.X
 		end
 	end
-	local function adjustSizeForChildRemoved()
-		local function getNumberSpinnerXSize()
-			return numberSpinner.Frame.Size.X.Offset
-		end
+	local function getNumberSpinnerXSize()
+		return numberSpinner.Frame.AbsoluteSize.X
+	end
 
-		local totalDigitXSize, numOfDigits = getTotalDigitXSize()
+	local function adjustSize()
+		local totalDigitXSize, numOfDigits = getSpinnerSizeAndDigitCount()
+		if numOfDigits < 18 then
+			self:setLabel(numberSpinner.Value)
+		end
 
 		local NumberSpinnerXSize = getNumberSpinnerXSize()
+
 		while totalDigitXSize < NumberSpinnerXSize do
-			task.wait(0)
-			numberSpinner.TextSize += 1
-			totalDigitXSize, numOfDigits = getTotalDigitXSize()
-			if numOfDigits > minDigits then
+			task.wait(0.05)
+			if numOfDigits > minDigits and numOfDigits < maxDigits then
 				numberSpinner.TextSize = label.TextSize
 				break
+			else
+				numberSpinner.TextSize += 1
 			end
+
 			NumberSpinnerXSize = getNumberSpinnerXSize()
+			totalDigitXSize, numOfDigits = getSpinnerSizeAndDigitCount()
+		end
+
+		local labelParentContainerXSize = getLabelParentContainerXSize()
+		while totalDigitXSize > labelParentContainerXSize do
+			task.wait(0.05)
+			if numOfDigits < maxDigits and numOfDigits > minDigits then
+				numberSpinner.TextSize = label.TextSize
+				break
+			else
+				numberSpinner.TextSize -= 1
+			end
+
+			labelParentContainerXSize = getLabelParentContainerXSize()
+			totalDigitXSize, numOfDigits = getSpinnerSizeAndDigitCount()
 		end
 	end
 
-	self:addToJanitor(numberSpinner.Frame.ChildAdded:Connect(adjustSizeForChildAdded))
-	self:addToJanitor(numberSpinner.Frame.ChildRemoved:Connect(adjustSizeForChildRemoved))
+	self:addToJanitor(numberSpinner.Frame.ChildAdded:Connect(adjustSize))
+	self:addToJanitor(numberSpinner.Frame.ChildRemoved:Connect(adjustSize))
 	self:addToJanitor(self.iconAdded:Connect(function()
 		task.wait(1)
-		adjustSizeForChildAdded()
-		adjustSizeForChildRemoved()
+		adjustSize()
 	end))
 
 	self:updateParent()
