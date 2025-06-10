@@ -24,14 +24,10 @@ return function(icon, Icon)
 	button.Active = false -- This is essential for mobile scrollers to work when dragging
 	icon.deselected:Connect(function()
 		button.ClipsDescendants = true
-	end)
-	icon.selected:Connect(function()
-		task.defer(function()
-			icon.resizingComplete:Once(function()
-				if icon.isSelected then
-					button.ClipsDescendants = false
-				end
-			end)
+		task.delay(0.2, function()
+			if icon.isSelected then
+				button.ClipsDescendants = false
+			end
 		end)
 	end)
 

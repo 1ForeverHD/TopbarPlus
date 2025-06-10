@@ -399,7 +399,7 @@ type Methods = {
 			Joins the menu of <code>parentIcon</code>.
 			This is what <code>icon:setMenu</code> calls internally on the icons within its array.
 		]]
-		function(self: Icon, icons: { Icon }): Icon
+		function(self: Icon, parentIcon: Icon): Icon
 			return nil :: any
 		end
 	),

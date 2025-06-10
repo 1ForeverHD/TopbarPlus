@@ -1120,17 +1120,13 @@ function Icon:convertLabelToNumberSpinner(numberSpinner)
 		end
 		return TotalSize, numOfDigits
 	end
-	
-	local function getLabelParentContainerXSize()
-		return label.Parent.AbsoluteSize.X
-	end
-
 	local function adjustSizeForChildAdded()
-		self:setLabel(numberSpinner.Value)
+		local function getLabelParentContainerXSize()
+			return label.Parent.Parent.Parent.Size.X.Offset
+		end
 
 		local totalDigitXSize, numOfDigits = getTotalDigitXSize()
 		local labelParentContainerXSize = getLabelParentContainerXSize()
-
 		while totalDigitXSize > labelParentContainerXSize do
 			task.wait()
 			numberSpinner.TextSize -= 1
@@ -1142,13 +1138,14 @@ function Icon:convertLabelToNumberSpinner(numberSpinner)
 			labelParentContainerXSize = getLabelParentContainerXSize()
 		end
 	end
-
 	local function adjustSizeForChildRemoved()
-		self:setLabel(numberSpinner.Value)
+		local function getNumberSpinnerXSize()
+			return numberSpinner.Frame.Size.X.Offset
+		end
 
 		local totalDigitXSize, numOfDigits = getTotalDigitXSize()
-		local NumberSpinnerXSize = getLabelParentContainerXSize()
 
+		local NumberSpinnerXSize = getNumberSpinnerXSize()
 		while totalDigitXSize < NumberSpinnerXSize do
 			task.wait(0)
 			numberSpinner.TextSize += 1
@@ -1157,7 +1154,7 @@ function Icon:convertLabelToNumberSpinner(numberSpinner)
 				numberSpinner.TextSize = label.TextSize
 				break
 			end
-			NumberSpinnerXSize = getLabelParentContainerXSize()
+			NumberSpinnerXSize = getNumberSpinnerXSize()
 		end
 	end
 

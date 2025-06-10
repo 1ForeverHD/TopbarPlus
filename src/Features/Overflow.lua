@@ -14,6 +14,7 @@ local currentCamera = workspace.CurrentCamera
 local overflowIcons = {}
 local overflowIconUIDs = {}
 local Utility = require(script.Parent.Parent.Utility)
+local beginCheckingCenterIcons = false
 local Icon
 
 
@@ -48,11 +49,15 @@ function Overflow.start(incomingIcon)
 		Overflow.updateBoundary("Left")
 		Overflow.updateBoundary("Right")
 	end)
-	task.delay(1, function()
+	task.delay(0.5, function()
+		beginOverflow = true
+		updateBoundaries()
+	end)
+	task.delay(2, function()
 		-- This is essential to prevent central icons begin added
 		-- left or right due to incomplete UIListLayout calculations
 		-- within the first few frames
-		beginOverflow = true
+		beginCheckingCenterIcons = true
 		updateBoundaries()
 	end)
 	Icon.iconAdded:Connect(updateBoundaries)
@@ -224,6 +229,9 @@ function Overflow.updateBoundary(alignment)
 	local totalChecks = 0
 	local usingNearestCenter = false
 	local function checkToShiftCentralIcon()
+		if not beginCheckingCenterIcons then
+			return
+		end
 		local centerOrderedIcons = Overflow.getAvailableIcons("Center")
 		local centerPos = (isLeft and 1) or #centerOrderedIcons
 		local nearestCenterIcon = centerOrderedIcons[centerPos]
