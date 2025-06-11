@@ -11,8 +11,8 @@
 	its development by reporting any issues or feedback you have at its repository:
 	https://github.com/1ForeverHD/TopbarPlus
 
-	You can get in touch with me on Discord at `foreverhd` or on the DevForum at:
-	https://devforum.roblox.com/u/ForeverHD
+	You can get in touch with me on Discord via the social link here:
+	https://create.roblox.com/store/asset/92368439343389/TopbarPlus
 
 	Many thanks! ~Ben, June 10th 2025
 	

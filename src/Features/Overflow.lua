@@ -15,6 +15,7 @@ local overflowIcons = {}
 local overflowIconUIDs = {}
 local Utility = require(script.Parent.Parent.Utility)
 local beginCheckingCenterIcons = false
+local beganSecondaryCenterCheck = false
 local Icon
 
 
@@ -229,12 +230,15 @@ function Overflow.updateBoundary(alignment)
 	local totalChecks = 0
 	local usingNearestCenter = false
 	local function checkToShiftCentralIcon()
-		if not beginCheckingCenterIcons then
-			return
-		end
 		local centerOrderedIcons = Overflow.getAvailableIcons("Center")
 		local centerPos = (isLeft and 1) or #centerOrderedIcons
 		local nearestCenterIcon = centerOrderedIcons[centerPos]
+		local function secondaryCheck()
+			if not beganSecondaryCenterCheck then
+				beganSecondaryCenterCheck = true
+				task.delay(3, Overflow.updateBoundary, alignment)
+			end
+		end
 		if nearestCenterIcon and not nearestCenterIcon.hasRelocatedInOverflow then
 			local ourNearestIcon = (isLeft and ourOrderedIcons[#ourOrderedIcons]) or (isRight and ourOrderedIcons[1])
 			local centralNearestXPos = nearestCenterIcon.widget.AbsolutePosition.X
@@ -245,12 +249,20 @@ function Overflow.updateBoundary(alignment)
 			local hasShifted = false
 			if isLeft then
 				if centerBoundary < removeBoundary then
+					if not beginCheckingCenterIcons then
+						secondaryCheck()
+						return
+					end
 					nearestCenterIcon:align("Left")
 					nearestCenterIcon.hasRelocatedInOverflow = true
 					hasShifted = true
 				end
 			elseif isRight then
 				if centerBoundary > removeBoundary then
+					if not beginCheckingCenterIcons or removeBoundary < 0 then
+						secondaryCheck()
+						return
+					end
 					nearestCenterIcon:align("Right")
 					nearestCenterIcon.hasRelocatedInOverflow = true
 					hasShifted = true

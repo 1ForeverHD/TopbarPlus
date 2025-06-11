@@ -433,7 +433,7 @@ type Fields = {
 	-- CLASS PROPERTIES
 	name: string,
 	isSelected: boolean,
-	enabled: boolean,
+	isEnabled: boolean,
 	totalNotices: number,
 	locked: boolean,
 

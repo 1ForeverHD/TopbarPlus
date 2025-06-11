@@ -224,6 +224,7 @@ function Icon.new()
 	self.iconModule = iconModule
 	self.UID = iconUID
 	self.isEnabled = true
+	self.enabled = self.isEnabled -- Backwards compatability
 	self.isSelected = false
 	self.isViewing = false
 	self.joinedFrame = false
@@ -681,6 +682,7 @@ end
 
 function Icon:setEnabled(bool)
 	self.isEnabled = bool
+	self.enabled = self.isEnabled
 	self.widget.Visible = bool
 	self:updateParent()
 	return self
@@ -1118,10 +1120,14 @@ function Icon:convertLabelToNumberSpinner(numberSpinner)
 	end
 
 	local function getLabelParentContainerXSize()
-		if label.Parent.Parent.IconImage.Visible == true then
+		local nextParent = label.Parent.Parent
+		if nextParent == nil then
+			return 0
+		end
+		if nextParent.IconImage.Visible == true then
 			return numberSpinner.Frame.AbsoluteSize.X + label.Parent.Parent.IconImage.AbsoluteSize.X
 		else
-			return label.Parent.Parent.AbsoluteSize.X
+			return nextParent.AbsoluteSize.X
 		end
 	end
 	local function getNumberSpinnerXSize()
@@ -1136,7 +1142,7 @@ function Icon:convertLabelToNumberSpinner(numberSpinner)
 
 		local NumberSpinnerXSize = getNumberSpinnerXSize()
 
-		while totalDigitXSize < NumberSpinnerXSize do
+		while totalDigitXSize < NumberSpinnerXSize and self.isDestroyed ~= true do
 			task.wait(0.05)
 			if numOfDigits > minDigits and numOfDigits < maxDigits then
 				numberSpinner.TextSize = label.TextSize
@@ -1150,7 +1156,7 @@ function Icon:convertLabelToNumberSpinner(numberSpinner)
 		end
 
 		local labelParentContainerXSize = getLabelParentContainerXSize()
-		while totalDigitXSize > labelParentContainerXSize do
+		while totalDigitXSize > labelParentContainerXSize and self.isDestroyed ~= true do
 			task.wait(0.05)
 			if numOfDigits < maxDigits and numOfDigits > minDigits then
 				numberSpinner.TextSize = label.TextSize
