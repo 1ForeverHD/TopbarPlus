@@ -98,7 +98,6 @@ return function(icon)
 			otherIcon:destroy()
 		end
 		-- Add new icons
-		local totalNewIcons = #arrayOfIcons
 		if type(arrayOfIcons) == "table" then
 			for i, otherIcon in pairs(arrayOfIcons) do
 				otherIcon:joinDropdown(icon)

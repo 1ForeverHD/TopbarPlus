@@ -1,8 +1,9 @@
+local hasBecomeOldTheme = false
+local previousInsetHeight = 0
 return function(Icon)
 	
 	local GuiService = game:GetService("GuiService")
 	local isConsoleScreen = GuiService:IsTenFootInterface()
-	local isOldTopbar = Icon.isOldTopbar
 	local container = {}
 
 	-- Has to be included for the time being due to this bug mentioned here:
@@ -14,6 +15,28 @@ return function(Icon)
 	local yDownOffset = 0
 	local ySizeOffset = 0
 	local function checkInset()
+		local isOldTopbar = GuiService.TopbarInset.Height == 36
+		Icon.isOldTopbar = isOldTopbar
+		if Icon.isOldTopbar and hasBecomeOldTheme == false then
+			task.defer(function()
+				-- If oldtopbar, apply the Classic theme
+				local themes = script.Parent.Parent.Features.Themes
+				local Classic = require(themes.Classic)
+				hasBecomeOldTheme = true
+				Icon.modifyBaseTheme(Classic)
+
+				-- Also configure the oldtopbar correctly
+				local function decideToHideTopbar()
+					if GuiService.MenuIsOpen then
+						Icon.setTopbarEnabled(false, true)
+					else
+						Icon.setTopbarEnabled()
+					end
+				end
+				GuiService:GetPropertyChangedSignal("MenuIsOpen"):Connect(decideToHideTopbar)
+				decideToHideTopbar()
+			end)
+		end
 		guiInset = GuiService:GetGuiInset()
 		startInset = if isOldTopbar then 12 else guiInset.Y - 50
 		yDownOffset = if isOldTopbar then 2 else 0
@@ -26,6 +49,13 @@ return function(Icon)
 			ySizeOffset = 50
 		end
 		insetChanged:Fire(guiInset)
+		local insetHeight = guiInset.Y
+		if insetHeight ~= previousInsetHeight then
+			previousInsetHeight = insetHeight
+			task.defer(function()
+				Icon.insetHeightChanged:Fire(insetHeight)
+			end)
+		end
 	end
 	GuiService:GetPropertyChangedSignal("TopbarInset"):Connect(checkInset)
 	checkInset()
@@ -41,7 +71,6 @@ return function(Icon)
 	screenGui.ResetOnSpawn = false
 	screenGui.ScreenInsets = Enum.ScreenInsets.TopbarSafeInsets
 	container[screenGui.Name] = screenGui
-	screenGui.DisplayOrder = Icon.baseDisplayOrder
 	Icon.baseDisplayOrderChanged:Connect(function()
 		screenGui.DisplayOrder = Icon.baseDisplayOrder
 	end)
@@ -87,20 +116,6 @@ return function(Icon)
 		screenGuiCenterClipped.DisplayOrder = Icon.baseDisplayOrder + 1
 	end)
 	container[screenGuiCenterClipped.Name] = screenGuiCenterClipped
-	
-	if isOldTopbar then
-		task.defer(function()
-			local function decideToHideTopbar()
-				if GuiService.MenuIsOpen then
-					Icon.setTopbarEnabled(false, true)
-				else
-					Icon.setTopbarEnabled()
-				end
-			end
-			GuiService:GetPropertyChangedSignal("MenuIsOpen"):Connect(decideToHideTopbar)
-			decideToHideTopbar()
-		end)
-	end
 	
 	local holderReduction = -24
 	local left = Instance.new("ScrollingFrame")

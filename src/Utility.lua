@@ -216,7 +216,6 @@ function Utility.clipOutside(icon, instance)
 	cloneJanitor:add(widget:GetPropertyChangedSignal("Visible"):Connect(updateVisibility))
 
 	local previousScroller
-	local Icon = require(icon.iconModule)
 	local function checkIfOutsideParentXBounds()
 		-- Defer so that roblox's properties reflect their true values
 		task.defer(function()
@@ -295,9 +294,9 @@ function Utility.clipOutside(icon, instance)
 				local viewportWidth = workspace.CurrentCamera.ViewportSize.X
 				local guiWidth = screenGui.AbsoluteSize.X
 				local guiOffset = screenGui.AbsolutePosition.X
-				local widthDifference = guiOffset - topbarInset.Min.X
-				local oldTopbarCenterOffset = 0--widthDifference/30 -- I have no idea why this works, it just does
-				local offsetX = if icon.isOldTopbar then guiOffset else viewportWidth - guiWidth - oldTopbarCenterOffset
+				--local widthDifference = guiOffset - topbarInset.Min.X
+				local oldTopbarCenterOffset = 0--widthDifference/30
+				local offsetX = if Icon.isOldTopbar then guiOffset else viewportWidth - guiWidth - oldTopbarCenterOffset
 				
 				-- Also add additionalOffset
 				offsetX -= additionalOffsetX
@@ -313,7 +312,10 @@ function Utility.clipOutside(icon, instance)
 		-- This defer is essential as the listener may be in a different screenGui to the actor
 		local updatePropertyStaggered = Utility.createStagger(0.01, updateProperty)
 		cloneJanitor:add(clone:GetPropertyChangedSignal(absoluteProperty):Connect(updatePropertyStaggered))
-		
+		cloneJanitor:add(clone:GetAttributeChangedSignal("ForceUpdate"):Connect(function()
+			updatePropertyStaggered()
+		end))
+
 		-- This is to patch a weirddddd bug with ScreenGuis with SreenInsets set to
 		-- 'TopbarSafeInsets'. For some reason the absolute position of gui instances
 		-- within this type of screenGui DO NOT accurately update to match their new

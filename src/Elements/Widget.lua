@@ -192,7 +192,6 @@ return function(icon, Icon)
 
 	local TweenService = game:GetService("TweenService")
 	local resizingCount = 0
-	local repeating = false
 	local function handleLabelAndImageChangesUnstaggered(forceUpdateString)
 
 		-- We defer changes by a frame to eliminate all but 1 requests which
@@ -205,7 +204,7 @@ return function(icon, Icon)
 			local usingIndicator = indicator and indicator.Visible
 			local usingText = usingIndicator or iconLabel.Text ~= ""
 			local usingImage = iconImage.Image ~= "" and iconImage.Image ~= nil
-			local alignment = Enum.HorizontalAlignment.Center
+			local _alignment = Enum.HorizontalAlignment.Center
 			local NORMAL_BUTTON_SIZE = UDim2.fromScale(1, 1)
 			local buttonSize = NORMAL_BUTTON_SIZE
 			if usingImage and not usingText then
@@ -226,7 +225,7 @@ return function(icon, Icon)
 				paddingLeft.Visible = true
 				paddingCenter.Visible = not usingIndicator
 				paddingRight.Visible = not usingIndicator
-				alignment = Enum.HorizontalAlignment.Left
+				_alignment = Enum.HorizontalAlignment.Left
 			end
 			button.Size = buttonSize
 

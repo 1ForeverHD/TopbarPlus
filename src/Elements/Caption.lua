@@ -165,8 +165,8 @@ return function(icon)
 	
 	
 	
-	local isCompletelyEnabled = false
 	-- This handles the appearing/disappearing/positioning of the caption
+	local isCompletelyEnabled = false
 	local captionHeader = caption.Box.Header
 	local UserInputService = game:GetService("UserInputService")
 	local function updateHotkey(keyCodeEnum)
@@ -290,6 +290,9 @@ return function(icon)
 			GroupTransparency = newTransparency
 		})
 		tweenTransparency:Play()
+		if enabled then
+			captionClone:SetAttribute("ForceUpdate", true)
+		end
 		updatePosition()
 		updateHotkey()
 	end

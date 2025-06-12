@@ -37,13 +37,15 @@
 -- SERVICES
 local UserInputService = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
-local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
-
 local Types = require(script.Types)
+
+
 
 -- TYPES
 export type Icon = Types.Icon
+
+
 
 -- REFERENCE HANDLER
 -- Multiple Icons packages may exist at runtime (for instance if the developer additionally uses HD Admin)
@@ -65,7 +67,6 @@ end
 local Signal = require(iconModule.Packages.GoodSignal)
 local Janitor = require(iconModule.Packages.Janitor)
 local Utility = require(iconModule.Utility)
-local Attribute = require(iconModule.Attribute)
 local Themes = require(iconModule.Features.Themes)
 local Gamepad = require(iconModule.Features.Gamepad)
 local Overflow = require(iconModule.Features.Overflow)
@@ -88,8 +89,9 @@ local totalCreatedIcons = 0
 Icon.baseDisplayOrderChanged = Signal.new()
 Icon.baseDisplayOrder = 10
 Icon.baseTheme = require(themes.Default)
-Icon.isOldTopbar = false --Old topbar is now gone, GuiService.TopbarInset.Height == 36
+Icon.isOldTopbar = false -- Logic has been moved to Container
 Icon.iconsDictionary = iconsDict
+Icon.insetHeightChanged = Signal.new()
 Icon.container = require(elements.Container)(Icon)
 Icon.topbarEnabled = true
 Icon.iconAdded = Signal.new()
@@ -108,6 +110,7 @@ function Icon.getIconByUID(UID)
 	if match then
 		return match
 	end
+	return nil
 end
 
 function Icon.getIcon(nameOrUID)
@@ -120,6 +123,7 @@ function Icon.getIcon(nameOrUID)
 			return icon
 		end
 	end
+	return nil
 end
 
 function Icon.setTopbarEnabled(bool, isInternal)
@@ -161,13 +165,7 @@ task.defer(function()
 	for _, screenGui in pairs(Icon.container) do
 		screenGui.Parent = playerGui
 	end
-	if GuiService.TopbarInset.Height == 0 then
-		GuiService:GetPropertyChangedSignal("TopbarInset"):Wait()
-	end
-	Icon.isOldTopbar = false --GuiService.TopbarInset.Height == 36
-	if Icon.isOldTopbar then
-		Icon.modifyBaseTheme(require(themes.Classic))
-	end
+	require(iconModule.Attribute)
 end)
 
 
@@ -247,7 +245,6 @@ function Icon.new()
 	self.menuIcons = {}
 	self.dropdownIcons = {}
 	self.childIconsDict = {}
-	self.isOldTopbar = Icon.isOldTopbar
 	self.creationTime = os.clock()
 
 	-- Widget is the new name for an icon
@@ -403,7 +400,6 @@ function Icon.new()
 	end
 
 	-- Additional children behaviour when toggled (mostly notices)
-	local noticeLabel = self:getInstance("NoticeLabel")
 	self.toggled:Connect(function(isSelected)
 		self.noticeChanged:Fire(self.totalNotices)
 		for childIconUID, _ in pairs(self.childIconsDict) do
@@ -454,7 +450,6 @@ function Icon.new()
 	-- There's a rare occassion where the appearance is not
 	-- fully set to deselected so this ensures the icons
 	-- appearance is fully as it should be
-	--print("self.activeState =", self.activeState)
 	task.delay(0.1, function()
 		if self.activeState == "Deselected" then
 			self.stateChanged:Fire("Deselected")
@@ -551,7 +546,6 @@ function Icon:getInstance(name)
 			end
 			-- If the child is a fake placeholder instance (such as dropdowns, notices, etc)
 			-- then its important we scan the real original instance instead of this clone
-			local previousChild = child
 			local realChild = Themes.getRealInstance(child)
 			if realChild then
 				child = realChild
@@ -647,8 +641,8 @@ function Icon:setBehaviour(collectiveOrInstanceName, property, callback, refresh
 	end
 end
 
-function Icon:modifyTheme(modifications, modificationUID)
-	local modificationUID = Themes.modify(self, modifications, modificationUID)
+function Icon:modifyTheme(modifications, customModificationUID)
+	local modificationUID = Themes.modify(self, modifications, customModificationUID)
 	return self, modificationUID
 end
 
