@@ -14,15 +14,21 @@ return function(Icon)
 	local startInset = 0
 	local yDownOffset = 0
 	local ySizeOffset = 0
-	local function checkInset()
-		local isOldTopbar = GuiService.TopbarInset.Height == 36
+	local function checkInset(status)
+		local currentHeight = GuiService.TopbarInset.Height
+		local isOldTopbar = currentHeight <= 36
 		Icon.isOldTopbar = isOldTopbar
-		if Icon.isOldTopbar and hasBecomeOldTheme == false then
+		if currentHeight == 0 then
+			task.delay(5,function()
+				checkInset("ForceConvertToOld")
+			end)
+		end
+		if Icon.isOldTopbar and hasBecomeOldTheme == false and (currentHeight ~= 0 or status == "ForceConvertToOld") then
+			hasBecomeOldTheme = true
 			task.defer(function()
 				-- If oldtopbar, apply the Classic theme
 				local themes = script.Parent.Parent.Features.Themes
 				local Classic = require(themes.Classic)
-				hasBecomeOldTheme = true
 				Icon.modifyBaseTheme(Classic)
 
 				-- Also configure the oldtopbar correctly
@@ -39,12 +45,12 @@ return function(Icon)
 		end
 		guiInset = GuiService:GetGuiInset()
 		startInset = if isOldTopbar then 12 else guiInset.Y - 50
-		yDownOffset = if isOldTopbar then 2 else 0
+		yDownOffset = if isOldTopbar then 2 else 0 --if isOldTopbar then 2 else 0 
 		ySizeOffset = -2
 		if isConsoleScreen then
 			startInset = 10
 		end
-		if GuiService.TopbarInset.Height == 0 then
+		if GuiService.TopbarInset.Height == 0 and not hasBecomeOldTheme then
 			yDownOffset += 13
 			ySizeOffset = 50
 		end
