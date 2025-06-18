@@ -2,10 +2,10 @@ local hasBecomeOldTheme = false
 local previousInsetHeight = 0
 return function(Icon)
 	
-	local GuiService = game:GetService("GuiService")
-	local container = {}
 	-- Has to be included for the time being due to this bug mentioned here:
 	-- https://devforum.roblox.com/t/bug/2973508/7
+	local GuiService = game:GetService("GuiService")
+	local container = {}
 	local Signal = require(script.Parent.Parent.Packages.GoodSignal)
 	local insetChanged = Signal.new()
 	local guiInset = GuiService:GetGuiInset()
