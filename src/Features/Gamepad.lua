@@ -88,17 +88,20 @@ function Gamepad.start(incomingIcon)
 		end
 		GuiService:GetPropertyChangedSignal("SelectedObject"):Connect(updateSelectedObject)
 
-		-- This listens for a gamepad being present/added/removed
-		local function checkGamepadEnabled()
-			local gamepadEnabled = UserInputService.GamepadEnabled
-			if not gamepadEnabled then
-				usedIndicatorOnce = false
-				usedBOnce = false
-			end
-			updateSelectedObject()
-		end
-		UserInputService:GetPropertyChangedSignal("GamepadEnabled"):Connect(checkGamepadEnabled)
-		checkGamepadEnabled()
+	        -- This listens for a gamepad being present/added/removed
+	        local GAMEPAD_INPUT = Enum.PreferredInput.Gamepad
+	        local function preferredInputChanged()
+	            local preferredInput = UserInputService.PreferredInput
+	            local isUsingGamepad = preferredInput == GAMEPAD_INPUT
+	            
+	            if not isUsingGamepad then
+	                usedIndicatorOnce = false
+	                usedBOnce = false
+	            end
+	            updateSelectedObject()
+	        end
+	        UserInputService:GetPropertyChangedSignal("PreferredInput"):Connect(preferredInputChanged)
+	        preferredInputChanged()
 
 		-- This allows for easy highlighting of the topbar when the
 		-- when ``Icon.highlightKey`` (i.e. DPadUp) is pressed.
