@@ -2,7 +2,7 @@
 name = "1foreverhd/topbarplus"
 description = "Construct dynamic and intuitive topbar icons. Enhance the appearance and behaviour of these icons with features such as themes, dropdowns and menus."
 license = "MPL2"
-version = "3.2.4"
+version = "3.2.5"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 exclude = [
