@@ -207,7 +207,6 @@ function Utility.clipOutside(icon, instance)
 			return
 		end
 		local isVisible = widget.Visible
-		
 		if isOutsideParent then
 			isVisible = false
 		end
@@ -237,6 +236,9 @@ function Utility.clipOutside(icon, instance)
 						break
 					end
 					parentInstance = nextParentInstance
+					if parentInstance and parentInstance.Name == "DropdownScroller" then
+						break
+					end
 				end
 			end
 			if not parentInstance then
