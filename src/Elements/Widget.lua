@@ -172,6 +172,11 @@ return function(icon, Icon)
 	iconLabel.AutoLocalize = true
 	iconLabel.Parent = iconLabelContainer
 
+	local textGradient = Instance.new("UIGradient")
+	iconGradient.Name = "TextGradient"
+	iconGradient.Enabled = true
+	iconGradient.Parent = iconLabel
+	
 	local iconImage = Instance.new("ImageLabel")
 	iconImage.Name = "IconImage"
 	iconImage.LayoutOrder = 2
