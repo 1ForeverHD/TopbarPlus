@@ -59,7 +59,7 @@ return {
 	{"NoticeLabel", "TextSize", 13, "Deselected"},
 	{"PaddingLeft", "Size", UDim2.new(0, 9, 1, 0), "Deselected"},
 	{"PaddingRight", "Size", UDim2.new(0, 11, 1, 0), "Deselected"},
-	{"IconSpotGradient", "Color", ColorSequence.new(Color3.fromRGB(96, 98, 100), Color3.fromRGB(77, 78, 80)), "Deselected"},
+	{"TextGradient", "Color", ColorSequence.new(Color3.fromRGB(96, 98, 100), Color3.fromRGB(77, 78, 80)), "Deselected"},
 	
 	-- When the icon is selected
 	-- Selected also inherits everything from Deselected if nothing is set
