@@ -1,5 +1,6 @@
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
+local Themes = require(script.Parent.Parent.Features.Themes)
 local PADDING = 0 -- used to be 8
 return function(icon)
 	
@@ -58,7 +59,7 @@ return function(icon)
 
 	local TweenDuration = Instance.new("NumberValue") -- this helps to change the speed to open / close in modifyTheme()
 	TweenDuration.Name = "DropdownSpeed"
-	TweenDuration.Value = 0.35
+	TweenDuration.Value = 0.07
 	TweenDuration.Parent = dropdown
 
 	local dropdownPadding = Instance.new("UIPadding")
@@ -109,19 +110,10 @@ return function(icon)
 		end
 	end)
 
-	-- Update visibiliy of dropdown using tween transition
-	local Utility = require(script.Parent.Parent.Utility)
-
-	local tweenInfo = TweenInfo.new(TweenDuration.Value, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	local openTween = nil
-	local closeTween = nil
-
 	local function updateMaxIcons()
 		--icon:modifyTheme({"Dropdown", "Visible", icon.isSelected})
 		local maxIcons = dropdown:GetAttribute("MaxIcons")
 		if not maxIcons then return 0 end
-
-		local fillDir = dropdownList.FillDirection
 		local children = {}
 		for _, child in pairs(dropdownScroller:GetChildren()) do
 			if child:IsA("GuiObject") and child.Visible then
@@ -146,7 +138,28 @@ return function(icon)
 		return totalHeight
 	end
 	
+	local openTween = nil
+	local closeTween = nil
+	local currentSpeedMultiplier = nil
+	local currentTweenInfo = nil
+	local function getTweenInfo()
+		local speedMultiplier = Themes.getInstanceValue(dropdown, "MaxIcons") or 1
+		if currentSpeedMultiplier and currentSpeedMultiplier == speedMultiplier and currentTweenInfo then
+			return currentTweenInfo
+		end
+		local newTweenInfo = TweenInfo.new(
+			TweenDuration.Value * speedMultiplier,
+			Enum.EasingStyle.Exponential,
+			Enum.EasingDirection.Out
+		)
+		currentTweenInfo = newTweenInfo
+		currentSpeedMultiplier = speedMultiplier
+		return newTweenInfo
+	end
 	local function updateVisibility()
+		-- Update visibiliy of dropdown using tween transition
+		local tweenInfo = getTweenInfo()
+		
 		if openTween then
 			openTween:Cancel()
 			openTween = nil
@@ -168,7 +181,8 @@ return function(icon)
 				openTween = nil
 			end)
 		else
-			closeTween = TweenService:Create(dropdown, tweenInfo, {Size = UDim2.new(0, dropdown.Size.X.Offset, 0, 0)})
+			local closeTweenInfo = TweenInfo.new(0)
+			closeTween = TweenService:Create(dropdown, closeTweenInfo, {Size = UDim2.new(0, dropdown.Size.X.Offset, 0, 0)})
 			closeTween:Play()
 			closeTween.Completed:Connect(function()
 				closeTween = nil
@@ -181,6 +195,7 @@ return function(icon)
 	--task.delay(0.2, updateVisibility)
 
 	local function updateChildSize()
+		local tweenInfo = getTweenInfo()
 		if not icon.isSelected then return end
 		if openTween then
 			openTween:Cancel()

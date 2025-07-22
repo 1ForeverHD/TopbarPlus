@@ -94,7 +94,7 @@ type Methods = {
 		--[[
 			Updates the appearance of the icon.
 		]]
-		function(self: Icon, modifications: { Modification }): Icon
+		function(self: Icon, modifications: {Modification} | Modification): Icon
 			return nil :: any
 		end
 	),
