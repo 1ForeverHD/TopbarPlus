@@ -5,6 +5,7 @@ return function(Icon)
 	-- Has to be included for the time being due to this bug mentioned here:
 	-- https://devforum.roblox.com/t/bug/2973508/7
 	local GuiService = game:GetService("GuiService")
+	local Players =  game:GetService("Players")
 	local container = {}
 	local Signal = require(script.Parent.Parent.Packages.GoodSignal)
 	local insetChanged = Signal.new()
@@ -24,11 +25,14 @@ return function(Icon)
 		Icon.isOldTopbar = isOldTopbar
 		checkCount += 1
 		if currentHeight == 0 and status == nil then
-			task.delay(5,function()
+			task.defer(function()
+				task.wait(8)
 				checkInset("ForceConvertToOld")
 			end)
 		elseif checkCount == 1 then
 			task.delay(5, function()
+				local localPlayer = Players.LocalPlayer
+				localPlayer:WaitForChild("PlayerGui")
 				if checkCount == 1 then
 					checkInset()
 				end

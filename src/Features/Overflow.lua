@@ -94,7 +94,7 @@ function Overflow.updateAvailableIcons(alignment)
 		local parentUID = icon.parentIconUID
 		local isDirectlyOnTopbar = not parentUID or overflowIconUIDs[parentUID]
 		local isOverflow = overflowIconUIDs[icon.UID]
-		if isDirectlyOnTopbar and icon.alignment == alignment and not isOverflow then
+		if isDirectlyOnTopbar and icon.alignment == alignment and not isOverflow and icon.isEnabled then
 			table.insert(ourOrderedIcons, icon)
 			ourTotal += 1
 		end
@@ -204,6 +204,10 @@ function Overflow.updateBoundary(alignment)
 		overflowIcon:setEnabled(false)
 		overflowIcons[alignment] = overflowIcon
 		overflowIconUIDs[overflowIcon.UID] = true
+		if not Icon.closeableOverflowMenus then
+			local iconSpot = overflowIcon:getInstance("IconSpot")
+			iconSpot.Visible = false
+		end
 	end
 
 	-- The default boundary is the point where both the left-most-right-icon

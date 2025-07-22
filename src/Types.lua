@@ -295,7 +295,7 @@ type Methods = {
 			The first argument passed is the icon itself.
 			This is useful when needing to extend the behaviour of an icon while remaining in the chain.
 		]]
-		function(self: Icon, func: (self: Icon) -> (...any)): Icon
+		function(self: Icon, func: (self: Icon) -> (...any), ...: any): Icon
 			return nil :: any
 		end
 	),
@@ -415,7 +415,7 @@ type Methods = {
 		--[[
 			Unparents an icon from a parentIcon if it belongs to a dropdown or menu.
 		]]
-		function(self: Icon, numberSpinner: any): Icon
+		function(self: Icon, numberSpinner: any, func: (...any) -> (...any), ...: any): Icon
 			return nil :: any
 		end
 	),
