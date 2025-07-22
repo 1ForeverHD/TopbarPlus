@@ -395,6 +395,7 @@ function Icon.new()
 		end
 	end
 	if origin and originsScreenGui and originsScreenGui.ResetOnSpawn == true then
+		self.originsScreenGui = originsScreenGui
 		Utility.localPlayerRespawned(function()
 			self:destroy()
 		end)
@@ -1126,9 +1127,10 @@ function Icon:convertLabelToNumberSpinner(numberSpinner, callback)
 			end
 			return TotalSize, numOfDigits
 		end
-
+		
 		local function getLabelParentContainerXSize()
-			local nextParent = label.Parent.Parent
+			local firstParent = label.Parent
+			local nextParent = firstParent and firstParent.Parent
 			if nextParent == nil then
 				return 0
 			end

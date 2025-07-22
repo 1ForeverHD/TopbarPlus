@@ -141,7 +141,7 @@ return function(icon)
 		end
 		local orderedInstances = {}
 		for _, child in pairs(dropdownScroller:GetChildren()) do
-			if child:IsA("GuiObject") then
+			if child:IsA("GuiObject") and child.Visible then
 				table.insert(orderedInstances, {child, child.AbsolutePosition.Y})
 			end
 		end
