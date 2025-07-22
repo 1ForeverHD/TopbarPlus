@@ -36,6 +36,7 @@
 
 -- SERVICES
 local UserInputService = game:GetService("UserInputService")
+local ContentProvider = game:GetService("ContentProvider")
 local StarterGui = game:GetService("StarterGui")
 local Players = game:GetService("Players")
 local Types = require(script.Types)
@@ -719,6 +720,17 @@ Icon.disableStateOverlay = Icon.disableOverlay
 
 function Icon:setImage(imageId, iconState)
 	self:modifyTheme({"IconImage", "Image", imageId, iconState})
+	
+	-- This code ensures icon images are preloaded if they haven't been fetched yet
+	task.spawn(function()
+		local newIdContent = if tonumber(imageId) then `rbxassetid://{imageId}` else imageId
+		local initialAssetFetchStatus = ContentProvider:GetAssetFetchStatus(newIdContent)
+	
+		if initialAssetFetchStatus ~= Enum.AssetFetchStatus.Success then
+			pcall(ContentProvider.PreloadAsync, ContentProvider, { newIdContent })
+		end
+	end)
+		
 	return self
 end
 
