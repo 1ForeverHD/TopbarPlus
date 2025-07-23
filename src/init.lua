@@ -83,6 +83,11 @@ local iconsDict = {}
 local anyIconSelected = Signal.new()
 local elements = iconModule.Elements
 local totalCreatedIcons = 0
+local preferredInput = {
+	mobile = Enum.PreferredInput.Touch,
+	desktop = Enum.PreferredInput.KeyboardAndMouse,
+	console = Enum.PreferredInput.Gamepad
+}
 
 
 
@@ -337,7 +342,7 @@ function Icon.new()
 		end
 	end)
 	clickRegion.MouseEnter:Connect(function()
-		local dontSetState = not UserInputService.KeyboardEnabled
+		local dontSetState = UserInputService.PreferredInput ~= preferredInput.desktop
 		viewingStarted(dontSetState)
 	end)
 	local touchCount = 0
@@ -346,7 +351,7 @@ function Icon.new()
 	clickRegion.SelectionGained:Connect(viewingStarted)
 	clickRegion.SelectionLost:Connect(viewingEnded)
 	clickRegion.MouseButton1Down:Connect(function()
-		if not self.locked and UserInputService.TouchEnabled then
+		if not self.locked and UserInputService.PreferredInput == preferredInput.mobile then
 			touchCount += 1
 			local myTouchCount = touchCount
 			task.delay(0.2, function()
