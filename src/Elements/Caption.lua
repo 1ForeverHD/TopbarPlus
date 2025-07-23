@@ -121,24 +121,20 @@ return function(icon)
 	
 	local caret = Instance.new("ImageLabel")
 	caret.Name = "Caret"
-	caret.Image = "rbxasset://LuaPackages/Packages/_Index/FoundationImages/FoundationImages/SpriteSheets/img_set_2x_1.png"
+	caret.Image = "rbxassetid://101906294438076"
 	caret.ImageColor3 = CAPTION_COLOR
-	caret.ImageRectOffset = Vector2.new(0, 494)
-	caret.ImageRectSize = Vector2.new(32, 16)
 	caret.AnchorPoint = Vector2.new(0, 0.5)
 	caret.BackgroundTransparency = 1
 	caret.Position = UDim2.new(0, 0, 0, 4)
-	caret.Rotation = 180
 	caret.Size = UDim2.fromOffset(16, 8)
 	caret.ZIndex = 12
 	caret.Parent = caption
 
 	local dropShadow = Instance.new("ImageLabel")
+	dropShadow.Visible = true
 	dropShadow.Name = "DropShadow"
-	dropShadow.Image = "rbxasset://LuaPackages/Packages/_Index/FoundationImages/FoundationImages/SpriteSheets/img_set_2x_5.png"
+	dropShadow.Image = "rbxassetid://124920646932671"
 	dropShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-	dropShadow.ImageRectOffset = Vector2.new(52, 460)
-	dropShadow.ImageRectSize = Vector2.new(50, 50)
 	dropShadow.ImageTransparency = 0.45
 	dropShadow.ScaleType = Enum.ScaleType.Slice
 	dropShadow.SliceCenter = Rect.new(12, 12, 13, 13)

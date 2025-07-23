@@ -5,7 +5,7 @@ local VERSION = {}
 
 
 -- SHARED
-VERSION.appVersion = "v3.3.0"
+VERSION.appVersion = "v3.3.1"
 VERSION.latestVersion = nil :: string?
 
 
