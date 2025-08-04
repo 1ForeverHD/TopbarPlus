@@ -69,9 +69,7 @@ type StaticFunctions = {
 	),
 }
 
-local MT = {} :: Methods
 type Methods = {
-	__index: typeof(MT),
 	
 	-- CLASS FUNCTIONS
 	setName: typeof(
@@ -446,7 +444,7 @@ type Fields = {
 	notified: Signal,
 }
 
-export type Icon = typeof(setmetatable({} :: Fields, MT))
+export type Icon = Methods & StaticFunctions --typeof(setmetatable({} :: Fields, MT))
 
 export type StaticIcon = {
 	new: typeof(
@@ -454,7 +452,7 @@ export type StaticIcon = {
 			Constructs an empty <code>32x32</code> icon on the topbar.
 		]]
 		function(): Icon
-			return nil :: any
+			return (nil :: any) :: Icon
 		end
 	),
 } & StaticFunctions
