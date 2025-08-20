@@ -293,6 +293,7 @@ return function(icon)
 	local function connectVisibilityListeners(child)
 		if child:IsA("GuiObject") then
 			child:GetPropertyChangedSignal("Visible"):Connect(updateChildSize)
+			child:GetPropertyChangedSignal("Size"):Connect(updateChildSize) -- -- update max icons when child size changes
 		end
 	end
 	

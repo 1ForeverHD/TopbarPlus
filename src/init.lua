@@ -842,6 +842,18 @@ function Icon:setTextFont(font, fontWeight, fontStyle, iconState)
 	return self
 end
 
+function Icon:setTextColor(Color, iconState)
+	if Color == nil or Color == "" or (type(Color) ~= "userdata" or typeof(Color) ~= "Color3") then
+		if Color ~= nil and Color ~= "" then
+			warn("setTextColor item must be a Color3 value! Changed the color to white.")
+		end
+		Color = Color3.fromRGB(255, 255, 255)
+	end
+
+	self:modifyTheme({"IconLabel", "TextColor3", Color, iconState})
+	return self
+end
+
 function Icon:bindToggleItem(guiObjectOrLayerCollector)
 	if not guiObjectOrLayerCollector:IsA("GuiObject") and not guiObjectOrLayerCollector:IsA("LayerCollector") then
 		error("Toggle item must be a GuiObject or LayerCollector!")
