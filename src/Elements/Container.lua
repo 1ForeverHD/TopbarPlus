@@ -1,12 +1,13 @@
 local hasBecomeOldTheme = false
 local previousInsetHeight = 0
 return function(Icon)
-	
+
 	-- Has to be included for the time being due to this bug mentioned here:
 	-- https://devforum.roblox.com/t/bug/2973508/7
 	local GuiService = game:GetService("GuiService")
 	local Players =  game:GetService("Players")
 	local UserInputService = game:GetService("UserInputService")
+	local StarterGui = game:GetService("StarterGui")
 	local container = {}
 	local Signal = require(script.Parent.Parent.Packages.GoodSignal)
 	local insetChanged = Signal.new()
@@ -17,10 +18,51 @@ return function(Icon)
 	local checkCount = 0
 	local isConsoleScreen = false
 	local isUsingVR = false
+
+	-- Health bar offset handling variables
+	local healthBarOffset = -12 -- Default offset
+
+	local function getHealthBarOffset()
+		-- Check if health bar is enabled in CoreGui
+		local isHealthBarEnabled = false
+		local success, enabled = pcall(function()
+			return StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Health)
+		end)
+		if success then
+			isHealthBarEnabled = enabled
+		end
+
+		-- Don't apply offset on old topbar, console, or VR
+		if Icon.isOldTopbar or isConsoleScreen or isUsingVR then
+			return -12
+		end
+
+		-- Only apply offset if health bar is enabled
+		if isHealthBarEnabled then
+			-- Additional check for actual visibility (optional - can be refined)
+			local localPlayer = Players.LocalPlayer
+			if localPlayer and localPlayer.Character then
+				local humanoid = localPlayer.Character:FindFirstChild("Humanoid")
+				if humanoid then
+					-- Conservative approach: only offset when health is below max
+					local maxHealth = humanoid.MaxHealth
+					local currentHealth = humanoid.Health
+					local healthThreshold = maxHealth * 0.99
+
+					if currentHealth < healthThreshold then
+						return -212 -- Health bar width (200) + original padding (12)
+					end
+				end
+			end
+		end
+
+		return -12 -- Default offset
+	end
+
 	local function checkInset(status)
 		local currentHeight = GuiService.TopbarInset.Height
 		local isOldTopbar = currentHeight <= 36
-		
+
 
 		-- These additional checks are needed to ensure *it is actually* the old topbar
 		-- and not a client which takes a really long time to load
@@ -89,7 +131,7 @@ return function(Icon)
 				Icon.insetHeightChanged:Fire(insetHeight)
 			end)
 		end
-		
+
 	end
 	GuiService:GetPropertyChangedSignal("TopbarInset"):Connect(checkInset)
 	checkInset("FirstTime")
@@ -122,7 +164,7 @@ return function(Icon)
 	holders.Visible = true
 	holders.ZIndex = 1
 	holders.Parent = screenGui
-	
+
 	local screenGuiCenter = screenGui:Clone()
 	local holdersCenter = screenGuiCenter.Holders
 	local function updateCenteredHoldersHeight()
@@ -135,10 +177,10 @@ return function(Icon)
 		screenGuiCenter.DisplayOrder = Icon.baseDisplayOrder
 	end)
 	container[screenGuiCenter.Name] = screenGuiCenter
-	
+
 	insetChanged:Connect(updateCenteredHoldersHeight)
 	updateCenteredHoldersHeight()
-	
+
 	local screenGuiClipped = screenGui:Clone()
 	screenGuiClipped.Name = screenGuiClipped.Name.."Clipped"
 	screenGuiClipped.DisplayOrder = (Icon.baseDisplayOrder + 1)
@@ -146,7 +188,7 @@ return function(Icon)
 		screenGuiClipped.DisplayOrder = (Icon.baseDisplayOrder + 1)
 	end)
 	container[screenGuiClipped.Name] = screenGuiClipped
-	
+
 	local screenGuiCenterClipped = screenGuiCenter:Clone()
 	screenGuiCenterClipped.Name = screenGuiCenterClipped.Name.."Clipped"
 	screenGuiCenterClipped.DisplayOrder = (Icon.baseDisplayOrder + 1)
@@ -154,7 +196,7 @@ return function(Icon)
 		screenGuiCenterClipped.DisplayOrder = (Icon.baseDisplayOrder + 1)
 	end)
 	container[screenGuiCenterClipped.Name] = screenGuiCenterClipped
-	
+
 	local holderReduction = -24
 	local left = Instance.new("ScrollingFrame")
 	left:SetAttribute("IsAHolder", true)
@@ -178,7 +220,7 @@ return function(Icon)
 	left.ScrollingEnabled = false--true
 	left.ElasticBehavior = Enum.ElasticBehavior.Never
 	left.Parent = holders
-	
+
 	local UIListLayout = Instance.new("UIListLayout")
 	insetChanged:Connect(function()
 		UIListLayout.Padding = UDim.new(0, startInset)
@@ -188,7 +230,7 @@ return function(Icon)
 	UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
 	UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 	UIListLayout.Parent = left
-	
+
 	local center = left:Clone()
 	insetChanged:Connect(function()
 		center.UIListLayout.Padding = UDim.new(0, startInset)
@@ -197,16 +239,62 @@ return function(Icon)
 	center.UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	center.Name = "Center"
 	center.Parent = holdersCenter
-	
+
 	local right = left:Clone()
 	insetChanged:Connect(function()
 		right.UIListLayout.Padding = UDim.new(0, startInset)
+		-- Update health bar offset each time inset changes
+		local currentHealthBarOffset = getHealthBarOffset()
+		right.Position = UDim2.new(1, currentHealthBarOffset, 0, 0)
 	end)
 	right.UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
 	right.Name = "Right"
 	right.AnchorPoint = Vector2.new(1, 0)
-	right.Position = UDim2.new(1, -12, 0, 0)
+	right.Position = UDim2.new(1, getHealthBarOffset(), 0, 0) -- Initial position with health bar consideration
 	right.Parent = holders
+
+	-- Setup health monitoring to trigger position updates when health changes
+	local function setupHealthMonitoring()
+		local localPlayer = Players.LocalPlayer
+		if localPlayer then
+			local function onCharacterAdded(character)
+				local humanoid = character:WaitForChild("Humanoid", 5)
+				if humanoid then
+					-- When health changes, trigger inset change to update positions
+					humanoid.HealthChanged:Connect(function()
+						-- Fire inset changed to trigger right container position update
+						insetChanged:Fire(guiInset)
+					end)
+				end
+			end
+
+			if localPlayer.Character then
+				onCharacterAdded(localPlayer.Character)
+			end
+			localPlayer.CharacterAdded:Connect(onCharacterAdded)
+		end
+	end
+
+	-- Setup monitoring for health bar changes
+	local success, connection = pcall(function()
+		return StarterGui.CoreGuiChangedSignal:Connect(function(coreGuiType, enabled)
+			if coreGuiType == Enum.CoreGuiType.Health then
+				-- Trigger position update when health bar is toggled
+				insetChanged:Fire(guiInset)
+			end
+		end)
+	end)
+
+	-- Setup health monitoring
+	if Players.LocalPlayer then
+		setupHealthMonitoring()
+	else
+		Players:GetPropertyChangedSignal("LocalPlayer"):Connect(function()
+			if Players.LocalPlayer then
+				setupHealthMonitoring()
+			end
+		end)
+	end
 
 	-- This is important so that all elements update instantly
 	insetChanged:Fire(guiInset)
