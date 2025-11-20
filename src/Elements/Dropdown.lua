@@ -134,6 +134,16 @@ return function(icon)
 			end
 			totalHeight += height
 		end
+		-- FIX: Include UIListLayout padding in height calculation
+		-- Previously, the dropdown height didn't account for spacing between icons
+		-- causing a slight visual mismatch when MaxIcons was set
+		local listPadding = dropdownList.Padding.Offset
+		local visibleIconCount = math.min(maxIconsRoundedUp, #children)
+		if visibleIconCount > 1 then
+			totalHeight += listPadding * (visibleIconCount - 1)
+		end
+
+		-- Add container padding
 		totalHeight += dropdownPadding.PaddingTop.Offset + dropdownPadding.PaddingBottom.Offset
 		return totalHeight
 	end
@@ -274,10 +284,16 @@ return function(icon)
 				childIcon:getInstance("ClickRegion").NextSelectionUp = nextSelection
 			end
 		end
+		-- FIX: Include UIListLayout padding in height calculation
+		-- Previously, the dropdown height didn't account for spacing between icons
+		-- causing a slight visual mismatch when MaxIcons was set
+		local listPadding = dropdownList.Padding.Offset
+		local visibleIconCount = math.min(maxIconsRoundedUp, #orderedInstances)
+		if visibleIconCount > 1 then
+			totalHeight += listPadding * (visibleIconCount - 1)
+		end
 		totalHeight += dropdownPadding.PaddingTop.Offset + dropdownPadding.PaddingBottom.Offset
-
 		dropdownScroller.Size = UDim2.fromOffset(0, totalHeight)
-
 	end
 
 	dropdownJanitor:add(dropdownScroller:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(updateMaxIconsListener))

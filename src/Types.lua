@@ -279,6 +279,23 @@ type Methods = {
 			return nil :: any
 		end
 	),
+	bindSignal: typeof(
+	--[[
+		Connects an <code>RBXScriptSignal</code> (such as <code>Touched</code> or <code>Changed</code>) to the icon.
+		<code>callback</code> is called with arguments <code>(self, ...)</code> when the signal fires.
+	]]
+		function(self: Icon, signal: RBXScriptSignal, callback: (...any) -> ()): Icon
+			return nil :: any
+		end
+	),
+	unbindSignal: typeof(
+		--[[ 
+			Disconnects a signal previously bound with <code>:bindSignal()</code>.
+		]]
+		function(self: Icon, signal: RBXScriptSignal): Icon
+			return nil :: any
+		end
+	),
 	bindToggleKey: typeof(
 		--[[
 			Binds a keycode which toggles the icon when pressed.
