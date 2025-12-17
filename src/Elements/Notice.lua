@@ -27,11 +27,10 @@ return function(icon, Icon)
 	noticeLabel.BackgroundTransparency = 1
 	noticeLabel.Position = UDim2.new(0.5, 0, 0.515, 0)
 	noticeLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	noticeLabel.FontSize = Enum.FontSize.Size14
+	noticeLabel.TextSize = 14
 	noticeLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
 	noticeLabel.Text = "1"
 	noticeLabel.TextWrapped = true
-	noticeLabel.TextWrap = true
 	noticeLabel.Font = Enum.Font.Arial
 	noticeLabel.Parent = notice
 	
