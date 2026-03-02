@@ -5,6 +5,7 @@ license = "MPL2"
 version = "3.4.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
+repository = "https://github.com/1ForeverHD/TopbarPlus"
 exclude = [
     "**",
 ]
