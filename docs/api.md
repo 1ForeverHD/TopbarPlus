@@ -135,7 +135,7 @@ icon:clearNotices()
 #### disableOverlay
 {chainable}
 ```lua
-icon:disableStateOverlay(bool)
+icon:disableOverlay(bool)
 ```
 When set to ``true``, disables the shade effect which appears when the icon is pressed and released.
 
