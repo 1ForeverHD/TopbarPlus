@@ -28,7 +28,7 @@ task.defer(function()
 		print(`🍍 Running TopbarPlus {appVersion} by @ForeverHD & HD Admin`)
 	end
 	if isOutdated then
-		warn(`A new version of TopbarPlus ({latestVersion}) is available: https://devforum.roblox.com/t/topbarplus/1017485`)
+		warn(`A new version of TopbarPlus ({appVersion} -> {latestVersion}) is available: https://devforum.roblox.com/t/topbarplus/1017485`)
 	end
 end)
 
