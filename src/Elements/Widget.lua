@@ -246,7 +246,7 @@ return function(icon, Icon)
 			local widgetMinimumWidth = widget:GetAttribute("MinimumWidth")
 			local widgetMinimumHeight = widget:GetAttribute("MinimumHeight")
 			local widgetBorderSize = widget:GetAttribute("BorderSize")
-			local widgetWidth = math.clamp(initialWidgetWidth, widgetMinimumWidth, viewportX)
+			local widgetWidth = math.clamp(initialWidgetWidth, widgetMinimumWidth, math.max(viewportX, widgetMinimumWidth))
 			local menuIcons = icon.menuIcons
 			local additionalWidth = 0
 			local hasMenu = #menuIcons > 0
