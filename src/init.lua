@@ -252,6 +252,7 @@ function Icon.new()
 	self.dropdownIcons = {}
 	self.childIconsDict = {}
 	self.creationTime = os.clock()
+	self.bindedSignalEvents = {}
 
 	-- Widget is the new name for an icon
 	local widget = janitor:add(require(elements.Widget)(self, Icon))
@@ -921,6 +922,27 @@ function Icon:unbindEvent(iconEventName)
 		eventConnection:Disconnect()
 		self.bindedEvents[iconEventName] = nil
 	end
+	return self
+end
+
+function Icon:bindSignal(signal, signalFunction)
+	assert(typeof(signal) == "RBXScriptSignal", "argument[1] must be a valid RBXScriptSignal!")
+	assert(typeof(signalFunction) == "function", "argument[2] must be a function!")
+
+	local connection = signal:Connect(function(...)
+		signalFunction(self, ...)
+	end)
+	self.bindSignalEvents[signal] = connection
+	return self
+end
+
+function Icon:unbindSignal(signal)
+	local connection = self.bindSignalEvents[signal]
+	if connection then
+		connection:Disconnect()
+		self.bindSignalEvents[signal] = nil
+	end
+
 	return self
 end
 

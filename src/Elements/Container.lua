@@ -130,7 +130,7 @@ return function(Icon)
 	end
 	screenGuiCenter.Name = "TopbarCentered"
 	screenGuiCenter.DisplayOrder = Icon.baseDisplayOrder
-	screenGuiCenter.ScreenInsets = Enum.ScreenInsets.None
+	screenGuiCenter.ScreenInsets = Enum.ScreenInsets.TopbarSafeInsets
 	Icon.baseDisplayOrderChanged:Connect(function()
 		screenGuiCenter.DisplayOrder = Icon.baseDisplayOrder
 	end)

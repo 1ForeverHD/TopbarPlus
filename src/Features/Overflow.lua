@@ -353,6 +353,93 @@ function Overflow.updateBoundary(alignment)
 		overflowIcon:select()
 	end
 
+		-- Restore relocated center icons when space is available
+	if not isCentral then
+		-- Only restore if both overflow menus are completely inactive
+		local leftOverflow = overflowIcons["Left"]
+		local rightOverflow = overflowIcons["Right"]
+		local leftIsInactive = not leftOverflow or not leftOverflow.isEnabled
+		local rightIsInactive = not rightOverflow or not rightOverflow.isEnabled
+		local bothSidesStable = leftIsInactive and rightIsInactive
+
+		if not joinOverflow and bothSidesStable then
+			local relocatedIcons = {}
+			for _, icon in pairs(ourOrderedIcons) do
+				if icon.hasRelocatedInOverflow and not icon.parentIconUID then
+					table.insert(relocatedIcons, icon)
+				end
+			end
+
+			if #relocatedIcons > 0 then
+				table.sort(relocatedIcons, function(a, b)
+					return (a.widget.LayoutOrder or 0) < (b.widget.LayoutOrder or 0)
+				end)
+
+				for _, icon in ipairs(relocatedIcons) do
+					local centerOrderedIcons = Overflow.getAvailableIcons("Center")
+					local centerHolder = holders["Center"]
+					local centerHolderXPos = centerHolder.AbsolutePosition.X
+					local centerHolderXSize = centerHolder.AbsoluteSize.X
+					local centerUIList = centerHolder.UIListLayout
+					local centerPadding = centerUIList.Padding.Offset
+
+					local totalCenterWidth = 0
+					for _, centerIcon in pairs(centerOrderedIcons) do
+						totalCenterWidth += Overflow.getWidth(centerIcon) + centerPadding
+					end
+					totalCenterWidth += Overflow.getWidth(icon) + centerPadding
+
+					local leftOrderedIcons = Overflow.getAvailableIcons("Left")
+					local rightOrderedIcons = Overflow.getAvailableIcons("Right")
+
+					local leftBoundary = centerHolderXPos
+					local rightBoundary = centerHolderXPos + centerHolderXSize
+
+					-- Calculate boundaries excluding relocated icons
+					if #leftOrderedIcons > 0 then
+						local leftRealXPositions = Overflow.getRealXPositions("Left", leftOrderedIcons)
+						for _, leftIcon in pairs(leftOrderedIcons) do
+							if not leftIcon.hasRelocatedInOverflow then
+								local leftIconX = leftRealXPositions[leftIcon.UID]
+								local leftIconWidth = Overflow.getWidth(leftIcon)
+								leftBoundary = math.max(leftBoundary, leftIconX + leftIconWidth + BOUNDARY_GAP)
+							end
+						end
+					end
+
+					if #rightOrderedIcons > 0 then
+						local rightRealXPositions = Overflow.getRealXPositions("Right", rightOrderedIcons)
+						for _, rightIcon in pairs(rightOrderedIcons) do
+							if not rightIcon.hasRelocatedInOverflow then
+								local rightIconX = rightRealXPositions[rightIcon.UID]
+								rightBoundary = math.min(rightBoundary, rightIconX - BOUNDARY_GAP)
+							end
+						end
+					end
+
+					-- Safety margin to prevent oscillation
+					local SAFETY_MARGIN = BOUNDARY_GAP * 2.5
+					local availableCenterWidth = rightBoundary - leftBoundary - SAFETY_MARGIN
+
+					if availableCenterWidth > 0 and totalCenterWidth <= availableCenterWidth then
+						icon:align("Center")
+						icon.hasRelocatedInOverflow = nil
+
+						Overflow.updateAvailableIcons("Center")
+						Overflow.updateAvailableIcons(alignment)
+
+						task.spawn(function()
+							task.wait(0.2)
+							Overflow.updateBoundary("Left")
+							Overflow.updateBoundary("Right")
+						end)
+
+						break
+					end
+				end
+			end
+		end
+	end
 end
 
 
