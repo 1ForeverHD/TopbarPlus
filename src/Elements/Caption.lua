@@ -36,7 +36,6 @@ return function(icon)
 	header.TextSize = TEXT_SIZE
 	header.TextTruncate = Enum.TextTruncate.None
 	header.TextWrapped = false
-	header.TextXAlignment = Enum.TextXAlignment.Left
 	header.AutomaticSize = Enum.AutomaticSize.X
 	header.BackgroundTransparency = 1
 	header.LayoutOrder = 1
@@ -48,6 +47,7 @@ return function(icon)
 	layout.Name = "Layout"
 	layout.Padding = UDim.new(0, 8)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	layout.Parent = box
 
 	local UICorner = Instance.new("UICorner")

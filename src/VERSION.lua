@@ -20,7 +20,7 @@ function VERSION.getLatestVersion(): string?
 	local placeName = ""
 	while true do
 		local success, hdDevelopmentDetails = pcall(function()
-			return game:GetService("MarketplaceService"):GetProductInfo(DEVELOPMENT_PLACE_ID)
+			return game:GetService("MarketplaceService"):GetProductInfoAsync(DEVELOPMENT_PLACE_ID)
 		end)
 		if success and hdDevelopmentDetails then
 			placeName = hdDevelopmentDetails.Name

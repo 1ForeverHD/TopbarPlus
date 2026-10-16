@@ -241,7 +241,7 @@ type Methods = {
 			a font ID (such as <code>12187370928</code>),
 			or font family link (such as <code>"rbxasset://fonts/families/Sarpanch.json"</code>).
 		]]
-		function(self: Icon, font: string | Enum.Font, fontWeight: Enum.FontWeight?, fontStyle: Enum.FontSize?, iconState: IconState?): Icon
+		function(self: Icon, font: string | Enum.Font, fontWeight: Enum.FontWeight?, fontStyle: Enum.FontStyle?, iconState: IconState?): Icon
 			return nil :: any
 		end
 	),

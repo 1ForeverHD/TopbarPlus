@@ -166,7 +166,6 @@ return function(icon, Icon)
 	iconLabel.TextXAlignment = Enum.TextXAlignment.Left
 	iconLabel.Text = ""
 	iconLabel.TextWrapped = true
-	iconLabel.TextWrap = true
 	iconLabel.TextScaled = false
 	iconLabel.Active = false
 	iconLabel.AutoLocalize = true

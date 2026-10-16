@@ -266,7 +266,8 @@ function Themes.set(icon, theme)
 		Themes.change(icon)
 	end))
 	if typeof(theme) == "Instance" and theme:IsA("ModuleScript") then
-		theme = require(theme)
+		local themeModule = theme :: ModuleScript
+		theme = require(themeModule)
 	end
 	icon.appliedTheme = theme
 	Themes.rebuild(icon)
