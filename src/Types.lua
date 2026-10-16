@@ -461,7 +461,7 @@ type Fields = {
 	notified: Signal,
 }
 
-export type Icon = Methods & StaticFunctions --typeof(setmetatable({} :: Fields, MT))
+export type Icon = Methods & Fields & StaticFunctions --typeof(setmetatable({} :: Fields, MT))
 
 export type StaticIcon = {
 	new: typeof(
