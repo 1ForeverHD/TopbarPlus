@@ -18,6 +18,9 @@
 	
 ]]
 
+-- The HD Supporter badge is awarded in Try HD Admin on someone's first donation
+local SUPPORTER_BADGE_ID = 3117667999886969
+
 task.defer(function()
 	local RunService = game:GetService("RunService")
 	local VERSION = require(script.Parent.VERSION)
@@ -29,6 +32,20 @@ task.defer(function()
 	end
 	if isOutdated and latestVersion then
 		warn(`A new version of TopbarPlus ({appVersion} -> {latestVersion}) is available: https://devforum.roblox.com/t/topbarplus/1017485`)
+	end
+end)
+
+task.defer(function()
+	-- Only the developer playtesting in Studio sees this, and only until they've donated
+	local RunService = game:GetService("RunService")
+	local localPlayer = game:GetService("Players").LocalPlayer
+	if not RunService:IsStudio() or not localPlayer or localPlayer.UserId <= 0 then
+		return
+	end
+	local BadgeService = game:GetService("BadgeService")
+	local success, isSupporter = pcall(BadgeService.UserHasBadgeAsync, BadgeService, localPlayer.UserId, SUPPORTER_BADGE_ID)
+	if success and not isSupporter then
+		print("[TopbarPlus]: Please consider a one-time donation (from 5 Robux) at roblox.com/games/106966695720565 to help continue these open source projects (this message only ever appears to non-donators in-studio)")
 	end
 end)
 
