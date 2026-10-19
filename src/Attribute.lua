@@ -7,19 +7,17 @@
 		2. If an experience, to credit TopbarPlus in your description, or in a
 		   devforum post linked from your experience's description.
 
-	v3 has involved over 350 hours of work to develop, so please consider supporting
-	its development by reporting any issues or feedback you have at its repository:
-	https://github.com/1ForeverHD/TopbarPlus
+	v3 has involved over 380 hours of work to develop, so please consider supporting
+	its development by donating here:
+	https://www.roblox.com/games/106966695720565
 
-	You can get in touch with me on Discord via the social link here:
-	https://create.roblox.com/store/asset/92368439343389/TopbarPlus
+	You can suggest features or report bugs with the tag 'TopbarPlus' here:
+	https://forum.hdadmin.com/
 
-	Many thanks! ~Ben, June 10th 2025
-	
+	Many thanks! ~Ben, October 19th 2026
+
 ]]
 
--- The HD Supporter badge is awarded in Try HD Admin on someone's first donation
-local SUPPORTER_BADGE_ID = 3117667999886969
 
 task.defer(function()
 	local RunService = game:GetService("RunService")
@@ -36,16 +34,16 @@ task.defer(function()
 end)
 
 task.defer(function()
-	-- Only the developer playtesting in Studio sees this, and only until they've donated
+	-- Only the developer playtesting in Studio sees this, and only if not donated. Nothing ever appears in-game
 	local RunService = game:GetService("RunService")
 	local localPlayer = game:GetService("Players").LocalPlayer
 	if not RunService:IsStudio() or not localPlayer or localPlayer.UserId <= 0 then
 		return
 	end
 	local BadgeService = game:GetService("BadgeService")
-	local success, isSupporter = pcall(BadgeService.UserHasBadgeAsync, BadgeService, localPlayer.UserId, SUPPORTER_BADGE_ID)
+	local success, isSupporter = pcall(BadgeService.UserHasBadgeAsync, BadgeService, localPlayer.UserId, 3117667999886969)
 	if success and not isSupporter then
-		print("[TopbarPlus]: Please consider a one-time donation (from 5 Robux) at roblox.com/games/106966695720565 to help continue these open source projects (this message only ever appears to non-donators in-studio)")
+		print("[TopbarPlus]: Please consider a one-time donation (from 5 Robux) at roblox.com/games/106966695720565 to support this open source project (this message only ever appears to non-donators in-studio)")
 	end
 end)
 
