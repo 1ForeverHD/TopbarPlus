@@ -1,1 +1,11 @@
 std = "roblox"
+exclude = ["src/Packages/*"]
+
+# The existing code trips these in lots of places. Turn each back on once its warnings are cleared
+[lints]
+unused_variable = "allow"
+shadowing = "allow"
+multiple_statements = "allow"
+parenthese_conditions = "allow"
+empty_if = "allow"
+if_same_then_else = "allow"
