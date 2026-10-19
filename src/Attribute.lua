@@ -9,7 +9,7 @@
 
 	v3 has involved over 380 hours of work to develop, so please consider supporting
 	its development by donating here:
-	https://www.roblox.com/games/106966695720565
+	https://www.roblox.com/games/start?placeId=106966695720565
 
 	You can suggest features or report bugs with the tag 'TopbarPlus' here:
 	https://forum.hdadmin.com/
@@ -43,7 +43,7 @@ task.defer(function()
 	local BadgeService = game:GetService("BadgeService")
 	local success, isSupporter = pcall(BadgeService.UserHasBadgeAsync, BadgeService, localPlayer.UserId, 3117667999886969)
 	if success and not isSupporter then
-		print("[TopbarPlus]: Please consider a one-time donation (from 5 Robux) at roblox.com/games/106966695720565 to support this open source project (this message only ever appears to non-donators in-studio)")
+		print("[TopbarPlus]: Please consider a one-time donation (from 5 Robux) at https://www.roblox.com/games/start?placeId=106966695720565 to support this open source project (this message only ever appears to non-donators in-studio)")
 	end
 end)
 
