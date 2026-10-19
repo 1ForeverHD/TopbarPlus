@@ -165,7 +165,7 @@ icon:setOrder(order, iconState)
 #### setCornerRadius
 {chainable} {toggleable}
 ```lua
-icon:setCornerRadius(scale, offset, iconState)
+icon:setCornerRadius(udim, iconState)
 ```
 
 ----
@@ -329,6 +329,38 @@ icon:oneClick(bool)
 When set to true the icon will automatically deselect when selected. This creates the effect of a single click button.
 
 ----
+#### setCloseOnOutsideClick
+{chainable}
+```lua
+icon:setCloseOnOutsideClick(bool)
+```
+When ``true`` (the default) the icon's dropdown closes when the player clicks or taps anywhere outside of it, the same as Roblox's own menus. Set to ``false`` to keep it open until the icon is pressed again.
+
+----
+#### setDestroyOnRespawn
+{chainable}
+```lua
+icon:setDestroyOnRespawn(bool)
+```
+Icons created from a LocalScript inside a ScreenGui with ``ResetOnSpawn`` enabled are destroyed when the player respawns because its LocalScript runs again and regenerates. Set to ``false`` to instead stop it being destroyed when this happens.
+
+----
+#### setNoticeLabel
+{chainable}
+```lua
+icon:setNoticeLabel(text)
+```
+Shows ``text`` (such as ``"!"``) in the icon's notice instead of the number of notices. The notice still only appears while it has active notices. Pass ``nil`` to show the count again. To change the notice's colours, use ``modifyTheme`` with ``"Notice"`` and ``"NoticeLabel"``.
+
+----
+#### addInstance
+{chainable}
+```lua
+icon:addInstance(guiObject, side)
+```
+Adds your own ``GuiObject`` inside the icon to the ``"Left"`` or ``"Right"`` (the default) of its image and label. Give it an offset or automatic width, as a scale width would follow the icon's own width. It's destroyed with the icon, and you can theme it by its ``Name`` with ``modifyTheme``.
+
+----
 #### setCaption
 {chainable}
 ```lua
@@ -442,7 +474,7 @@ Clears all connections and destroys all instances associated with the icon.
 ```lua
 icon.selected:Connect(function(fromSource)
     -- fromSource can be useful for checking if the behaviour was triggered by a user (such as clicking)
-    -- fromSource values include "User", "OneClick", "AutoDeselect", "HideParentFeature", "Overflow"
+    -- fromSource values include "User", "OneClick", "AutoDeselect", "HideParentFeature", "Overflow" & "OutsideClick"
     local sourceName = fromSource or "Unknown"
     print("The icon was selected by the "..sourceName)
 end)

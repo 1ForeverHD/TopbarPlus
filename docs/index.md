@@ -68,6 +68,8 @@ Sometimes you'll want an item to appear only when *deselected* and similarily on
 !!! info
     If no ``iconState`` is specified (i.e. is nil) the value will be applied to all states.
 
+    States also build on each other. ``"Selected"`` keeps any ``"Deselected"`` values it doesn't set itself, and ``"Viewing"`` adds its values on top of whichever of those two looks the icon currently has.
+
 ```lua
 -- It doesn't matter if you do "deselected", "Deselected" or "dEsElEcTeD"; iconStates are not case sensitive
 Icon.new()
