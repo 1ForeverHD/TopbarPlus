@@ -43,7 +43,7 @@ task.defer(function()
 	local BadgeService = game:GetService("BadgeService")
 	local success, isSupporter = pcall(BadgeService.UserHasBadgeAsync, BadgeService, localPlayer.UserId, 3117667999886969)
 	if success and not isSupporter then
-		print("[TopbarPlus]: Please consider a one-time donation (from 5 Robux) at https://www.roblox.com/games/start?placeId=106966695720565 to support this open source project (this message only ever appears to non-donators in-studio)")
+		print("[TopbarPlus]: Please consider a one-time donation (from 5 Robux) at https://www.roblox.com/games/start?placeId=106966695720565 to support this project (this message only ever appears to non-donators in-studio)")
 	end
 end)
 
