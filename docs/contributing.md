@@ -19,4 +19,4 @@ You can submit pull requests on the [TopbarPlus repository]. Please branch off `
 
 ## Donate
 
-You can [donate in-game] if you'd like to support TopbarPlus. Your support is really appreciated!
+You can [donate in-game] if you'd like to support TopbarPlus. Any support is really appreciated!
