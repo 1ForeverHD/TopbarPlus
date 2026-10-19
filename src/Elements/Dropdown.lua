@@ -132,6 +132,7 @@ return function(icon)
 
 		table.sort(children, function(a, b) return a.AbsolutePosition.Y < b.AbsolutePosition.Y end)
 		local totalHeight = 0
+		local countedRows = 0
 		local maxIconsRoundedUp = math.ceil(maxIcons)
 		for i = 1, maxIconsRoundedUp do
 			local child = children[i]
@@ -142,7 +143,10 @@ return function(icon)
 				height *= (maxIcons - maxIconsRoundedUp + 1)
 			end
 			totalHeight += height
+			countedRows += 1
 		end
+		-- The gaps between rows count too, otherwise a themed DropdownList padding cuts the last row short
+		totalHeight += dropdownList.Padding.Offset * math.max(countedRows - 1, 0)
 		totalHeight += dropdownPadding.PaddingTop.Offset + dropdownPadding.PaddingBottom.Offset
 		return totalHeight
 	end
@@ -257,6 +261,7 @@ return function(icon)
 		table.sort(orderedInstances, function(a, b) return a[2] < b[2] end)
 
 		local totalHeight = 0
+		local countedRows = 0
 		local hasSetNextSelection = false
 		local maxIconsRoundedUp = math.ceil(maxIcons)
 		for i = 1, maxIconsRoundedUp do
@@ -269,6 +274,7 @@ return function(icon)
 				height = height * (maxIcons - maxIconsRoundedUp + 1)
 			end
 			totalHeight += height
+			countedRows += 1
 			if isReduced then
 				continue
 			end
@@ -283,6 +289,7 @@ return function(icon)
 				childIcon:getInstance("ClickRegion").NextSelectionUp = nextSelection
 			end
 		end
+		totalHeight += dropdownList.Padding.Offset * math.max(countedRows - 1, 0)
 		totalHeight += dropdownPadding.PaddingTop.Offset + dropdownPadding.PaddingBottom.Offset
 
 		dropdownScroller.Size = UDim2.fromOffset(0, totalHeight)
