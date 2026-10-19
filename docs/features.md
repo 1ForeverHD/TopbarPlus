@@ -1,4 +1,4 @@
-[icon states]: https://1foreverhd.github.io/TopbarPlus/#states
+[icon states]: index.md#states
 [v3 Playground]: https://www.roblox.com/games/117501901079852/TopbarPlus
 
 
@@ -7,7 +7,7 @@
 Icon.new:setImage(shopImageId)
 ```
 
-<a><img src="https://i.imgur.com/IEJfUye.png" width="50%"/></a>
+<a><img src="../images/features-images.png" width="50%"/></a>
 
 ------------------------------
 
@@ -16,14 +16,14 @@ Icon.new:setImage(shopImageId)
 icon:setLabel("Shop")
 ```
 
-<a><img src="https://i.imgur.com/d0nVAc6.png" width="50%"/></a>
+<a><img src="../images/features-labels.png" width="50%"/></a>
 
 ```lua
 icon:setImage(shopImageId)
 icon:setLabel("Shop")
 ```
 
-<a><img src="https://i.imgur.com/vJHvJWI.png" width="50%"/></a>
+<a><img src="../images/features-labels-with-image.png" width="50%"/></a>
 
 ------------------------------
 
@@ -54,7 +54,7 @@ icon:align("Right")
 icon:notify()
 ```
 
-<a><img src="https://i.imgur.com/xFBbVoA.png" width="50%"/></a>
+<a><img src="../images/features-notices.png" width="50%"/></a>
 
 ------------------------------
 
@@ -63,7 +63,7 @@ icon:notify()
 icon:setCaption("Open Shop")
 ```
 
-<a><img src="https://i.imgur.com/QpecT2Y.gif" width="50%"/></a>
+<a><video src="../images/features-captions.mp4" width="50%" autoplay loop muted playsinline></video></a>
 
 ------------------------------
 
@@ -91,7 +91,7 @@ Icon.new()
 	})
 ```
 
-<a><img src="https://i.imgur.com/ZMt6bhr.gif" width="50%"/></a>
+<a><video src="../images/features-dropdowns.mp4" width="50%" autoplay loop muted playsinline></video></a>
 
 !!! warning
 	Icons containing a dropdown can join other menus but not dropdowns.
@@ -121,7 +121,7 @@ Icon.new()
 	})
 ```
 
-<a><img src="https://i.imgur.com/tXLrD8t.gif" width="50%"/></a>
+<a><video src="../images/features-menus.mp4" width="50%" autoplay loop muted playsinline></video></a>
 
 ------------------------------
 
@@ -150,7 +150,7 @@ Icon.new()
 	})
 ```
 
-<a><img src="https://i.imgur.com/LgJCj4X.gif" width="50%"/></a>
+<a><video src="../images/features-fixed-menus.mp4" width="50%" autoplay loop muted playsinline></video></a>
 
 ------------------------------
 
@@ -208,7 +208,7 @@ This determines *when* the modification is applied. See [icon states] for more d
 
 You can find example arrays under the 'Default' module:
 
-<a><img src="https://i.imgur.com/idH1SRi.png" width="100%"/></a>
+<a><img src="../images/features-modify-theme.png" width="100%"/></a>
 
 ------------------------------
 
@@ -230,7 +230,7 @@ Icon.new()
 	:oneClick()
 ```
 
-<a><img src="https://i.imgur.com/Ma2mpjB.gif" width="50%"/></a>
+<a><video src="../images/features-one-click-icons.mp4" width="50%" autoplay loop muted playsinline></video></a>
 
 ------------------------------
 
@@ -261,7 +261,7 @@ Icon.new()
 	:setCaption("Open Shop")
 ```
 
-<a><img src="https://i.imgur.com/GsdNfXr.gif" width="50%"/></a>
+<a><video src="../images/features-toggle-keys.mp4" width="50%" autoplay loop muted playsinline></video></a>
 
 ------------------------------
 
@@ -270,7 +270,7 @@ Icon.new()
 TopbarPlus comes with inbuilt support for gamepads (such as Xbox and PlayStation
 controllers) and console screens:
 
-<a><img src="https://i.imgur.com/N0n2Zau.gif" width="100%"/></a>
+<a><video src="../images/features-gamepad-console.mp4" width="100%" autoplay loop muted playsinline></video></a>
 
 To highlight the last-selected icon (or left-most if none have been selected yet) users simply press DPadUp or navigate to the topbar via the virtual cursor.
 To change the default trigger keycode (from DPadUp) do:
@@ -283,13 +283,13 @@ Icon.highlightKey = Enum.KeyCode.NEW_KEYCODE
 ### Overflows
 When accounting for device types and screen sizes, icons may occasionally overlap. This is especially common for phones when they enter portrait mode. TopbarPlus solves this with overflows:
 
-<a><img src="https://i.imgur.com/9jrHBaJ.gif" width="100%"/></a>
+<a><video src="../images/features-overflows.mp4" width="100%" autoplay loop muted playsinline></video></a>
 
 Overflows will appear when left-set or right-set icons exceed the boundary of the closest opposite-aligned icon or viewport.
 
 If a center-aligned icon exceeds the bounds of another icon, its alignment will be set to the alignment of the icon it exceeded:
 
-<a><img src="https://i.imgur.com/fAds4Ph.gif" width="100%"/></a>
+<a><video src="../images/features-overflows-center-alignment.mp4" width="100%" autoplay loop muted playsinline></video></a>
 
 ------------------------------
 

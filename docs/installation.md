@@ -6,11 +6,11 @@
 3. Click TopbarPlus to insert into your game and place anywhere within ``ReplicatedStorage`` or ``Workspace``. 
 4. TopbarPlus is a package so you can update it instantly (instead of re-adding) by right-clicking the Icon module and selecting an option such as 'Get Latest Package':
 
-    <a><img src="https://i.imgur.com/kIZdT83.png" width="50%"/></a>
+    <a><img src="../images/installation-get-latest-package.png" width="50%"/></a>
 
 5. You can receive automatic updates by enabling 'AutoUpdate' within the PackageLink:
 
-    <a><img src="https://i.imgur.com/2hGbjTS.png" width="50%"/></a>
+    <a><img src="../images/installation-autoupdate-packagelink.png" width="50%"/></a>
 
 !!! info
     All v3 updates will be backwards compatible so you don't need to worry about updates interfering with your code.

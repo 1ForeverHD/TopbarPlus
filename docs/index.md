@@ -1,6 +1,6 @@
-[icon:setOrder]: https://1foreverhd.github.io/TopbarPlus/api/#setorder
-[Feature Guide]: https://1foreverhd.github.io/TopbarPlus/features
-[Icon API]: https://1foreverhd.github.io/TopbarPlus/api
+[icon:setOrder]: api.md#setorder
+[Feature Guide]: features.md
+[Icon API]: api.md
 [TopbarPlus DevForum Thread]: https://devforum.roblox.com/t/topbarplus/1017485
 
 ### About
@@ -79,7 +79,7 @@ Icon.new()
 	:setLabel("Viewing", "Viewing")
 ```
 
-<a><img src="https://i.imgur.com/0QrDmi6.gif" width="50%"/></a>
+<a><video src="images/index-states.mp4" width="50%" autoplay loop muted playsinline></video></a>
 
 ----------
 

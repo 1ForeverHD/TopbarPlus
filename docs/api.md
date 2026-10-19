@@ -1,11 +1,11 @@
-[themes]: https://1foreverhd.github.io/TopbarPlus/features/#modify-theme
-[alignments]: https://1foreverhd.github.io/TopbarPlus/features/#alignments
+[themes]: features.md#modify-theme
+[alignments]: features.md#alignments
 [font family]: https://create.roblox.com/docs/reference/engine/datatypes/Font/#fromEnum
-[toggle keys]: https://1foreverhd.github.io/TopbarPlus/features/#toggle-keys
-[captions]: https://1foreverhd.github.io/TopbarPlus/features/#captions
-[icon event]: https://1foreverhd.github.io/TopbarPlus/api/#events
-[menus]: https://1foreverhd.github.io/TopbarPlus/features/#menus
-[dropdowns]: https://1foreverhd.github.io/TopbarPlus/features/#dropdowns
+[toggle keys]: features.md#toggle-keys
+[captions]: features.md#captions
+[icon event]: api.md#events
+[menus]: features.md#menus
+[dropdowns]: features.md#dropdowns
 [numberSpinner]: https://devforum.roblox.com/t/numberspinner-module/1105961
 
 ## Functions
