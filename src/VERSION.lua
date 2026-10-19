@@ -28,10 +28,9 @@ function VERSION.getLatestVersion(): string?
 		end
 		task.wait(1)
 	end
-	latestVersion = string.match(placeName, "^TopbarPlus (.*)$")
-	if latestVersion then
-		latestVersion = latestVersion:gsub("%s+", "") -- Remove all whitespace (spaces, tabs, newlines)
-	end
+	-- Roblox translates the place name for different languages so only the digits can be trusted
+	local versionNumbers = string.match(placeName, "(%d+%.%d+%.%d+)")
+	latestVersion = if versionNumbers then "v"..versionNumbers else nil
 	VERSION.latestVersion = latestVersion
 	return latestVersion
 end

@@ -124,6 +124,21 @@ function Utility.formatStateName(incomingStateName)
 	return string.upper(string.sub(incomingStateName, 1, 1))..string.lower(string.sub(incomingStateName, 2))
 end
 
+function Utility.isReducedMotion()
+	local success, isEnabled = pcall(function()
+		return game:GetService("GuiService").ReducedMotionEnabled
+	end)
+	return success and isEnabled == true
+end
+
+function Utility.getTweenInfo(tweenInfo)
+	-- A zero length tween still fires Completed, so anything waiting on it carries on as normal
+	if Utility.isReducedMotion() then
+		return TweenInfo.new(0)
+	end
+	return tweenInfo
+end
+
 function Utility.localPlayerRespawned(callback)
 	-- The client localscript may be located under a ScreenGui with ResetOnSpawn set to true
 	-- In these scenarios, traditional methods like CharacterAdded won't be called by the
@@ -131,7 +146,7 @@ function Utility.localPlayerRespawned(callback)
 	-- If humanoid and health == 0, then reset/died normally, else was
 	-- forcefully reset via a method such as LoadCharacter
 	-- We wrap this behaviour in case any additional quirks need to be accounted for
-	localPlayer.CharacterRemoving:Connect(callback)
+	return localPlayer.CharacterRemoving:Connect(callback)
 end
 
 function Utility.getClippedContainer(screenGui)

@@ -9,6 +9,39 @@
 local Themes = {}
 local Utility = require(script.Parent.Parent.Utility)
 local baseTheme = require(script.Default)
+local isStudio = game:GetService("RunService"):IsStudio()
+local alreadyWarned = {}
+
+-- Some elements like Caption and Notice are only built once they're used, so a theme
+-- can name them before they exist. Add any new element names here or they'll warn in Studio
+local KNOWN_INSTANCE_NAMES = {
+	"Box", "Caption", "CaptionCorner", "Caret", "ClickRegion", "Contents", "ContentsList", "DropShadow",
+	"Dropdown", "DropdownCorner", "DropdownList", "DropdownPadding", "DropdownScroller", "DropdownSpeed",
+	"Header", "Hotkeys", "IconButton", "IconCorners", "IconGradient", "IconImage", "IconImageCorner",
+	"IconImageRatio", "IconImageScale", "IconLabel", "IconLabelContainer", "IconOverlay", "IconSpot",
+	"IconSpotGradient", "Indicator", "IndicatorButton", "Inset", "Key1", "LabelContent", "Layout", "Layout1",
+	"Menu", "MenuGap", "MenuUIListLayout", "Notice", "NoticeLabel", "OverlayUICorner", "Padding",
+	"PaddingCenter", "PaddingLeft", "PaddingRight", "Selection", "SelectionContainer", "SelectionGradient",
+	"UICorner", "UIStroke", "Widget",
+}
+
+-- Every attribute TopbarPlus relies on (like MinimumWidth) gets its default in the base theme,
+-- so any property named there is a deliberate attribute rather than a typo
+local baseThemeProperties = {}
+for _, detail in pairs(baseTheme) do
+	baseThemeProperties[detail[2]] = true
+end
+
+
+
+-- LOCAL FUNCTIONS
+local function warnOnce(key, message)
+	if alreadyWarned[key] then
+		return
+	end
+	alreadyWarned[key] = true
+	warn(`TopbarPlus: {message} (this warning only shows in Studio)`)
+end
 
 
 
@@ -57,18 +90,46 @@ function Themes.getClippedClone(instance)
 	return clippedClone.Value
 end
 
+function Themes.getActiveGroup(icon)
+	-- Hovering happens on both selected and deselected icons, so its own values go on top
+	-- of the look the icon already has instead of replacing it
+	local stateGroup = icon:getStateGroup()
+	if icon.activeState ~= "Viewing" then
+		return stateGroup
+	end
+	local underlyingState = if icon.isSelected then "Selected" else "Deselected"
+	local combined = {}
+	local positions = {}
+	for _, detail in pairs(icon:getStateGroup(underlyingState)) do
+		table.insert(combined, detail)
+		positions[detail[1].."-"..detail[2]] = #combined
+	end
+	for _, detail in pairs(stateGroup) do
+		local detailState = detail[4]
+		if typeof(detailState) == "string" and string.lower(detailState) == "viewing" then
+			local position = positions[detail[1].."-"..detail[2]]
+			if position then
+				combined[position] = detail
+			else
+				table.insert(combined, detail)
+			end
+		end
+	end
+	return combined
+end
+
 function Themes.refresh(icon, instance, specificProperty)
 	-- Some instances such as notices need immediate refreshing upon creation as
 	-- they're added in after the initial refresh period
 	if specificProperty then
-		local stateGroup = icon:getStateGroup()
+		local stateGroup = Themes.getActiveGroup(icon)
 		local value = Themes.getThemeValue(stateGroup, instance.Name, specificProperty) or Themes.getInstanceValue(instance, specificProperty)
 		Themes.apply(icon, instance, specificProperty, value, true)
 		return
 	end
 	-- If no property is specified we update all properties that exist within
 	-- the applied theme appearance
-	local stateGroup = icon:getStateGroup()
+	local stateGroup = Themes.getActiveGroup(icon)
 	if not stateGroup then
 		return
 	end
@@ -136,8 +197,10 @@ function Themes.apply(icon, collectiveOrInstanceNameOrInstance, property, value,
 				value = newValue
 			end
 		end
+		-- Content can't go into Image so it goes into ImageContent instead
+		local propertyToSet = if property == "Image" and typeof(value) == "Content" then "ImageContent" else property
 		local success = pcall(function()
-			instance[property] = value
+			instance[propertyToSet] = value
 		end)
 		if not success then
 			-- If property is not a real property, we set
@@ -145,7 +208,12 @@ function Themes.apply(icon, collectiveOrInstanceNameOrInstance, property, value,
 			-- for instance in :setWidth where we also want to
 			-- specify a desired width for every state which can
 			-- then be easily read by the widget element
+			local isExistingAttribute = instance:GetAttribute(property) ~= nil
 			instance:SetAttribute(property, value)
+			local isClippedClone = instance:GetAttribute("IsAClippedClone")
+			if isStudio and not isClippedClone and not isExistingAttribute and not baseThemeProperties[property] then
+				warnOnce(`Property-{collectiveOrInstanceName}-{property}`, `couldn't set {property} on {collectiveOrInstanceName} to {tostring(value)}. It's either not a real property or the value is the wrong type`)
+			end
 		end
 	end
 end
@@ -157,6 +225,25 @@ function Themes.getModifications(modifications)
 		modifications = {modifications}
 	end
 	return modifications
+end
+
+function Themes.checkModifications(modifications, icon)
+	-- Typos in a theme used to fail silently, so we point them out while developing
+	if not isStudio or typeof(modifications) ~= "table" then
+		return
+	end
+	for _, modification in pairs(Themes.getModifications(modifications)) do
+		local instanceName = modification[1]
+		if typeof(instanceName) == "string" and not table.find(KNOWN_INSTANCE_NAMES, instanceName) then
+			-- Your own instances (like ones added to an icon) are fine as long as they exist by now
+			task.defer(function()
+				if icon and not icon.isDestroyed and #icon:getInstanceOrCollective(instanceName) > 0 then
+					return
+				end
+				warnOnce("Instance-"..instanceName, `a theme names "{instanceName}" but no icon instance has that name, so it won't change anything`)
+			end)
+		end
+	end
 end
 
 function Themes.merge(detail, modification, callback)
@@ -173,6 +260,7 @@ function Themes.merge(detail, modification, callback)
 end
 
 function Themes.modify(icon, modifications, modificationsUID)
+	Themes.checkModifications(modifications, icon)
 	-- This is what the 'old set' used to do (although for clarity that behaviour has now been
 	-- split into two methods, .modifyTheme and .apply).
 	-- modifyTheme is responsible for UPDATING the internal values within a theme for a particular
@@ -249,7 +337,7 @@ end
 function Themes.change(icon)
 	-- This changes the theme to the appearance of whatever
 	-- state is currently active
-	local stateGroup = icon:getStateGroup()
+	local stateGroup = Themes.getActiveGroup(icon)
 	for _, detail in pairs(stateGroup) do
 		local instanceName, property, value = unpack(detail)
 		Themes.apply(icon, instanceName, property, value)
@@ -268,6 +356,9 @@ function Themes.set(icon, theme)
 	if typeof(theme) == "Instance" and theme:IsA("ModuleScript") then
 		local themeModule = theme :: ModuleScript
 		theme = require(themeModule)
+	end
+	if theme ~= baseTheme then
+		Themes.checkModifications(theme, icon)
 	end
 	icon.appliedTheme = theme
 	Themes.rebuild(icon)
@@ -320,7 +411,6 @@ function Themes.rebuild(icon)
 				if stateName == "Selected" then
 					updateDetails(appliedTheme, "Deselected")
 				end
-				updateDetails(baseTheme, "Empty")
 				updateDetails(appliedTheme, stateName)
 			end
 			-- Finally we apply any modifications that have already been made

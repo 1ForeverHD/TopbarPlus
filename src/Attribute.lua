@@ -27,7 +27,7 @@ task.defer(function()
 	if not RunService:IsStudio() then
 		print(`🍍 Running TopbarPlus {appVersion} by @ForeverHD & HD Admin`)
 	end
-	if isOutdated then
+	if isOutdated and latestVersion then
 		warn(`A new version of TopbarPlus ({appVersion} -> {latestVersion}) is available: https://devforum.roblox.com/t/topbarplus/1017485`)
 	end
 end)

@@ -5,6 +5,9 @@
 
 return function(icon, Icon)
 
+	local Utility = require(script.Parent.Parent.Utility)
+	local hasSizedOnScreen = false
+
 	local widget = Instance.new("Frame")
 	widget:SetAttribute("WidgetUID", icon.UID)
 	widget.Name = "Widget"
@@ -70,7 +73,7 @@ return function(icon, Icon)
 	local overlay = iconSpot:Clone()
 	overlay.UICorner.Name = "OverlayUICorner"
 	overlay.Name = "IconOverlay"
-	overlay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	overlay.BackgroundColor3 = Color3.fromRGB(208, 217, 251)
 	overlay.ZIndex = iconSpot.ZIndex + 1
 	overlay.Size = UDim2.new(1, 0, 1, 0)
 	overlay.Position = UDim2.new(0, 0, 0, 0)
@@ -112,7 +115,7 @@ return function(icon, Icon)
 
 	local paddingLeft = Instance.new("Frame")
 	paddingLeft.Name = "PaddingLeft"
-	paddingLeft.LayoutOrder = 1
+	paddingLeft.LayoutOrder = 0
 	paddingLeft.ZIndex = 5
 	paddingLeft.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	paddingLeft.BackgroundTransparency = 1
@@ -133,7 +136,7 @@ return function(icon, Icon)
 
 	local paddingRight = Instance.new("Frame")
 	paddingRight.Name = "PaddingRight"
-	paddingRight.LayoutOrder = 5
+	paddingRight.LayoutOrder = 7
 	paddingRight.ZIndex = 5
 	paddingRight.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	paddingRight.BackgroundTransparency = 1
@@ -162,7 +165,7 @@ return function(icon, Icon)
 	iconLabel.BackgroundTransparency = 1
 	iconLabel.Position = UDim2.fromScale(0, 0)
 	iconLabel.RichText = true
-	iconLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	iconLabel.TextColor3 = Color3.fromRGB(247, 247, 248)
 	iconLabel.TextXAlignment = Enum.TextXAlignment.Left
 	iconLabel.Text = ""
 	iconLabel.TextWrapped = true
@@ -202,7 +205,7 @@ return function(icon, Icon)
 			local indicator = icon.indicator
 			local usingIndicator = indicator and indicator.Visible
 			local usingText = usingIndicator or iconLabel.Text ~= ""
-			local usingImage = iconImage.Image ~= "" and iconImage.Image ~= nil
+			local usingImage = iconImage.Image ~= "" or iconImage.ImageContent.SourceType ~= Enum.ContentSourceType.None
 			local _alignment = Enum.HorizontalAlignment.Center
 			local NORMAL_BUTTON_SIZE = UDim2.fromScale(1, 1)
 			local buttonSize = NORMAL_BUTTON_SIZE
@@ -229,8 +232,18 @@ return function(icon, Icon)
 			button.Size = buttonSize
 
 			local function getItemWidth(item)
-				local targetWidth = item:GetAttribute("TargetWidth") or item.AbsoluteSize.X
-				return targetWidth
+				-- AbsoluteSize stays 0 until the icon is laid out on screen, so fixed pixel widths are read
+				-- straight from Size. Scaled or automatic widths still need the measured size
+				local targetWidth = item:GetAttribute("TargetWidth")
+				if targetWidth then
+					return targetWidth
+				end
+				local automaticSize = item.AutomaticSize
+				local isAutomaticX = automaticSize == Enum.AutomaticSize.X or automaticSize == Enum.AutomaticSize.XY
+				if item.Size.X.Scale == 0 and not isAutomaticX then
+					return item.Size.X.Offset
+				end
+				return item.AbsoluteSize.X
 			end
 			local contentsPadding = contentsList.Padding.Offset
 			local initialWidgetWidth = contentsPadding --0
@@ -245,7 +258,7 @@ return function(icon, Icon)
 			local widgetMinimumWidth = widget:GetAttribute("MinimumWidth")
 			local widgetMinimumHeight = widget:GetAttribute("MinimumHeight")
 			local widgetBorderSize = widget:GetAttribute("BorderSize")
-			local widgetWidth = math.clamp(initialWidgetWidth, widgetMinimumWidth, viewportX)
+			local widgetWidth = math.clamp(initialWidgetWidth, widgetMinimumWidth, math.max(viewportX, widgetMinimumWidth))
 			local menuIcons = icon.menuIcons
 			local additionalWidth = 0
 			local hasMenu = #menuIcons > 0
@@ -289,8 +302,13 @@ return function(icon, Icon)
 			local spotWidthMax = math.max(spotWidth, getItemWidth(iconSpot), iconSpot.AbsoluteSize.X)
 			local widgetWidthMax = math.max(widgetWidth, getItemWidth(widget), widget.AbsoluteSize.X)
 			local SPEED = 750
-			local spotTweenInfo = TweenInfo.new(spotWidthMax/SPEED, style, direction)
-			local widgetTweenInfo = TweenInfo.new(widgetWidthMax/SPEED, style, direction)
+			-- The first size once the icon is laid out on screen snaps into place instead of growing
+			local isFirstSizeOnScreen = not hasSizedOnScreen and contents.AbsoluteSize.Y > 0
+			if isFirstSizeOnScreen then
+				hasSizedOnScreen = true
+			end
+			local spotTweenInfo = if isFirstSizeOnScreen then TweenInfo.new(0) else Utility.getTweenInfo(TweenInfo.new(spotWidthMax/SPEED, style, direction))
+			local widgetTweenInfo = if isFirstSizeOnScreen then TweenInfo.new(0) else Utility.getTweenInfo(TweenInfo.new(widgetWidthMax/SPEED, style, direction))
 			TweenService:Create(iconSpot, spotTweenInfo, {
 				Position = UDim2.new(0, widgetBorderSize, 0.5, 0),
 				Size = UDim2.new(0, spotWidth, 1, -widgetBorderSize*2),
@@ -309,8 +327,8 @@ return function(icon, Icon)
 			})
 			movingTween:Play()
 			resizingCount += 1
-			for i = 1, widgetTweenInfo.Time * 100 do
-				task.delay(i/100, function()
+			for step = 1, math.max(widgetTweenInfo.Time * 100, 1) do
+				task.delay(step/100, function()
 					Icon.iconChanged:Fire(icon)
 				end)
 			end
@@ -325,8 +343,19 @@ return function(icon, Icon)
 			icon:updateParent()
 		end)
 	end
-	local Utility = require(script.Parent.Parent.Utility)
 	local handleLabelAndImageChanges = Utility.createStagger(0.01, handleLabelAndImageChangesUnstaggered)
+
+	-- The first size is worked out before the icon is on screen, when the contents have no height
+	-- (so the image counts as 0 wide) and the font may not have loaded. We size again once the real values arrive
+	local lastContentsHeight = contents.AbsoluteSize.Y
+	contents:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+		local contentsHeight = contents.AbsoluteSize.Y
+		if contentsHeight ~= lastContentsHeight then
+			lastContentsHeight = contentsHeight
+			handleLabelAndImageChanges()
+		end
+	end)
+	iconLabel:GetPropertyChangedSignal("TextBounds"):Connect(handleLabelAndImageChanges)
 	local firstTimeSettingFontFace = true
 	icon:setBehaviour("IconLabel", "Text", handleLabelAndImageChanges)
 	icon:setBehaviour("IconLabel", "FontFace", function(value)
@@ -375,12 +404,17 @@ return function(icon, Icon)
 	icon:setBehaviour("Widget", "Visible", handleLabelAndImageChanges)
 	icon:setBehaviour("Widget", "DesiredWidth", handleLabelAndImageChanges)
 	icon:setBehaviour("Widget", "MinimumWidth", handleLabelAndImageChanges)
+	icon:setBehaviour("PaddingLeft", "Size", handleLabelAndImageChanges)
+	icon:setBehaviour("PaddingCenter", "Size", handleLabelAndImageChanges)
+	icon:setBehaviour("PaddingRight", "Size", handleLabelAndImageChanges)
 	icon:setBehaviour("Widget", "MinimumHeight", handleLabelAndImageChanges)
 	icon:setBehaviour("Indicator", "Visible", handleLabelAndImageChanges)
 	icon:setBehaviour("IconImageRatio", "AspectRatio", handleLabelAndImageChanges)
 	icon:setBehaviour("IconImage", "Image", function(value)
-		local textureId = (tonumber(value) and "http://www.roblox.com/asset/?id="..value) or value or ""
-		if iconImage.Image ~= textureId then
+		local isContent = typeof(value) == "Content"
+		local textureId = if isContent then value elseif tonumber(value) then `rbxassetid://{value}` else value or ""
+		local currentValue = if isContent then iconImage.ImageContent else iconImage.Image
+		if currentValue ~= textureId then
 			handleLabelAndImageChanges()
 		end
 		return textureId

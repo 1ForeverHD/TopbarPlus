@@ -46,9 +46,10 @@ return function(icon, Icon)
 			return
 		end
 		local exceeded99 = totalNotices > 99
-		local noticeDisplay = (exceeded99 and "99+") or totalNotices
+		local customLabel = icon.noticeLabelText
+		local noticeDisplay = customLabel or (exceeded99 and "99+") or totalNotices
 		noticeLabel.Text = noticeDisplay
-		if exceeded99 then
+		if exceeded99 and not customLabel then
 			noticeLabel.TextSize = 11
 		end
 

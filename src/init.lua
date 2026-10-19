@@ -145,6 +145,7 @@ function Icon.setTopbarEnabled(bool, isInternal)
 end
 
 function Icon.modifyBaseTheme(modifications)
+	Themes.checkModifications(modifications)
 	modifications = Themes.getModifications(modifications)
 	for _, modification in pairs(modifications) do
 		for _, detail in pairs(Icon.baseTheme) do
@@ -166,6 +167,29 @@ end
 -- SETUP
 task.defer(Gamepad.start, Icon)
 task.defer(Overflow.start, Icon)
+
+-- Clicking or tapping anywhere outside an open dropdown closes it, the same as Roblox's own menus
+UserInputService.InputBegan:Connect(function(input)
+	local inputType = input.UserInputType
+	if inputType ~= Enum.UserInputType.MouseButton1 and inputType ~= Enum.UserInputType.Touch then
+		return
+	end
+	local point = Vector2.new(input.Position.X, input.Position.Y)
+	local function isInside(guiObject)
+		local position = guiObject.AbsolutePosition
+		local size = guiObject.AbsoluteSize
+		return point.X >= position.X and point.X <= position.X + size.X and point.Y >= position.Y and point.Y <= position.Y + size.Y
+	end
+	for _, icon in pairs(iconsDict) do
+		local dropdown = icon.dropdown
+		local hasOpenDropdown = icon.isSelected and dropdown and #icon.dropdownIcons > 0
+		if hasOpenDropdown and icon.closeOnOutsideClick and not icon.locked then
+			if not isInside(icon.widget) and not isInside(dropdown) then
+				icon:deselect("OutsideClick", icon)
+			end
+		end
+	end
+end)
 task.defer(function()
 	local playerGui = localPlayer:WaitForChild("PlayerGui")
 	for _, screenGui in pairs(Icon.container) do
@@ -234,6 +258,8 @@ function Icon.new()
 	self.joinedFrame = false
 	self.parentIconUID = false
 	self.deselectWhenOtherIconSelected = true
+	self.closeOnOutsideClick = true
+	self.destroyOnRespawn = true
 	self.totalNotices = 0
 	self.activeState = "Deselected"
 	self.alignment = ""
@@ -406,9 +432,11 @@ function Icon.new()
 	end
 	if origin and originsScreenGui and originsScreenGui.ResetOnSpawn == true then
 		self.originsScreenGui = originsScreenGui
-		Utility.localPlayerRespawned(function()
-			self:destroy()
-		end)
+		janitor:add(Utility.localPlayerRespawned(function()
+			if self.destroyOnRespawn then
+				self:destroy()
+			end
+		end))
 	end
 
 	-- Additional children behaviour when toggled (mostly notices)
@@ -709,6 +737,10 @@ function Icon:notify(customClearSignal, noticeId)
 	-- users of changes/updates within your UI such as a Catalog
 	-- 'customClearSignal' is a signal object (e.g. icon.deselected) or
 	-- Roblox event (e.g. Instance.new("BindableEvent").Event)
+	if self.isDestroyed then
+		warn("TopbarPlus: notify was called on an icon that has already been destroyed")
+		return self
+	end
 	local notice = self.notice
 	if not notice then
 		notice = require(elements.Notice)(self, Icon)
@@ -734,7 +766,10 @@ function Icon:setImage(imageId, iconState)
 	
 	-- This code ensures icon images are preloaded if they haven't been fetched yet
 	task.spawn(function()
-		local newIdContent = if tonumber(imageId) then `rbxassetid://{imageId}` else imageId
+		local newIdContent = if typeof(imageId) == "Content" then imageId.Uri elseif tonumber(imageId) then `rbxassetid://{imageId}` else imageId
+		if typeof(newIdContent) ~= "string" or newIdContent == "" then
+			return
+		end
 		local initialAssetFetchStatus = ContentProvider:GetAssetFetchStatus(newIdContent)
 	
 		if initialAssetFetchStatus ~= Enum.AssetFetchStatus.Success then
@@ -997,7 +1032,50 @@ function Icon:oneClick(bool)
 	return self
 end
 
+function Icon:setCloseOnOutsideClick(bool)
+	-- Open dropdowns close when the player clicks or taps anywhere else. Pass false to stop this
+	self.closeOnOutsideClick = bool ~= false
+	return self
+end
+
+function Icon:setDestroyOnRespawn(bool)
+	-- The script that made an icon under a ResetOnSpawn ScreenGui runs again on respawn and remakes it,
+	-- so we destroy the old one. Pass false to stop this
+	self.destroyOnRespawn = bool ~= false
+	return self
+end
+
+function Icon:setNoticeLabel(text)
+	-- Shows this text in the notice circle instead of the count. Pass nil to go back to the count
+	self.noticeLabelText = text
+	self.noticeChanged:Fire(self.totalNotices)
+	return self
+end
+
+function Icon:addInstance(instance, side)
+	-- The icon sizes itself around whatever you add, so give it an offset or automatic width
+	-- because a scale width would follow the icon's own width and keep resizing it
+	assert(typeof(instance) == "Instance" and instance:IsA("GuiObject"), "argument[1] must be a GuiObject!")
+	side = side or "Right"
+	assert(side == "Left" or side == "Right", `argument[2] must be "Left" or "Right"!`)
+	instance.LayoutOrder = if side == "Left" then 1 else 6
+	instance.Parent = self:getInstance("Contents")
+	self.janitor:add(instance)
+	local function resize()
+		self.updateSize:Fire()
+	end
+	self.janitor:add(instance:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize))
+	self.janitor:add(instance:GetPropertyChangedSignal("Visible"):Connect(resize))
+	self:refreshAppearance(instance)
+	resize()
+	return self
+end
+
 function Icon:setCaption(text)
+	if self.isDestroyed then
+		warn("TopbarPlus: setCaption was called on an icon that has already been destroyed")
+		return self
+	end
 	if text == "_hotkey_" and (self.captionText) then
 		return self
 	end

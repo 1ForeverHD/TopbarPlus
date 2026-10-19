@@ -1,6 +1,7 @@
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local Themes = require(script.Parent.Parent.Features.Themes)
+local Utility = require(script.Parent.Parent.Utility)
 local PADDING = 0 -- used to be 8
 return function(icon)
 	
@@ -31,7 +32,7 @@ return function(icon)
 
 	local UICorner = Instance.new("UICorner")
 	UICorner.Name = "DropdownCorner"
-	UICorner.CornerRadius = UDim.new(0, 10)
+	UICorner.CornerRadius = UDim.new(0, 8)
 	UICorner.Parent = dropdown
 
 	local dropdownScroller = Instance.new("ScrollingFrame")
@@ -79,19 +80,27 @@ return function(icon)
 	local dropdownJanitor = icon.dropdownJanitor
 	local Icon = require(icon.iconModule)
 	icon.dropdownChildAdded:Connect(function(childIcon)
-		local _, modificationUID = childIcon:modifyTheme({
+		local modifications = {
 			{"Widget", "BorderSize", 0},
-			{"IconCorners", "CornerRadius", UDim.new(0, 10)},
-			{"Widget", "MinimumWidth", 190},
-			{"Widget", "MinimumHeight", 58},
+			{"IconCorners", "CornerRadius", UDim.new(0, 8)},
+			{"Widget", "MinimumWidth", 192},
+			{"Widget", "MinimumHeight", 56},
 			{"IconLabel", "TextSize", 20},
 			{"IconOverlay", "Size", UDim2.new(1, 0, 1, 0)},
-			{"PaddingLeft", "Size", UDim2.fromOffset(25, 0)},
+			{"PaddingLeft", "Size", UDim2.fromOffset(15, 0)},
+			{"PaddingCenter", "Size", UDim2.fromOffset(12, 0)},
 			{"Notice", "Position", UDim2.new(1, -24, 0, 5)},
 			{"ContentsList", "HorizontalAlignment", Enum.HorizontalAlignment.Left},
 			{"Selection", "Size", UDim2.new(1, -PADDING, 1, -PADDING)},
 			{"Selection", "Position", UDim2.new(0, PADDING/2, 0, PADDING/2)},
-		})
+		}
+		-- Roblox's menu icons draw a little smaller than the default image scale, so rows shrink
+		-- images to match. We skip this when you've set your own scale so it isn't overwritten
+		local imageScale = Themes.getThemeValue(childIcon:getStateGroup("Deselected"), "IconImageScale", "Value")
+		if imageScale == nil or imageScale == 0.5 then
+			table.insert(modifications, {"IconImageScale", "Value", 0.45})
+		end
+		local _, modificationUID = childIcon:modifyTheme(modifications)
 		task.defer(function()
 			childIcon.joinJanitor:add(function()
 				childIcon:removeModification(modificationUID)
@@ -175,7 +184,7 @@ return function(icon)
 			dropdown.BackgroundTransparency = 0 -- no transparency so it looks solid
 			dropdown.Size = UDim2.new(0, dropdown.Size.X.Offset, 0, 0) -- reset height to 0 before tween
 
-			openTween = TweenService:Create(dropdown, tweenInfo, {Size = UDim2.new(0, dropdown.Size.X.Offset, 0, height)})
+			openTween = TweenService:Create(dropdown, Utility.getTweenInfo(tweenInfo), {Size = UDim2.new(0, dropdown.Size.X.Offset, 0, height)})
 			openTween:Play()
 			openTween.Completed:Connect(function()
 				openTween = nil
@@ -210,7 +219,7 @@ return function(icon)
 		
 		local height = updateMaxIcons()
 
-		openTween = TweenService:Create(dropdown, tweenInfo, {Size = UDim2.new(0, dropdown.Size.X.Offset, 0, height)})
+		openTween = TweenService:Create(dropdown, Utility.getTweenInfo(tweenInfo), {Size = UDim2.new(0, dropdown.Size.X.Offset, 0, height)})
 		openTween:Play()
 		openTween.Completed:Connect(function()	
 			openTween = nil

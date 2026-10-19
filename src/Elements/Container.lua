@@ -17,7 +17,7 @@ return function(Icon)
 	local checkCount = 0
 	local isConsoleScreen = false
 	local isUsingVR = false
-	local function checkInset(status)
+	local function checkInset()
 		local currentHeight = GuiService.TopbarInset.Height
 		local isOldTopbar = currentHeight <= 36
 		
@@ -29,12 +29,7 @@ return function(Icon)
 		isUsingVR = UserInputService.VREnabled
 		Icon.isOldTopbar = isOldTopbar
 		checkCount += 1
-		if currentHeight == 0 and status == nil then
-			task.defer(function()
-				task.wait(8)
-				checkInset("ForceConvertToOld")
-			end)
-		elseif checkCount == 1 then
+		if checkCount == 1 then
 			task.delay(5, function()
 				local localPlayer = Players.LocalPlayer
 				localPlayer:WaitForChild("PlayerGui")
@@ -45,7 +40,8 @@ return function(Icon)
 		end
 
 		-- Conver to old theme if verified
-		if Icon.isOldTopbar and not isConsoleScreen and not isUsingVR and hasBecomeOldTheme == false and (currentHeight ~= 0 or status == "ForceConvertToOld") then
+		-- A height of 0 means the topbar has not loaded yet
+		if Icon.isOldTopbar and currentHeight ~= 0 and not isConsoleScreen and not isUsingVR and hasBecomeOldTheme == false then
 			hasBecomeOldTheme = true
 			task.defer(function()
 				-- If oldtopbar, apply the Classic theme
@@ -71,10 +67,6 @@ return function(Icon)
 		startInset = if isOldTopbar then 12 else guiInset.Y - 50
 		yDownOffset = if isOldTopbar then 2 else 0 --if isOldTopbar then 2 else 0 
 		ySizeOffset = -2
-		if isConsoleScreen then
-			startInset = 10
-			yDownOffset = 0 ---9
-		end
 		if GuiService.TopbarInset.Height == 0 and not hasBecomeOldTheme then
 			yDownOffset += 13
 			ySizeOffset = 50
@@ -92,7 +84,7 @@ return function(Icon)
 		
 	end
 	GuiService:GetPropertyChangedSignal("TopbarInset"):Connect(checkInset)
-	checkInset("FirstTime")
+	checkInset()
 
 	local screenGui = Instance.new("ScreenGui")
 	insetChanged:Connect(function()
@@ -114,8 +106,9 @@ return function(Icon)
 	holders.Name = "Holders"
 	holders.BackgroundTransparency = 1
 	insetChanged:Connect(function()
-		local holderY = if isUsingVR then 36 else 56
-		local holderSize = if isConsoleScreen then UDim2.new(1, 0, 0, holderY) else UDim2.new(1, 0, 1, ySizeOffset)
+		-- Console used to get a fixed 56 tall holder, but its topbar now lays out like desktop
+		-- so the full inset height lines icons up with Roblox's own
+		local holderSize = if isConsoleScreen and isUsingVR then UDim2.new(1, 0, 0, 36) else UDim2.new(1, 0, 1, ySizeOffset)
 		holders.Position = UDim2.new(0, 0, 0, yDownOffset)
 		holders.Size = holderSize
 	end)
@@ -205,8 +198,52 @@ return function(Icon)
 	right.UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
 	right.Name = "Right"
 	right.AnchorPoint = Vector2.new(1, 0)
-	right.Position = UDim2.new(1, -12, 0, 0)
+	-- The same 16 Roblox leaves between the screen edge and its own logo
+	local EDGE_MARGIN = 16
+	right.Position = UDim2.new(1, -EDGE_MARGIN, 0, 0)
 	right.Parent = holders
+
+	-- Roblox's health bar sits in the top right but isn't counted in TopbarSafeInsets,
+	-- so we shuffle the right icons over ourselves while it's showing
+	local StarterGui = game:GetService("StarterGui")
+	local HEALTH_BAR_WIDTH = 136
+	local humanoidConnections = {}
+	local function updateRightOffset()
+		local isHealthBarShowing = false
+		local character = Players.LocalPlayer and Players.LocalPlayer.Character
+		local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+		if humanoid and not Icon.isOldTopbar and not isConsoleScreen and not isUsingVR then
+			local success, isHealthEnabled = pcall(StarterGui.GetCoreGuiEnabled, StarterGui, Enum.CoreGuiType.Health)
+			local displayType = humanoid.HealthDisplayType
+			if success and isHealthEnabled and displayType ~= Enum.HumanoidHealthDisplayType.AlwaysOff then
+				isHealthBarShowing = displayType == Enum.HumanoidHealthDisplayType.AlwaysOn or humanoid.Health < humanoid.MaxHealth
+			end
+		end
+		local healthOffset = if isHealthBarShowing then HEALTH_BAR_WIDTH else 0
+		right.Position = UDim2.new(1, -EDGE_MARGIN - healthOffset, 0, 0)
+		right.Size = UDim2.new(1, holderReduction - healthOffset, 1, 0)
+	end
+	local function trackCharacter(character)
+		for _, connection in pairs(humanoidConnections) do
+			connection:Disconnect()
+		end
+		table.clear(humanoidConnections)
+		local humanoid = character:WaitForChild("Humanoid", 10)
+		if humanoid then
+			table.insert(humanoidConnections, humanoid.HealthChanged:Connect(updateRightOffset))
+			table.insert(humanoidConnections, humanoid:GetPropertyChangedSignal("MaxHealth"):Connect(updateRightOffset))
+			table.insert(humanoidConnections, humanoid:GetPropertyChangedSignal("HealthDisplayType"):Connect(updateRightOffset))
+		end
+		updateRightOffset()
+	end
+	insetChanged:Connect(updateRightOffset)
+	task.defer(function()
+		local localPlayer = Players.LocalPlayer
+		localPlayer.CharacterAdded:Connect(trackCharacter)
+		if localPlayer.Character then
+			trackCharacter(localPlayer.Character)
+		end
+	end)
 
 	-- This is important so that all elements update instantly
 	insetChanged:Fire(guiInset)
