@@ -5,7 +5,7 @@ license = "MPL-2.0"
 version = "3.5.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
-homepage = "https://nanoblox.com/topbarplus"
+homepage = "https://nanoblox.com/topbarplus/features/"
 repository = "https://github.com/1ForeverHD/TopbarPlus"
 exclude = [
     "**",
