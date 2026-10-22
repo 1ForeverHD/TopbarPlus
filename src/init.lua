@@ -306,7 +306,7 @@ function Icon.new()
 		end
 
 		-- Debounce logic to prevent rapid toggling
-		local currentTime = tick()
+		local currentTime = os.clock()
 		if currentTime - lastToggleTime < DEBOUNCE_TIME then
 			return
 		end
