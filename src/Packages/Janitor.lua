@@ -216,7 +216,7 @@ function Janitor.__index:Cleanup()
 				local ObjectMethod = Object[MethodName]
 				if ObjectMethod then
 					local success, warning = pcall(ObjectMethod, Object)
-					local isAnInstanceBeingDestroyed = typeof(Object) == "Instance" and ObjectMethod == "Destroy"
+					local isAnInstanceBeingDestroyed = typeof(Object) == "Instance" and MethodName == "Destroy"
 					if not success and not isAnInstanceBeingDestroyed then
 						warnUser(warning)
 					end
