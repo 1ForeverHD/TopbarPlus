@@ -1,7 +1,7 @@
 -- As the name suggests, this handles everything related to gamepads
 -- (i.e. Xbox or Playstation controllers) and their navigation
 -- I created a separate module for gamepads (and not touchpads or
--- keyboards) because gamepads are greatly more unqiue and require
+-- keyboards) because gamepads are greatly more unique and require
 -- additional tailored programming
 
 
@@ -104,7 +104,7 @@ function Gamepad.start(incomingIcon)
 		preferredInputChanged()
 
 		-- This allows for easy highlighting of the topbar when the
-		-- when ``Icon.highlightKey`` (i.e. DPadUp) is pressed.
+		-- ``Icon.highlightKey`` (i.e. DPadUp) is pressed.
 		-- If you'd like to disable, do ``Icon.highlightKey = false``
 		UserInputService.InputBegan:Connect(function(input, touchingAnObject)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
