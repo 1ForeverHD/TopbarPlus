@@ -1,7 +1,7 @@
 -- As the name suggests, this handles everything related to gamepads
 -- (i.e. Xbox or Playstation controllers) and their navigation
 -- I created a separate module for gamepads (and not touchpads or
--- keyboards) because gamepads are greatly more unqiue and require
+-- keyboards) because gamepads are greatly more unique and require
 -- additional tailored programming
 
 
@@ -104,7 +104,7 @@ function Gamepad.start(incomingIcon)
 		preferredInputChanged()
 
 		-- This allows for easy highlighting of the topbar when the
-		-- when ``Icon.highlightKey`` (i.e. DPadUp) is pressed.
+		-- ``Icon.highlightKey`` (i.e. DPadUp) is pressed.
 		-- If you'd like to disable, do ``Icon.highlightKey = false``
 		UserInputService.InputBegan:Connect(function(input, touchingAnObject)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -147,7 +147,7 @@ function Gamepad.getIconToHighlight()
 			local thisX = icon.widget.AbsolutePosition.X
 			if not currentX or thisX < currentX then
 				iconToHighlight = icon
-				currentX = iconToHighlight.widget.AbsolutePosition.X
+				currentX = thisX
 			end
 		end
 	end
@@ -180,13 +180,12 @@ function Gamepad.registerButton(buttonInstance)
 			return
 		end
 		local isSelected = GuiService.SelectedObject == buttonInstance
-		local unselectKeyCodes = {"ButtonB", "ButtonSelect"}
-		local keyName = input.KeyCode.Name
-		if table.find(unselectKeyCodes, keyName) and isSelected then
+		local keyCode = input.KeyCode
+		if (keyCode == Enum.KeyCode.ButtonB or keyCode == Enum.KeyCode.ButtonSelect) and isSelected then
 			-- We unfocus when back button is pressed, but ignore
 			-- if the virtual cursor is disabled otherwise it will be
 			-- impossible to select the topbar
-			if not(keyName == "ButtonSelect" and not GamepadService.GamepadCursorEnabled) then
+			if not (keyCode == Enum.KeyCode.ButtonSelect and not GamepadService.GamepadCursorEnabled) then
 				GuiService.SelectedObject = nil
 			end
 		end
