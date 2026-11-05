@@ -1,7 +1,7 @@
 site_name: TopbarPlus v3
 site_description: Documentation for TopbarPlus v3
 site_author: Ben Horton
-site_url: https://1ForeverHD.github.io/TopbarPlus/
+site_url: https://nanoblox.com/topbarplus/
 
 repo_name: 1ForeverHD/TopbarPlus
 repo_url: https://github.com/1ForeverHD/TopbarPlus
@@ -56,11 +56,15 @@ markdown_extensions:
       permalink: true
   - pymdownx.superfences
 
+# nanoblox.com/topbarplus rebuilds from this nav whenever main changes
 nav:
-  - Home:
-    - Introduction: index.md
-    - Features: features.md
-    - Installation: installation.md
-    - Third Parties: third_parties.md
-    - API: api.md
-  - Contributing: contributing.md
+  - Docs:
+    - Overview:
+      - Introduction: index.md
+      - Installation: installation.md
+      - Third Parties: third_parties.md
+    - Reference:
+      - Features: features.md
+      - API: api.md
+    - Other:
+      - Contribute: contributing.md

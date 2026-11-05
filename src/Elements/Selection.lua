@@ -1,3 +1,4 @@
+local Utility = require(script.Parent.Parent.Utility)
 return function(Icon)
 
 	-- Credit to lolmansReturn and Canary Software for
@@ -38,7 +39,7 @@ return function(Icon)
 		rotationSpeed = selection:GetAttribute("RotationSpeed")
 	end)
 	RunService.Heartbeat:Connect(function()
-		if not GuiService.SelectedObject then
+		if not GuiService.SelectedObject or Utility.isReducedMotion() then
 			return
 		end
 		selectionGradient.Rotation = (os.clock() * rotationSpeed * 100) % 360

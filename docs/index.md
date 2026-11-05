@@ -1,6 +1,6 @@
-[icon:setOrder]: https://1foreverhd.github.io/TopbarPlus/api/#setorder
-[Feature Guide]: https://1foreverhd.github.io/TopbarPlus/features
-[Icon API]: https://1foreverhd.github.io/TopbarPlus/api
+[icon:setOrder]: api.md#setorder
+[Feature Guide]: features.md
+[Icon API]: api.md
 [TopbarPlus DevForum Thread]: https://devforum.roblox.com/t/topbarplus/1017485
 
 ### About
@@ -68,6 +68,8 @@ Sometimes you'll want an item to appear only when *deselected* and similarily on
 !!! info
     If no ``iconState`` is specified (i.e. is nil) the value will be applied to all states.
 
+    States also build on each other. ``"Selected"`` keeps any ``"Deselected"`` values it doesn't set itself, and ``"Viewing"`` adds its values on top of whichever of those two looks the icon currently has.
+
 ```lua
 -- It doesn't matter if you do "deselected", "Deselected" or "dEsElEcTeD"; iconStates are not case sensitive
 Icon.new()
@@ -77,7 +79,7 @@ Icon.new()
 	:setLabel("Viewing", "Viewing")
 ```
 
-<a><img src="https://i.imgur.com/0QrDmi6.gif" width="50%"/></a>
+<a><video src="images/index-states.mp4" width="50%" autoplay loop muted playsinline></video></a>
 
 ----------
 

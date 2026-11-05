@@ -83,6 +83,11 @@ local iconsDict = {}
 local anyIconSelected = Signal.new()
 local elements = iconModule.Elements
 local totalCreatedIcons = 0
+local preferredInput = {
+	mobile = Enum.PreferredInput.Touch,
+	desktop = Enum.PreferredInput.KeyboardAndMouse,
+	console = Enum.PreferredInput.Gamepad
+}
 
 
 
@@ -140,6 +145,7 @@ function Icon.setTopbarEnabled(bool, isInternal)
 end
 
 function Icon.modifyBaseTheme(modifications)
+	Themes.checkModifications(modifications)
 	modifications = Themes.getModifications(modifications)
 	for _, modification in pairs(modifications) do
 		for _, detail in pairs(Icon.baseTheme) do
@@ -161,6 +167,29 @@ end
 -- SETUP
 task.defer(Gamepad.start, Icon)
 task.defer(Overflow.start, Icon)
+
+-- Clicking or tapping anywhere outside an open dropdown closes it, the same as Roblox's own menus
+UserInputService.InputBegan:Connect(function(input)
+	local inputType = input.UserInputType
+	if inputType ~= Enum.UserInputType.MouseButton1 and inputType ~= Enum.UserInputType.Touch then
+		return
+	end
+	local point = Vector2.new(input.Position.X, input.Position.Y)
+	local function isInside(guiObject)
+		local position = guiObject.AbsolutePosition
+		local size = guiObject.AbsoluteSize
+		return point.X >= position.X and point.X <= position.X + size.X and point.Y >= position.Y and point.Y <= position.Y + size.Y
+	end
+	for _, icon in pairs(iconsDict) do
+		local dropdown = icon.dropdown
+		local hasOpenDropdown = icon.isSelected and dropdown and #icon.dropdownIcons > 0
+		if hasOpenDropdown and icon.closeOnOutsideClick and not icon.locked then
+			if not isInside(icon.widget) and not isInside(dropdown) then
+				icon:deselect("OutsideClick", icon)
+			end
+		end
+	end
+end)
 task.defer(function()
 	local playerGui = localPlayer:WaitForChild("PlayerGui")
 	for _, screenGui in pairs(Icon.container) do
@@ -229,6 +258,8 @@ function Icon.new()
 	self.joinedFrame = false
 	self.parentIconUID = false
 	self.deselectWhenOtherIconSelected = true
+	self.closeOnOutsideClick = true
+	self.destroyOnRespawn = true
 	self.totalNotices = 0
 	self.activeState = "Deselected"
 	self.alignment = ""
@@ -265,39 +296,44 @@ function Icon.new()
 
 	-- Button Clicked (for states "Selected" and "Deselected")
 	local clickRegion = self:getInstance("ClickRegion")
+	local hasUsedMouseButton1Click = false
+	local lastToggleTime = 0
+	local DEBOUNCE_TIME = 0.1 -- 100ms debounce to prevent rapid toggles
+
 	local function handleToggle()
 		if self.locked then
 			return
 		end
+
+		-- Debounce logic to prevent rapid toggling
+		local currentTime = tick()
+		if currentTime - lastToggleTime < DEBOUNCE_TIME then
+			return
+		end
+		lastToggleTime = currentTime
+
 		if self.isSelected then
 			self:deselect("User", self)
 		else
 			self:select("User", self)
 		end
 	end
-	local isTouchTapping = false
-	local isClicking = false
+
 	clickRegion.MouseButton1Click:Connect(function()
-		if isTouchTapping then
-			return
-		end
-		isClicking = true
-		task.delay(0.01, function()
-			isClicking = false
-		end)
+		hasUsedMouseButton1Click = true
 		handleToggle()
 	end)
+
 	clickRegion.TouchTap:Connect(function()
 		-- This resolves the bug report by @28Pixels:
 		-- https://devforum.roblox.com/t/topbarplus/1017485/1104
-		if isClicking then
-			return
+		-- Only use TouchTap if MouseButton1Click has never fired
+		-- This handles edge cases where ONLY TouchTap works
+		-- Also prevents double-toggle bug with multi-touch on mobile
+		-- Credit to @sayer80 for this fix
+		if not hasUsedMouseButton1Click then
+			handleToggle()
 		end
-		isTouchTapping = true
-		task.delay(0.01, function()
-			isTouchTapping = false
-		end)
-		handleToggle()
 	end)
 
 	-- Keys can be bound to toggle between Selected and Deselected
@@ -337,7 +373,7 @@ function Icon.new()
 		end
 	end)
 	clickRegion.MouseEnter:Connect(function()
-		local dontSetState = not UserInputService.KeyboardEnabled
+		local dontSetState = UserInputService.PreferredInput ~= preferredInput.desktop
 		viewingStarted(dontSetState)
 	end)
 	local touchCount = 0
@@ -346,7 +382,7 @@ function Icon.new()
 	clickRegion.SelectionGained:Connect(viewingStarted)
 	clickRegion.SelectionLost:Connect(viewingEnded)
 	clickRegion.MouseButton1Down:Connect(function()
-		if not self.locked and UserInputService.TouchEnabled then
+		if not self.locked and UserInputService.PreferredInput == preferredInput.mobile then
 			touchCount += 1
 			local myTouchCount = touchCount
 			task.delay(0.2, function()
@@ -396,9 +432,11 @@ function Icon.new()
 	end
 	if origin and originsScreenGui and originsScreenGui.ResetOnSpawn == true then
 		self.originsScreenGui = originsScreenGui
-		Utility.localPlayerRespawned(function()
-			self:destroy()
-		end)
+		janitor:add(Utility.localPlayerRespawned(function()
+			if self.destroyOnRespawn then
+				self:destroy()
+			end
+		end))
 	end
 
 	-- Additional children behaviour when toggled (mostly notices)
@@ -699,6 +737,10 @@ function Icon:notify(customClearSignal, noticeId)
 	-- users of changes/updates within your UI such as a Catalog
 	-- 'customClearSignal' is a signal object (e.g. icon.deselected) or
 	-- Roblox event (e.g. Instance.new("BindableEvent").Event)
+	if self.isDestroyed then
+		warn("TopbarPlus: notify was called on an icon that has already been destroyed")
+		return self
+	end
 	local notice = self.notice
 	if not notice then
 		notice = require(elements.Notice)(self, Icon)
@@ -724,7 +766,10 @@ function Icon:setImage(imageId, iconState)
 	
 	-- This code ensures icon images are preloaded if they haven't been fetched yet
 	task.spawn(function()
-		local newIdContent = if tonumber(imageId) then `rbxassetid://{imageId}` else imageId
+		local newIdContent = if typeof(imageId) == "Content" then imageId.Uri elseif tonumber(imageId) then `rbxassetid://{imageId}` else imageId
+		if typeof(newIdContent) ~= "string" or newIdContent == "" then
+			return
+		end
 		local initialAssetFetchStatus = ContentProvider:GetAssetFetchStatus(newIdContent)
 	
 		if initialAssetFetchStatus ~= Enum.AssetFetchStatus.Success then
@@ -839,6 +884,18 @@ function Icon:setTextFont(font, fontWeight, fontStyle, iconState)
 		fontFace = Font.new(font, fontWeight, fontStyle)
 	end
 	self:modifyTheme({"IconLabel", "FontFace", fontFace, iconState})
+	return self
+end
+
+function Icon:setTextColor(Color, iconState)
+	if Color == nil or Color == "" or (type(Color) ~= "userdata" or typeof(Color) ~= "Color3") then
+		if Color ~= nil and Color ~= "" then
+			warn("setTextColor item must be a Color3 value! Changed the color to white.")
+		end
+		Color = Color3.fromRGB(255, 255, 255)
+	end
+
+	self:modifyTheme({"IconLabel", "TextColor3", Color, iconState})
 	return self
 end
 
@@ -975,7 +1032,50 @@ function Icon:oneClick(bool)
 	return self
 end
 
+function Icon:setCloseOnOutsideClick(bool)
+	-- Open dropdowns close when the player clicks or taps anywhere else. Pass false to stop this
+	self.closeOnOutsideClick = bool ~= false
+	return self
+end
+
+function Icon:setDestroyOnRespawn(bool)
+	-- The script that made an icon under a ResetOnSpawn ScreenGui runs again on respawn and remakes it,
+	-- so we destroy the old one. Pass false to stop this
+	self.destroyOnRespawn = bool ~= false
+	return self
+end
+
+function Icon:setNoticeLabel(text)
+	-- Shows this text in the notice circle instead of the count. Pass nil to go back to the count
+	self.noticeLabelText = text
+	self.noticeChanged:Fire(self.totalNotices)
+	return self
+end
+
+function Icon:addInstance(instance, side)
+	-- The icon sizes itself around whatever you add, so give it an offset or automatic width
+	-- because a scale width would follow the icon's own width and keep resizing it
+	assert(typeof(instance) == "Instance" and instance:IsA("GuiObject"), "argument[1] must be a GuiObject!")
+	side = side or "Right"
+	assert(side == "Left" or side == "Right", `argument[2] must be "Left" or "Right"!`)
+	instance.LayoutOrder = if side == "Left" then 1 else 6
+	instance.Parent = self:getInstance("Contents")
+	self.janitor:add(instance)
+	local function resize()
+		self.updateSize:Fire()
+	end
+	self.janitor:add(instance:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize))
+	self.janitor:add(instance:GetPropertyChangedSignal("Visible"):Connect(resize))
+	self:refreshAppearance(instance)
+	resize()
+	return self
+end
+
 function Icon:setCaption(text)
+	if self.isDestroyed then
+		warn("TopbarPlus: setCaption was called on an icon that has already been destroyed")
+		return self
+	end
 	if text == "_hotkey_" and (self.captionText) then
 		return self
 	end
@@ -1018,10 +1118,11 @@ function Icon:setMenu(arrayOfIcons)
 	return self
 end
 
-function Icon:setFrozenMenu(arrayOfIcons)
+function Icon:setFixedMenu(arrayOfIcons)
 	self:freezeMenu(arrayOfIcons)
 	self:setMenu(arrayOfIcons)
 end
+Icon.setFrozenMenu = Icon.setFixedMenu
 
 function Icon:freezeMenu()
 	-- A frozen menu is a menu which is permanently locked in the

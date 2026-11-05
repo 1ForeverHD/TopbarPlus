@@ -1,11 +1,11 @@
-[themes]: https://1foreverhd.github.io/TopbarPlus/features/#modify-theme
-[alignments]: https://1foreverhd.github.io/TopbarPlus/features/#alignments
+[themes]: features.md#modify-theme
+[alignments]: features.md#alignments
 [font family]: https://create.roblox.com/docs/reference/engine/datatypes/Font/#fromEnum
-[toggle keys]: https://1foreverhd.github.io/TopbarPlus/features/#toggle-keys
-[captions]: https://1foreverhd.github.io/TopbarPlus/features/#captions
-[icon event]: https://1foreverhd.github.io/TopbarPlus/api/#events
-[menus]: https://1foreverhd.github.io/TopbarPlus/features/#menus
-[dropdowns]: https://1foreverhd.github.io/TopbarPlus/features/#dropdowns
+[toggle keys]: features.md#toggle-keys
+[captions]: features.md#captions
+[icon event]: api.md#events
+[menus]: features.md#menus
+[dropdowns]: features.md#dropdowns
 [numberSpinner]: https://devforum.roblox.com/t/numberspinner-module/1105961
 
 ## Functions
@@ -135,7 +135,7 @@ icon:clearNotices()
 #### disableOverlay
 {chainable}
 ```lua
-icon:disableStateOverlay(bool)
+icon:disableOverlay(bool)
 ```
 When set to ``true``, disables the shade effect which appears when the icon is pressed and released.
 
@@ -165,7 +165,7 @@ icon:setOrder(order, iconState)
 #### setCornerRadius
 {chainable} {toggleable}
 ```lua
-icon:setCornerRadius(scale, offset, iconState)
+icon:setCornerRadius(udim, iconState)
 ```
 
 ----
@@ -207,6 +207,14 @@ How stretched the image will appear. The default value is ``1`` (a perfect squar
 icon:setTextSize(number, iconState)
 ```
 The size of the icon labels' text. The default value is ``16``.
+
+----
+#### setTextColor
+{chainable} {toggleable}
+```lua
+icon:setTextColor(color, iconState)
+```
+The color of the icon labels' text.
 
 ----
 #### setTextFont
@@ -321,6 +329,38 @@ icon:oneClick(bool)
 When set to true the icon will automatically deselect when selected. This creates the effect of a single click button.
 
 ----
+#### setCloseOnOutsideClick
+{chainable}
+```lua
+icon:setCloseOnOutsideClick(bool)
+```
+When ``true`` (the default) the icon's dropdown closes when the player clicks or taps anywhere outside of it, the same as Roblox's own menus. Set to ``false`` to keep it open until the icon is pressed again.
+
+----
+#### setDestroyOnRespawn
+{chainable}
+```lua
+icon:setDestroyOnRespawn(bool)
+```
+Icons created from a LocalScript inside a ScreenGui with ``ResetOnSpawn`` enabled are destroyed when the player respawns because its LocalScript runs again and regenerates. Set to ``false`` to instead stop it being destroyed when this happens.
+
+----
+#### setNoticeLabel
+{chainable}
+```lua
+icon:setNoticeLabel(text)
+```
+Shows ``text`` (such as ``"!"``) in the icon's notice instead of the number of notices. The notice still only appears while it has active notices. Pass ``nil`` to show the count again. To change the notice's colours, use ``modifyTheme`` with ``"Notice"`` and ``"NoticeLabel"``.
+
+----
+#### addInstance
+{chainable}
+```lua
+icon:addInstance(guiObject, side)
+```
+Adds your own ``GuiObject`` inside the icon to the ``"Left"`` or ``"Right"`` (the default) of its image and label. Give it an offset or automatic width, as a scale width would follow the icon's own width. It's destroyed with the icon, and you can theme it by its ``Name`` with ``modifyTheme``.
+
+----
 #### setCaption
 {chainable}
 ```lua
@@ -361,6 +401,14 @@ icon:setMenu(arrayOfIcons)
 Creates a horizontal menu based upon the given array of icons. Pass an empty table ``{}`` to remove the menu. See [menus] for more details.
 
 ----
+#### setFixedMenu
+{chainable}
+```lua
+icon:setFixedMenu(arrayOfIcons)
+```
+Creates a menu that is always selected and has its close button hidden. Pass an empty table ``{}`` to remove the menu. See [menus] for more details.
+
+----
 #### joinMenu
 {chainable}
 ```lua
@@ -380,7 +428,7 @@ Unparents an icon from a parentIcon if it belongs to a dropdown or menu.
 #### convertLabelToNumberSpinner
 {chainable}
 ```lua
-icon:convertLabelToNumberSpinner(numberSpinner)
+icon:convertLabelToNumberSpinner(numberSpinner, readyCallback)
 ```
 Accepts a [numberSpinner] and converts the icon's label into that spinner. For example:
 ```lua
@@ -391,18 +439,23 @@ Icon.new()
 	:call(function(pointsIcon)
 		local NumberSpinner = require(ReplicatedStorage.NumberSpinner)
 		local numberSpinner = NumberSpinner.new()
-		pointsIcon:convertLabelToNumberSpinner(numberSpinner)
-		numberSpinner.Name = "LabelSpinner"
-		numberSpinner.Prefix = "$"
-		numberSpinner.Commas = true
-		numberSpinner.Decimals = 0
-		numberSpinner.Duration = 0.25
-		while true do
-			numberSpinner.Value = math.random(1,1000)
-			task.wait(1)
-		end
+		pointsIcon:convertLabelToNumberSpinner(numberSpinner, function()
+			numberSpinner.Name = "LabelSpinner"
+			numberSpinner.Prefix = "$"
+			numberSpinner.Commas = true
+			numberSpinner.Decimals = 0
+			numberSpinner.Duration = 0.25
+			while true do
+				numberSpinner.Value = math.random(1,1000)
+				task.wait(1)
+			end
+		end)
 	end)
 ```
+
+!!! warning
+	Any changes to the NumberSpinner must be made within ``readyCallback`` otherwise you risk breaking the icon's appearance
+
 
 ----
 #### destroy
@@ -421,7 +474,7 @@ Clears all connections and destroys all instances associated with the icon.
 ```lua
 icon.selected:Connect(function(fromSource)
     -- fromSource can be useful for checking if the behaviour was triggered by a user (such as clicking)
-    -- fromSource values include "User", "OneClick", "AutoDeselect", "HideParentFeature", "Overflow"
+    -- fromSource values include "User", "OneClick", "AutoDeselect", "HideParentFeature", "Overflow" & "OutsideClick"
     local sourceName = fromSource or "Unknown"
     print("The icon was selected by the "..sourceName)
 end)

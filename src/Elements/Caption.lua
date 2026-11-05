@@ -1,3 +1,4 @@
+local Utility = require(script.Parent.Parent.Utility)
 local CAPTION_COLOR = Color3.fromRGB(39, 41, 48)
 local TEXT_SIZE = 15
 return function(icon)
@@ -32,11 +33,10 @@ return function(icon)
 		Enum.FontStyle.Normal
 	)
 	header.Text = "Caption"
-	header.TextColor3 = Color3.fromRGB(255, 255, 255)
+	header.TextColor3 = Color3.fromRGB(247, 247, 248)
 	header.TextSize = TEXT_SIZE
 	header.TextTruncate = Enum.TextTruncate.None
 	header.TextWrapped = false
-	header.TextXAlignment = Enum.TextXAlignment.Left
 	header.AutomaticSize = Enum.AutomaticSize.X
 	header.BackgroundTransparency = 1
 	header.LayoutOrder = 1
@@ -48,6 +48,7 @@ return function(icon)
 	layout.Name = "Layout"
 	layout.Padding = UDim.new(0, 8)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	layout.Parent = box
 
 	local UICorner = Instance.new("UICorner")
@@ -121,33 +122,31 @@ return function(icon)
 	
 	local caret = Instance.new("ImageLabel")
 	caret.Name = "Caret"
-	caret.Image = "rbxasset://LuaPackages/Packages/_Index/FoundationImages/FoundationImages/SpriteSheets/img_set_2x_1.png"
+	caret.Image = "rbxassetid://101906294438076"
 	caret.ImageColor3 = CAPTION_COLOR
-	caret.ImageRectOffset = Vector2.new(0, 494)
-	caret.ImageRectSize = Vector2.new(32, 16)
 	caret.AnchorPoint = Vector2.new(0, 0.5)
 	caret.BackgroundTransparency = 1
 	caret.Position = UDim2.new(0, 0, 0, 4)
-	caret.Rotation = 180
 	caret.Size = UDim2.fromOffset(16, 8)
 	caret.ZIndex = 12
 	caret.Parent = caption
 
 	local dropShadow = Instance.new("ImageLabel")
+	dropShadow.Visible = true
 	dropShadow.Name = "DropShadow"
-	dropShadow.Image = "rbxasset://LuaPackages/Packages/_Index/FoundationImages/FoundationImages/SpriteSheets/img_set_2x_5.png"
+	dropShadow.Image = "rbxassetid://124920646932671"
 	dropShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-	dropShadow.ImageRectOffset = Vector2.new(52, 460)
-	dropShadow.ImageRectSize = Vector2.new(50, 50)
-	dropShadow.ImageTransparency = 0.45
+	dropShadow.ImageTransparency = 0.5
 	dropShadow.ScaleType = Enum.ScaleType.Slice
 	dropShadow.SliceCenter = Rect.new(12, 12, 13, 13)
 	dropShadow.BackgroundTransparency = 1
 	dropShadow.Position = UDim2.fromOffset(0, 5)
-	dropShadow.Size = UDim2.new(1, 0, 0, 48)
+	dropShadow.Size = UDim2.fromOffset(0, 48)
 	dropShadow.Parent = caption
 	box:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
-		dropShadow.Size = UDim2.new(1, 0, 0, box.AbsoluteSize.Y + 8)
+		-- Offset sized so the shadow overhangs the box by 4 on both sides, which also
+		-- widens the caption evenly so the box stays centred under the icon
+		dropShadow.Size = UDim2.fromOffset(box.AbsoluteSize.X + 8, box.AbsoluteSize.Y + 8)
 	end)
 	
 	-- It's important we match the sizes as this is not
@@ -197,7 +196,7 @@ return function(icon)
 	local RunService = game:GetService("RunService")
 	local function getCaptionPosition(customEnabled)
 		local enabled = if customEnabled ~= nil then customEnabled else isCompletelyEnabled
-		local yOut = 2
+		local yOut = -3
 		local yIn = yOut + 8
 		local yOffset = if enabled then yIn else yOut
 		return UDim2.new(0.5, 0, 1, yOffset)
@@ -251,7 +250,7 @@ return function(icon)
 		
 		-- Now we tween into the new state
 		local tweenInfo = (enabled and TWEEN_INFO_IN) or TWEEN_INFO_OUT
-		local tween = TweenService:Create(captionClone, tweenInfo, {Position = endPosition})
+		local tween = TweenService:Create(captionClone, Utility.getTweenInfo(tweenInfo), {Position = endPosition})
 		local updateCaretConnection = RunService.Heartbeat:Connect(updateCaret)
 		tween:Play()
 		tween.Completed:Once(function()
@@ -286,9 +285,21 @@ return function(icon)
 		isCompletelyEnabled = enabled
 		local newTransparency = (enabled and 0) or 1
 		local tweenInfo = (enabled and TWEEN_INFO_IN) or TWEEN_INFO_OUT
+		-- The fade stays even with Reduce Motion on, the same as Roblox's own captions. Only the slide is skipped
 		local tweenTransparency = TweenService:Create(caption, tweenInfo, {
 			GroupTransparency = newTransparency
 		})
+		-- A fully faded CanvasGroup can still draw as a white box on some phones,
+		-- so we stop showing it at all once it's gone
+		if enabled then
+			Utility.setVisible(caption, true, "CaptionFade")
+		else
+			tweenTransparency.Completed:Once(function()
+				if not isCompletelyEnabled then
+					Utility.setVisible(caption, false, "CaptionFade")
+				end
+			end)
+		end
 		tweenTransparency:Play()
 		if enabled then
 			captionClone:SetAttribute("ForceUpdate", true)
@@ -297,6 +308,8 @@ return function(icon)
 		updateHotkey()
 	end
 	
+	Utility.setVisible(caption, false, "CaptionFade")
+
 	local WAIT_DURATION = 0.5
 	local RECOVER_PERIOD = 0.3
 	local Icon = require(icon.iconModule)

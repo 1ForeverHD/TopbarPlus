@@ -8,8 +8,10 @@
 -- it will instead be applied as an attribute on the instance:
 -- (i.e. ``instance:SetAttribute(argument[2], [argument[3])``)
 -- Use argument[4] to specify a state: "Deselected", "Selected"
--- or "Viewing". If argument[4] is empty the state will default
--- to "Deselected".
+-- or "Viewing". If argument[4] is empty the value applies to all three
+-- states, Selected also picks up any Deselected values it doesn't set itself
+-- and Viewing (hovering) adds its values on top of whichever of those two
+-- looks the icon currently has
 -- I've designed themes this way so you have full control over
 -- the appearance of the widget and its descendants
 
@@ -44,7 +46,7 @@ return {
 	{"IconLabel", "FontFace", Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal), "Deselected"},
 	{"IconLabel", "TextSize", 16, "Deselected"},
 	{"IconSpot", "BackgroundTransparency", 1, "Deselected"},
-	{"IconOverlay", "BackgroundTransparency", 0.85, "Deselected"},
+	{"IconOverlay", "BackgroundTransparency", 0.92, "Deselected"},
 	{"IconSpotGradient", "Enabled", false, "Deselected"},
 	{"IconGradient", "Enabled", false, "Deselected"},
 	{"ClickRegion", "Active", true, "Deselected"},  -- This is set to false within scrollers to ensure scroller can be dragged on mobile
@@ -62,11 +64,8 @@ return {
 	
 	-- When the icon is selected
 	-- Selected also inherits everything from Deselected if nothing is set
-	{"IconSpot", "BackgroundTransparency", 0.7, "Selected"},
-	{"IconSpot", "BackgroundColor3", Color3.fromRGB(255, 255, 255), "Selected"},
-	{"IconSpotGradient", "Enabled", true, "Selected"},
-	{"IconSpotGradient", "Rotation", 45, "Selected"},
-	{"IconSpotGradient", "Color", ColorSequence.new(Color3.fromRGB(96, 98, 100), Color3.fromRGB(77, 78, 80)), "Selected"},
+	{"IconSpot", "BackgroundTransparency", 0.85, "Selected"},
+	{"IconSpot", "BackgroundColor3", Color3.fromRGB(208, 217, 251), "Selected"},
 	
 	
 	-- When a cursor is hovering above, a controller highlighting, or touchpad (mobile) pressing (but not released)

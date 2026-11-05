@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    name: Lint and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: ok-nick/setup-aftman@v0.4.2
+
+      - name: Lint with selene
+        run: selene src
+
+      - name: Build with rojo
+        run: rojo build --output Icon.rbxm withLink.project.json

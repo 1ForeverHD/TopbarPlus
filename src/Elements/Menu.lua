@@ -89,7 +89,7 @@ return function(icon)
 			local fontLink = "rbxasset://fonts/families/FredokaOne.json"
 			local fontFace = Font.new(fontLink, Enum.FontWeight.Light, Enum.FontStyle.Normal)
 			icon:removeModificationWith("IconLabel", "Text", "Viewing")
-			icon:removeModificationWith("IconLabel", "Image", "Viewing")
+			icon:removeModificationWith("IconImage", "Image", "Viewing")
 			icon:modifyTheme({
 				{"IconLabel", "FontFace", fontFace, "Selected"},
 				{"IconLabel", "Text", "X", "Selected"},

@@ -21,7 +21,7 @@ type Signal<Variant... = ...any> = {
 export type IconState = "Deselected" | "Selected" | "Viewing"
 export type Events = "selected" | "deselected" | "toggled" | "viewingStarted" | "viewingEnded" | "notified"
 export type Alignment = "Left" | "Center" | "Right"
-export type EventSource = "User" | "OneClick" | "AutoDeselect" | "HideParentFeature" | "Overflow"
+export type EventSource = "User" | "OneClick" | "AutoDeselect" | "HideParentFeature" | "Overflow" | "OutsideClick"
 export type Modification = { any }
 
 
@@ -30,8 +30,8 @@ type StaticFunctions = {
 		--[[
 			Returns a dictionary of icons where the key is the icon's UID and value the icon.
 		]]
-		function(): { Icon }
-			return (nil :: any) :: { Icon }
+		function(): { [string]: Icon }
+			return (nil :: any) :: { [string]: Icon }
 		end
 	),
 	getIcon: typeof(
@@ -69,9 +69,7 @@ type StaticFunctions = {
 	),
 }
 
-local MT = {} :: Methods
 type Methods = {
-	__index: typeof(MT),
 	
 	-- CLASS FUNCTIONS
 	setName: typeof(
@@ -159,7 +157,7 @@ type Methods = {
 		--[[
 			Applies an image to the icon based on the given <code>imageId</code>. <code>imageId</code> can be an assetId or a complete asset string.
 		]]
-		function(self: Icon, imageId: string | number, iconState: IconState?): Icon
+		function(self: Icon, imageId: string | number | Content, iconState: IconState?): Icon
 			return nil :: any
 		end
 	),
@@ -183,7 +181,7 @@ type Methods = {
 		--[[
 			
 		]]
-		function(self: Icon, udim: UDim2, iconState: IconState?): Icon
+		function(self: Icon, udim: UDim, iconState: IconState?): Icon
 			return nil :: any
 		end
 	),
@@ -227,6 +225,14 @@ type Methods = {
 			return nil :: any
 		end
 	),
+	setTextColor: typeof(
+		--[[
+			The color of the icon labels' text
+		]]
+		function(self: Icon, color: Color3, iconState: IconState?): Icon
+			return nil :: any
+		end
+	),
 	setTextFont: typeof(
 		--[[
 			Sets the labels FontFace.
@@ -235,7 +241,7 @@ type Methods = {
 			a font ID (such as <code>12187370928</code>),
 			or font family link (such as <code>"rbxasset://fonts/families/Sarpanch.json"</code>).
 		]]
-		function(self: Icon, font: string | Enum.Font, fontWeight: Enum.FontWeight?, fontStyle: Enum.FontSize?, iconState: IconState?): Icon
+		function(self: Icon, font: string | Enum.Font, fontWeight: Enum.FontWeight?, fontStyle: Enum.FontStyle?, iconState: IconState?): Icon
 			return nil :: any
 		end
 	),
@@ -351,6 +357,38 @@ type Methods = {
 			return nil :: any
 		end
 	),
+	setCloseOnOutsideClick: typeof(
+		--[[
+			When true (the default) the icon's open dropdown closes when the player clicks or taps anywhere outside of it
+		]]
+		function(self: Icon, enabled: boolean?): Icon
+			return nil :: any
+		end
+	),
+	setDestroyOnRespawn: typeof(
+		--[[
+			When true (the default) an icon made from a script inside a ResetOnSpawn ScreenGui is destroyed when the player respawns
+		]]
+		function(self: Icon, enabled: boolean?): Icon
+			return nil :: any
+		end
+	),
+	setNoticeLabel: typeof(
+		--[[
+			Shows the given text in the notice instead of the number of notices. Pass nil to show the count again
+		]]
+		function(self: Icon, text: string?): Icon
+			return nil :: any
+		end
+	),
+	addInstance: typeof(
+		--[[
+			Adds your own GuiObject to the left or right of the icon's image and label and the icon resizes around it
+		]]
+		function(self: Icon, instance: GuiObject, side: ("Left" | "Right")?): Icon
+			return nil :: any
+		end
+	),
 	setCaption: typeof(
 		--[[
 			Sets a caption. To remove, pass <code>nil</code> as <code>text</code>.
@@ -394,6 +432,15 @@ type Methods = {
 			return nil :: any
 		end
 	),
+	setFixedMenu: typeof(
+		--[[
+			Creates a menu that is always selected and has it's close button hidden.
+			Pass an empty table <code>{}</code> to remove the menu.
+		]]
+		function(self: Icon, icons: { Icon }): Icon
+			return nil :: any
+		end
+	),
 	joinMenu: typeof(
 		--[[
 			Joins the menu of <code>parentIcon</code>.
@@ -423,19 +470,19 @@ type Methods = {
 		--[[
 			Clears all connections and destroys all instances associated with the icon.
 		]]
-		function(self: Icon): Icon
-			return nil :: any
+		function(self: Icon): ()
+			return
 		end
 	),
 } & StaticFunctions
 
 type Fields = {
 	-- CLASS PROPERTIES
-	name: string,
+	name: string?,
 	isSelected: boolean,
 	isEnabled: boolean,
 	totalNotices: number,
-	locked: boolean,
+	locked: boolean?,
 
 	-- CLASS EVENTS
 	selected: Signal<EventSource>,
@@ -446,7 +493,7 @@ type Fields = {
 	notified: Signal,
 }
 
-export type Icon = typeof(setmetatable({} :: Fields, MT))
+export type Icon = Methods & Fields & StaticFunctions --typeof(setmetatable({} :: Fields, MT))
 
 export type StaticIcon = {
 	new: typeof(
@@ -454,7 +501,7 @@ export type StaticIcon = {
 			Constructs an empty <code>32x32</code> icon on the topbar.
 		]]
 		function(): Icon
-			return nil :: any
+			return (nil :: any) :: Icon
 		end
 	),
 } & StaticFunctions

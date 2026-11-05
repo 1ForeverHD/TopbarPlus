@@ -70,6 +70,17 @@ function Overflow.start(incomingIcon)
 	primaryScreenGui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
 		updateBoundaries(true)
 	end)
+
+	-- Holders can move or shrink on their own, like when the inset settles late on mobile
+	-- or the health bar pushes the right icons over, and none of the above fire for that
+	for _, holder in pairs(holders) do
+		holder:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+			updateBoundaries(true)
+		end)
+		holder:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+			updateBoundaries(true)
+		end)
+	end
 end
 
 function Overflow.getWidth(icon, getMaxWidth)

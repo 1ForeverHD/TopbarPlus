@@ -89,7 +89,7 @@ function Janitor.__index:Add(Object, MethodName, Index)
 	end
 	MethodName = MethodName or TypeDefaults[objectType] or "Destroy"
 	if type(Object) ~= "function" and not Object[MethodName] then
-		warn(string.format(METHOD_NOT_FOUND_ERROR, tostring(Object), tostring(MethodName), debug.traceback(nil :: any, 2)))
+		warn(string.format(METHOD_NOT_FOUND_ERROR, tostring(Object), tostring(MethodName), debug.traceback(nil, 2)))
 	end
 
 	local OriginalTraceback = debug.traceback("")
