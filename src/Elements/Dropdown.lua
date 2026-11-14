@@ -47,7 +47,6 @@ return function(icon)
 	dropdownScroller.Visible = true
 	dropdownScroller.VerticalScrollBarInset = Enum.ScrollBarInset.None --ScrollBar
 	dropdownScroller.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
-	dropdownScroller.Active = false
 	dropdownScroller.ScrollingEnabled = true
 	dropdownScroller.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	dropdownScroller.ScrollBarThickness = 5
