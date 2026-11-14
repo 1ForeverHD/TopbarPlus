@@ -297,7 +297,7 @@ function Icon.new()
 	-- Button Clicked (for states "Selected" and "Deselected")
 	local clickRegion = self:getInstance("ClickRegion")
 	local hasUsedMouseButton1Click = false
-	local lastToggleTime = 0
+	local lastToggleTime = -math.huge
 	local DEBOUNCE_TIME = 0.1 -- 100ms debounce to prevent rapid toggles
 
 	local function handleToggle()
@@ -306,7 +306,7 @@ function Icon.new()
 		end
 
 		-- Debounce logic to prevent rapid toggling
-		local currentTime = tick()
+		local currentTime = os.clock()
 		if currentTime - lastToggleTime < DEBOUNCE_TIME then
 			return
 		end
