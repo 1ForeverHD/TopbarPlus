@@ -99,7 +99,6 @@ end
 function Overflow.updateAvailableIcons(alignment)
 
 	-- We only track items that are directly on the topbar (i.e. not within a parent icon)
-	local ourTotal = 0
 	local ourOrderedIcons = {}
 	for _, icon in pairs(iconsDict) do
 		local parentUID = icon.parentIconUID
@@ -107,12 +106,11 @@ function Overflow.updateAvailableIcons(alignment)
 		local isOverflow = overflowIconUIDs[icon.UID]
 		if isDirectlyOnTopbar and icon.alignment == alignment and not isOverflow and icon.isEnabled then
 			table.insert(ourOrderedIcons, icon)
-			ourTotal += 1
 		end
 	end
 
 	-- Ignore if no icons are available
-	if ourTotal <= 0 then
+	if #ourOrderedIcons == 0 then
 		return {}
 	end
 
@@ -182,16 +180,9 @@ function Overflow.updateBoundary(alignment)
 	local holderXPos = holder.AbsolutePosition.X
 	local holderXSize = holder.AbsoluteSize.X
 	local topbarInset = holderUIList.Padding.Offset
-	local topbarPadding = holderUIList.Padding.Offset
 	local BOUNDARY_GAP = topbarInset
 	local ourOrderedIcons = Overflow.updateAvailableIcons(alignment)
-	local boundWidth = 0
-	local ourTotal = 0
-	for _, icon in pairs(ourOrderedIcons) do
-		boundWidth += Overflow.getWidth(icon) + topbarPadding
-		ourTotal += 1
-	end
-	if ourTotal <= 0 then
+	if #ourOrderedIcons == 0 then
 		return
 	end
 	
