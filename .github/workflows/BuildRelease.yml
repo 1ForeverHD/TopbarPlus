@@ -16,7 +16,7 @@ jobs:
       - uses: CompeyDev/setup-rokit@v0.2.1
 
       - name: Build asset
-        run: rojo build --output Icon.rbxm withLink.project.json
+        run: rojo build --output Icon.rbxm default.project.json
 
       - name: Git Release
         uses: anton-yurchenko/git-release@v6
