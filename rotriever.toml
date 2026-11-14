@@ -1,8 +1,0 @@
-[package]
-name = "TopbarPlus"
-version = "3.0.0"
-license = "MPL2"
-authors = ["1ForeverHD"]
-content_root = "src"
-
-[dependencies]
