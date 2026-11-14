@@ -55,6 +55,14 @@ return function(icon)
 	UICorner.Name = "CaptionCorner"
 	UICorner.Parent = box
 
+	local shadow = Instance.new("UIShadow")
+	shadow.Name = "Shadow"
+	shadow.BlurRadius = UDim.new(0, 4)
+	shadow.Offset = UDim2.fromOffset(0, 2)
+	shadow.Spread = UDim2.fromOffset(0, 1)
+	shadow.Transparency = 0.5
+	shadow.Parent = box
+
 	local padding = Instance.new("UIPadding")
 	padding.Name = "Padding"
 	padding.PaddingBottom = UDim.new(0, 12)
