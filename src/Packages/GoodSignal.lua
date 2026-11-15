@@ -109,12 +109,8 @@ end
 
 function Signal:Connect(fn)
 	local connection = Connection.new(self, fn)
-	if self._handlerListHead then
-		connection._next = self._handlerListHead
-		self._handlerListHead = connection
-	else
-		self._handlerListHead = connection
-	end
+	connection._next = self._handlerListHead
+	self._handlerListHead = connection
 	return connection
 end
 
