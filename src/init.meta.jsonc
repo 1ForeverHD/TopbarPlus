@@ -1,0 +1,8 @@
+{
+  "properties": {
+    "Capabilities": {
+      "SecurityCapabilities": 9007355519305984 // RunClientScript | AccessOutsideWrite | CreateInstances | Basic | UI | AvatarAppearance | Input | Players | AssetManagement | AvatarBehavior
+    },
+    "Sandboxed": false
+  }
+}
